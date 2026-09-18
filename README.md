@@ -20,6 +20,10 @@ A scalable ticket booking web application built with **MySQL**, **Node.js + Expr
 git clone <repo-url>
 cd ticket-booking
 
+# Configure environment (see Environment Variables below)
+Copy-Item .env.example .env    # PowerShell
+# cp .env.example .env         # bash
+
 # Backend
 cd backend
 npm install
@@ -62,6 +66,66 @@ STRIPE_WEBHOOK_SECRET=your_webhook_secret
 # Email / SMS
 SMTP_HOST=smtp.your-provider.com
 SMS_PROVIDER=twilio
+```
+
+## Backend (Node.js + Express.js)
+
+The API is a modular Express application. Modules are added under
+`backend/src/` following the layout in [docs/12-deployment.md](docs/12-deployment.md).
+
+```text
+backend/
+├── scripts/
+│   └── test-connection.js        # standalone MySQL connectivity check
+├── src/
+│   ├── config/env.js             # reads repo-root .env (backend/.env overrides)
+│   ├── database/pool.js          # mysql2 connection pool + testConnection()
+│   ├── middlewares/              # notFound, errorHandler
+│   ├── routes/health.routes.js   # /health, /health/db
+│   ├── app.js                    # Express app factory (testable)
+│   └── index.js                  # entry point - boots server, graceful shutdown
+└── tests/health.test.js          # smoke tests (node:test)
+```
+
+### Scripts
+
+| Command | Description |
+|---|---|
+| `npm start` | Start the API on `http://localhost:4000` |
+| `npm run dev` | Start with auto-reload (`node --watch`) |
+| `npm run db:check` | Test the MySQL connection only; exits `1` on failure |
+| `npm test` | Run the API smoke tests (`node --test`) |
+
+### Verifying the connections
+
+```bash
+cd backend
+npm run db:check     # database connection
+npm test             # server + database endpoints
+```
+
+| Endpoint | Purpose | Success |
+|---|---|---|
+| `GET /` | API metadata | `200` |
+| `GET /health` | **Server** liveness (no DB access) | `200` |
+| `GET /health/db` | **Database** readiness (`SELECT DATABASE(), VERSION()`) | `200`, or `503` when MySQL is unreachable |
+| `GET /api/v1/...` | Feature endpoints (auth, events, shows, bookings, payments, tickets, admin) — mounted as implemented | — |
+
+Example response from `GET /health/db`:
+
+```json
+{
+  "status": "ok",
+  "database": {
+    "connected": true,
+    "host": "127.0.0.1",
+    "port": 3306,
+    "database": "ticket_booking",
+    "version": "26.7.0",
+    "tables": 10,
+    "checkedAt": "2026-09-18T14:48:34.686Z"
+  }
+}
 ```
 
 ## Database Tests

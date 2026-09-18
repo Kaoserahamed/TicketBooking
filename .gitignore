@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Environment / secrets
+# Copy .env.example to .env - real credentials must never be committed
+# (see docs/11-security.md - "Secrets management").
+.env
+.env.local
+.env.*.local
+
+# Build output
+dist/
+build/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Test / coverage output
+coverage/
+
+# Editor / OS
+.idea/
+.DS_Store
+Thumbs.db
