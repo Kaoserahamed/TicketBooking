@@ -14,6 +14,12 @@ const authenticate = require('../middlewares/authenticate');
 const authorize = require('../middlewares/authorize');
 const validate = require('../middlewares/validate');
 const { listUsersQuerySchema } = require('../validators/auth.validator');
+const {
+  listAdminEventsQuerySchema,
+  createEventSchema,
+  updateEventSchema,
+  eventIdParamSchema,
+} = require('../validators/event.validator');
 const asyncHandler = require('../utils/async-handler');
 
 const router = express.Router();
@@ -25,6 +31,34 @@ router.get(
   authorize('ADMIN'),
   validate(listUsersQuerySchema, 'query'),
   asyncHandler(adminController.listUsers)
+);
+
+// GET /api/v1/admin/events?status=&category=&search=&limit=&offset=
+router.get(
+  '/events',
+  authenticate,
+  authorize('ADMIN', 'EVENT_MANAGER'),
+  validate(listAdminEventsQuerySchema, 'query'),
+  asyncHandler(adminController.adminListEvents)
+);
+
+// POST /api/v1/admin/events
+router.post(
+  '/events',
+  authenticate,
+  authorize('ADMIN', 'EVENT_MANAGER'),
+  validate(createEventSchema),
+  asyncHandler(adminController.adminCreateEvent)
+);
+
+// PUT /api/v1/admin/events/:id
+router.put(
+  '/events/:id',
+  authenticate,
+  authorize('ADMIN', 'EVENT_MANAGER'),
+  validate(eventIdParamSchema, 'params'),
+  validate(updateEventSchema),
+  asyncHandler(adminController.adminUpdateEvent)
 );
 
 module.exports = router;

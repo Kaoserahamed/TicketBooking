@@ -17,6 +17,7 @@ const config = require('./config/env');
 const healthRoutes = require('./routes/health.routes');
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
+const eventRoutes = require('./routes/event.routes');
 const adminRoutes = require('./routes/admin.routes');
 const notFound = require('./middlewares/not-found');
 const errorHandler = require('./middlewares/error-handler');
@@ -68,7 +69,17 @@ function createApp() {
         changePassword: 'PUT /api/v1/users/me/password (Bearer)',
         getById: 'GET /api/v1/users/:id (Bearer, self or ADMIN)',
       },
-      admin: { listUsers: 'GET /api/v1/admin/users (ADMIN only)' },
+      admin: {
+        listUsers: 'GET /api/v1/admin/users (ADMIN only)',
+        listEvents: 'GET /api/v1/admin/events (ADMIN, EVENT_MANAGER)',
+        createEvent: 'POST /api/v1/admin/events (ADMIN, EVENT_MANAGER)',
+        updateEvent: 'PUT /api/v1/admin/events/:id (ADMIN, EVENT_MANAGER)',
+      },
+      events: {
+        list: 'GET /api/v1/events?category=&search=&status=&limit=&offset=',
+        detail: 'GET /api/v1/events/:id',
+        shows: 'GET /api/v1/events/:id/shows',
+      },
     });
   });
 
@@ -78,10 +89,10 @@ function createApp() {
   // Feature routers (docs/04-api-design.md)
   app.use('/api/v1/auth', authRoutes);
   app.use('/api/v1/users', userRoutes);
+  app.use('/api/v1/events', eventRoutes);
   app.use('/api/v1/admin', adminRoutes);
 
   // Remaining modules mount here as they are implemented, e.g.
-  //   app.use('/api/v1/events', eventRoutes);
   //   app.use('/api/v1/shows', showRoutes);
   //   app.use('/api/v1/bookings', bookingRoutes);
   //   app.use('/api/v1/payments', paymentRoutes);

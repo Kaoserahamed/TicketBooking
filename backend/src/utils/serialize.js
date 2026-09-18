@@ -32,4 +32,50 @@ function toPublicUser(row) {
   };
 }
 
-module.exports = { toPublicUser };
+/**
+ * Shape an `events` row for API responses.
+ */
+function toEvent(row) {
+  if (!row) {
+    return null;
+  }
+
+  return {
+    id: Number(row.id),
+    name: row.name,
+    description: row.description,
+    category: row.category,
+    posterUrl: row.poster_url,
+    status: row.status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+/**
+ * Shape a show row (joined with its venue) for API responses.
+ */
+function toShow(row) {
+  if (!row) {
+    return null;
+  }
+
+  return {
+    id: Number(row.id),
+    eventId: Number(row.event_id),
+    venueId: Number(row.venue_id),
+    venue: {
+      id: Number(row.venue_id),
+      name: row.venue_name,
+      address: row.venue_address,
+      city: row.venue_city,
+      capacity: Number(row.venue_capacity),
+    },
+    startTime: row.start_time,
+    endTime: row.end_time,
+    status: row.status,
+    createdAt: row.created_at,
+  };
+}
+
+module.exports = { toPublicUser, toEvent, toShow };
