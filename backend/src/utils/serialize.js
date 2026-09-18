@@ -25,6 +25,8 @@ function toPublicUser(row) {
     phone: row.phone,
     role: row.role,
     status: row.status,
+    emailVerified: Boolean(row.email_verified_at),
+    emailVerifiedAt: row.email_verified_at ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

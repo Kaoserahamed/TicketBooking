@@ -9,43 +9,23 @@
  */
 
 const { z } = require('zod');
-
-// bcrypt only considers the first 72 bytes, so longer passwords are rejected
-// rather than silently truncated.
-const password = z
-  .string({ message: 'Password is required' })
-  .min(8, 'Password must be at least 8 characters')
-  .max(72, 'Password must be at most 72 characters')
-  .regex(/[A-Za-z]/, 'Password must contain at least one letter')
-  .regex(/[0-9]/, 'Password must contain at least one number');
-
-const email = z
-  .string({ message: 'Email is required' })
-  .email('A valid email address is required')
-  .max(255, 'Email must be at most 255 characters');
-
-const phone = z
-  .string()
-  .regex(/^\+?[0-9]{7,15}$/, 'Phone must be 7-15 digits, optionally prefixed with +')
-  .optional();
-
-const name = z
-  .string({ message: 'Name is required' })
-  .min(2, 'Name must be at least 2 characters')
-  .max(255, 'Name must be at most 255 characters');
+const fields = require('./fields');
 
 /** POST /api/v1/auth/register */
 const registerSchema = z.object({
-  name,
-  email,
-  phone,
-  password,
+  name: fields.name,
+  email: fields.email,
+  phone: fields.phone.optional(),
+  password: fields.password,
 });
 
-/** POST /api/v1/auth/login */
+/** POST /api/v1/auth/login - password length is not re-checked here. */
 const loginSchema = z.object({
-  email,
-  password: z.string({ message: 'Password is required' }).min(1, 'Password is required'),
+  email: fields.email,
+  password: z
+    .string(fields.required('Password'))
+    .min(1, 'Password is required')
+    .max(255, 'Password is too long'),
 });
 
 /**
@@ -56,6 +36,22 @@ const loginSchema = z.object({
  */
 const refreshTokenSchema = z.object({
   refreshToken: z.string().min(1, 'refreshToken must not be empty').optional(),
+});
+
+/** POST /api/v1/auth/verify-email */
+const verifyEmailSchema = z.object({
+  token: fields.opaqueToken,
+});
+
+/** POST /api/v1/auth/forgot-password */
+const forgotPasswordSchema = z.object({
+  email: fields.email,
+});
+
+/** POST /api/v1/auth/reset-password */
+const resetPasswordSchema = z.object({
+  token: fields.opaqueToken,
+  newPassword: fields.password,
 });
 
 const ROLES = ['USER', 'ADMIN', 'EVENT_MANAGER', 'VENUE_MANAGER', 'SUPPORT'];
@@ -77,6 +73,9 @@ module.exports = {
   registerSchema,
   loginSchema,
   refreshTokenSchema,
+  verifyEmailSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
   listUsersQuerySchema,
   ROLES,
   STATUSES,

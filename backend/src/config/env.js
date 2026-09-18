@@ -70,6 +70,36 @@ const config = {
     secure: process.env.NODE_ENV === 'production' || process.env.COOKIE_SECURE === 'true',
     sameSite: process.env.COOKIE_SAME_SITE || 'strict',
     path: '/api/v1/auth',
+    maxAgeMs: toInt(process.env.REFRESH_COOKIE_MAX_AGE_MS, 7 * 24 * 60 * 60 * 1000),
+  },
+  // Redis is optional: docs/08-infrastructure-caching.md lists it for caching,
+  // rate limiting and distributed locks. When REDIS_URL is absent the API runs
+  // with in-process equivalents so local development needs no extra service.
+  cache: {
+    url: process.env.REDIS_URL || '',
+    enabled: Boolean(process.env.REDIS_URL),
+    connectTimeoutMs: toInt(process.env.REDIS_CONNECT_TIMEOUT_MS, 2000),
+  },
+  // Transactional email (docs/10-infrastructure-notifications.md).
+  mail: {
+    // 'console' logs messages (development), 'smtp' delivers via nodemailer.
+    // Empty = auto: smtp when SMTP_HOST is configured, otherwise console.
+    transport: process.env.MAIL_TRANSPORT || '',
+    host: process.env.SMTP_HOST || '',
+    port: toInt(process.env.SMTP_PORT, 587),
+    secure: process.env.SMTP_SECURE === 'true',
+    user: process.env.SMTP_USER || '',
+    password: process.env.SMTP_PASSWORD || '',
+    from: process.env.MAIL_FROM || 'Ticket Booking <no-reply@ticketbooking.local>',
+  },
+  // Account recovery / verification flows.
+  account: {
+    // Off by default so enabling it is an explicit decision.
+    requireEmailVerification: process.env.REQUIRE_EMAIL_VERIFICATION === 'true',
+    emailVerificationTtlMinutes: toInt(process.env.EMAIL_VERIFICATION_TTL_MINUTES, 24 * 60),
+    passwordResetTtlMinutes: toInt(process.env.PASSWORD_RESET_TTL_MINUTES, 60),
+    // Used to build the links inside verification/reset emails.
+    appBaseUrl: process.env.APP_BASE_URL || 'http://localhost:5173',
   },
 };
 

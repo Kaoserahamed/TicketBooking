@@ -87,6 +87,18 @@ function hashToken(token) {
 }
 
 /**
+ * Generate a cryptographically random, URL-safe opaque token.
+ *
+ * Used for email-verification and password-reset links. 32 random bytes give
+ * ~256 bits of entropy, so the value cannot be guessed.
+ *
+ * @returns {string} base64url token (no padding)
+ */
+function generateOpaqueToken() {
+  return crypto.randomBytes(32).toString('base64url');
+}
+
+/**
  * Read the expiry of a signed token without verifying it (used to store the
  * refresh-token expiry in the database).
  *
@@ -110,4 +122,5 @@ module.exports = {
   verifyRefreshToken,
   hashToken,
   getTokenExpiry,
+  generateOpaqueToken,
 };

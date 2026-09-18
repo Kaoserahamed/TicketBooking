@@ -9,6 +9,7 @@
 
 const config = require('../config/env');
 const authService = require('../services/auth.service');
+const accountService = require('../services/account.service');
 const { UnauthorizedError } = require('../utils/errors');
 
 /**
@@ -37,7 +38,7 @@ function setRefreshCookie(res, refreshToken) {
     secure: config.cookie.secure,
     sameSite: config.cookie.sameSite,
     path: config.cookie.path,
-    maxAge: 7 * 24 * 60 * 60 * 1000,
+    maxAge: config.cookie.maxAgeMs,
   });
 }
 
@@ -106,4 +107,48 @@ async function me(req, res) {
   res.json({ status: 'ok', user });
 }
 
-module.exports = { register, login, refresh, logout, me };
+/** POST /api/v1/auth/verify-email */
+async function verifyEmail(req, res) {
+  const { user } = await accountService.verifyEmail(req.body);
+  res.json({ status: 'ok', message: 'Email address verified', user });
+}
+
+/** POST /api/v1/auth/resend-verification */
+async function resendVerification(req, res) {
+  await accountService.resendVerification(req.user.id);
+  res.json({ status: 'ok', message: 'Verification email sent' });
+}
+
+/**
+ * POST /api/v1/auth/forgot-password
+ *
+ * Always returns the same response, whether or not the address is registered,
+ * so the endpoint cannot be used to enumerate accounts.
+ */
+async function forgotPassword(req, res) {
+  await accountService.requestPasswordReset(req.body);
+  res.json({
+    status: 'ok',
+    message: 'If that email address is registered, a password reset link has been sent.',
+  });
+}
+
+/** POST /api/v1/auth/reset-password */
+async function resetPassword(req, res) {
+  const { user } = await accountService.resetPassword(req.body);
+  // Any session tied to the old password is now invalid.
+  clearRefreshCookie(res);
+  res.json({ status: 'ok', message: 'Password reset. Please sign in again.', user });
+}
+
+module.exports = {
+  register,
+  login,
+  refresh,
+  logout,
+  me,
+  verifyEmail,
+  resendVerification,
+  forgotPassword,
+  resetPassword,
+};

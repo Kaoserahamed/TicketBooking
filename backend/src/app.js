@@ -16,6 +16,7 @@ const cookieParser = require('cookie-parser');
 const config = require('./config/env');
 const healthRoutes = require('./routes/health.routes');
 const authRoutes = require('./routes/auth.routes');
+const userRoutes = require('./routes/user.routes');
 const adminRoutes = require('./routes/admin.routes');
 const notFound = require('./middlewares/not-found');
 const errorHandler = require('./middlewares/error-handler');
@@ -56,6 +57,16 @@ function createApp() {
         refresh: 'POST /api/v1/auth/refresh',
         logout: 'POST /api/v1/auth/logout',
         me: 'GET /api/v1/auth/me',
+        verifyEmail: 'POST /api/v1/auth/verify-email',
+        resendVerification: 'POST /api/v1/auth/resend-verification (Bearer)',
+        forgotPassword: 'POST /api/v1/auth/forgot-password',
+        resetPassword: 'POST /api/v1/auth/reset-password',
+      },
+      users: {
+        me: 'GET /api/v1/users/me (Bearer)',
+        updateMe: 'PUT /api/v1/users/me (Bearer)',
+        changePassword: 'PUT /api/v1/users/me/password (Bearer)',
+        getById: 'GET /api/v1/users/:id (Bearer, self or ADMIN)',
       },
       admin: { listUsers: 'GET /api/v1/admin/users (ADMIN only)' },
     });
@@ -66,6 +77,7 @@ function createApp() {
 
   // Feature routers (docs/04-api-design.md)
   app.use('/api/v1/auth', authRoutes);
+  app.use('/api/v1/users', userRoutes);
   app.use('/api/v1/admin', adminRoutes);
 
   // Remaining modules mount here as they are implemented, e.g.

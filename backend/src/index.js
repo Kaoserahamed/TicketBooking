@@ -10,9 +10,15 @@
 const createApp = require('./app');
 const config = require('./config/env');
 const { testConnection, closePool } = require('./database/pool');
+const { initRateLimitStore } = require('./middlewares/rate-limit');
+const { closeRedis } = require('./cache/redis');
 
 async function start() {
   const app = createApp();
+
+  // Redis-backed rate limiting across instances when configured; otherwise
+  // the in-process store is used and the API still starts normally.
+  await initRateLimitStore();
 
   // Verify the database connection before accepting traffic.
   try {
@@ -37,6 +43,7 @@ async function start() {
     console.log(`[server] ${signal} received - shutting down`);
     server.close(async () => {
       await closePool();
+      await closeRedis();
       console.log('[server] shutdown complete');
       process.exit(0);
     });

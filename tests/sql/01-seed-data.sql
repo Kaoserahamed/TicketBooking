@@ -9,14 +9,17 @@ SET foreign_key_checks = 1;
 -- =============================================================
 -- 1. USERS  (docs/11-security.md: RBAC roles)
 -- =============================================================
-INSERT INTO users (name, email, phone, password_hash, role, status) VALUES
-    ('Admin User',        'admin@ticketbooking.test',  '9999999999', '$2a$10$adminhash', 'ADMIN', 'ACTIVE'),
-    ('Alice Smith',       'alice@example.com',         '8887776655', '$2a$10$alicehash', 'USER', 'ACTIVE'),
-    ('Bob Johnson',       'bob@example.com',           '7776665544', '$2a$10$bobhash',   'USER', 'ACTIVE'),
-    ('Carol Williams',    'carol@example.com',         '6665554433', '$2a$10$carolhash', 'USER', 'ACTIVE'),
-    ('David Brown',       'david@example.com',         '5554443322', '$2a$10$davidhash', 'USER', 'ACTIVE'),
-    ('Event Manager Eve', 'eve@venue.com',             '4443332211', '$2a$10$evehash',   'EVENT_MANAGER', 'ACTIVE'),
-    ('Grace Lee',         'grace@example.com',         '3332221100', '$2a$10$gracehash', 'USER', 'SUSPENDED');
+-- Passwords below are real bcrypt hashes (cost 10) of the development password
+-- "Password123" - the previous placeholder values ('$2a$10$alicehash') were not
+-- valid bcrypt strings, so these seed accounts could never sign in.
+INSERT INTO users (name, email, phone, password_hash, role, status, email_verified_at) VALUES
+    ('Admin User',        'admin@ticketbooking.test',  '9999999999', '$2b$10$PRhY.Z516rNHP9hb80jr5OuRDyyuRD8ZWqXnYGRQ74q0GyPboH5G.', 'ADMIN', 'ACTIVE', UTC_TIMESTAMP()),
+    ('Alice Smith',       'alice@example.com',         '8887776655', '$2b$10$094bXcpOmgu.KnTVQ0KGjelLIq.CUTpREjNulYgTSFvxfeUBI8DMO', 'USER', 'ACTIVE', UTC_TIMESTAMP()),
+    ('Bob Johnson',       'bob@example.com',           '7776665544', '$2b$10$8WPUwo2Eg.9AmDCWILiVtuvCoXTrTNM4/2doZ0ZoCcVRk5jKCGeqq', 'USER', 'ACTIVE', UTC_TIMESTAMP()),
+    ('Carol Williams',    'carol@example.com',         '6665554433', '$2b$10$WfpnXrj/uVMhEMPI1LgkY.GMqOugTHiMIehqK/fv6u2TH0mxdv0iC', 'USER', 'ACTIVE', UTC_TIMESTAMP()),
+    ('David Brown',       'david@example.com',         '5554443322', '$2b$10$pFxbfrBFquDLBEw5PLB.Xuw2ly9XxB010d6BitXn.8ZfcYD.Ay5V.', 'USER', 'ACTIVE', UTC_TIMESTAMP()),
+    ('Event Manager Eve', 'eve@venue.com',             '4443332211', '$2b$10$i1Ft3DVuf9ewHdAt6qpHfu.f9Jykk7meZR9AE9exmfkfwKdQl5POC', 'EVENT_MANAGER', 'ACTIVE', UTC_TIMESTAMP()),
+    ('Grace Lee',         'grace@example.com',         '3332221100', '$2b$10$wRMQEox1ZKS1lmTE5zqqBuaY3iDyeq/wUJXxGS79F1al/cXVgZYqO', 'USER', 'SUSPENDED', UTC_TIMESTAMP());
 
 -- =============================================================
 -- 2. VENUES

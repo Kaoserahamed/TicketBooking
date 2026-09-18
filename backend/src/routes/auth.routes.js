@@ -16,6 +16,9 @@ const {
   registerSchema,
   loginSchema,
   refreshTokenSchema,
+  verifyEmailSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
 } = require('../validators/auth.validator');
 const asyncHandler = require('../utils/async-handler');
 
@@ -55,5 +58,37 @@ router.post(
 
 // GET /api/v1/auth/me - the authenticated user's profile
 router.get('/me', authenticate, asyncHandler(authController.me));
+
+// POST /api/v1/auth/verify-email - confirm an address with a verification token
+router.post(
+  '/verify-email',
+  authRateLimiter(),
+  validate(verifyEmailSchema),
+  asyncHandler(authController.verifyEmail)
+);
+
+// POST /api/v1/auth/resend-verification - re-send the link (authenticated)
+router.post(
+  '/resend-verification',
+  authenticate,
+  authRateLimiter(),
+  asyncHandler(authController.resendVerification)
+);
+
+// POST /api/v1/auth/forgot-password - start a reset (always the same response)
+router.post(
+  '/forgot-password',
+  authRateLimiter(),
+  validate(forgotPasswordSchema),
+  asyncHandler(authController.forgotPassword)
+);
+
+// POST /api/v1/auth/reset-password - complete a reset with the emailed token
+router.post(
+  '/reset-password',
+  authRateLimiter(),
+  validate(resetPasswordSchema),
+  asyncHandler(authController.resetPassword)
+);
 
 module.exports = router;

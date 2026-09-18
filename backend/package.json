@@ -8,6 +8,8 @@
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
     "db:check": "node scripts/test-connection.js",
+    "db:migrate": "node scripts/run-migrations.js",
+    "seed:passwords": "node scripts/set-seed-passwords.js",
     "test": "node --test tests/"
   },
   "engines": {
@@ -30,6 +32,9 @@
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.10.0",
     "mysql2": "^3.11.5",
+    "nodemailer": "^10.0.10",
+    "rate-limit-redis": "^6.0.1",
+    "redis": "^6.2.1",
     "zod": "^4.6.5"
   }
 }

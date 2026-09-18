@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS users (
                      DEFAULT 'USER',
     status          ENUM('ACTIVE', 'INACTIVE', 'SUSPENDED', 'BLOCKED')
                      DEFAULT 'ACTIVE',
+    email_verified_at DATETIME    NULL DEFAULT NULL,
     created_at      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
                                     ON UPDATE CURRENT_TIMESTAMP,
@@ -307,6 +308,31 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
     UNIQUE KEY uk_refresh_tokens_hash (token_hash),
     INDEX idx_refresh_tokens_user    (user_id),
     INDEX idx_refresh_tokens_expires (expires_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================================
+-- 12. user_action_tokens  (Email verification & password reset)
+-- =============================================================
+-- Single-use tokens for the account-recovery flows. Only the SHA-256 hash is
+-- stored; `used_at` enforces one-time use and `expires_at` bounds the lifetime.
+CREATE TABLE IF NOT EXISTS user_action_tokens (
+    id              BIGINT      PRIMARY KEY AUTO_INCREMENT,
+    user_id         BIGINT      NOT NULL,
+    purpose         ENUM('EMAIL_VERIFICATION', 'PASSWORD_RESET') NOT NULL,
+    token_hash      CHAR(64)    NOT NULL,
+    expires_at      DATETIME    NOT NULL,
+    used_at         DATETIME    NULL DEFAULT NULL,
+    created_at      TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_user_action_tokens_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    UNIQUE KEY uk_user_action_tokens_hash   (token_hash),
+    INDEX idx_user_action_tokens_user       (user_id, purpose),
+    INDEX idx_user_action_tokens_expires    (expires_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =============================================================
