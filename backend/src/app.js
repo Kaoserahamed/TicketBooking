@@ -11,9 +11,12 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const cookieParser = require('cookie-parser');
 
 const config = require('./config/env');
 const healthRoutes = require('./routes/health.routes');
+const authRoutes = require('./routes/auth.routes');
+const adminRoutes = require('./routes/admin.routes');
 const notFound = require('./middlewares/not-found');
 const errorHandler = require('./middlewares/error-handler');
 
@@ -33,6 +36,8 @@ function createApp() {
 
   app.use(express.json({ limit: '1mb' }));
   app.use(express.urlencoded({ extended: true }));
+  // Required to read the httpOnly refresh-token cookie (docs/11-security.md §11.1).
+  app.use(cookieParser());
 
   if (config.env !== 'test') {
     app.use(morgan('dev'));
@@ -45,20 +50,30 @@ function createApp() {
       version: '0.1.0',
       basePath: '/api/v1',
       health: { server: '/health', database: '/health/db' },
+      auth: {
+        register: 'POST /api/v1/auth/register',
+        login: 'POST /api/v1/auth/login',
+        refresh: 'POST /api/v1/auth/refresh',
+        logout: 'POST /api/v1/auth/logout',
+        me: 'GET /api/v1/auth/me',
+      },
+      admin: { listUsers: 'GET /api/v1/admin/users (ADMIN only)' },
     });
   });
 
   // Connectivity probes
   app.use('/health', healthRoutes);
 
-  // Feature routers are mounted here as they are implemented, e.g.
-  //   app.use('/api/v1/auth', authRoutes);
+  // Feature routers (docs/04-api-design.md)
+  app.use('/api/v1/auth', authRoutes);
+  app.use('/api/v1/admin', adminRoutes);
+
+  // Remaining modules mount here as they are implemented, e.g.
   //   app.use('/api/v1/events', eventRoutes);
   //   app.use('/api/v1/shows', showRoutes);
   //   app.use('/api/v1/bookings', bookingRoutes);
   //   app.use('/api/v1/payments', paymentRoutes);
   //   app.use('/api/v1/tickets', ticketRoutes);
-  //   app.use('/api/v1/admin', adminRoutes);
 
   app.use(notFound);
   app.use(errorHandler);

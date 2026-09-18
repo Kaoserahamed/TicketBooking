@@ -3,18 +3,50 @@
 /**
  * Central error handler. Express only treats a 4-argument function as error
  * middleware, so `next` must stay in the signature even though it is unused.
+ *
+ * Every error leaving the API has the same shape (docs/04-api-design.md §4.1):
+ *   { "status": "error", "message": "...", "code": "...", "errors": [...] }
  */
 // eslint-disable-next-line no-unused-vars
 module.exports = function errorHandler(err, req, res, next) {
-  const status = Number.isInteger(err.status) ? err.status : 500;
+  let status = Number.isInteger(err.status) ? err.status : 500;
+  let message = err.message;
+  let code = err.code;
 
-  if (status >= 500) {
+  // express.json() raises this when the body is not valid JSON.
+  if (err.type === 'entity.parse.failed') {
+    status = 400;
+    message = 'Malformed JSON in request body';
+    code = 'INVALID_JSON';
+  }
+
+  // body-parser payload limits
+  if (err.type === 'entity.too.large') {
+    status = 413;
+    message = 'Request body is too large';
+    code = 'PAYLOAD_TOO_LARGE';
+  }
+
+  const isServerError = status >= 500;
+
+  if (isServerError) {
     console.error(`[error] ${req.method} ${req.originalUrl} ->`, err);
   }
 
-  res.status(status).json({
+  const payload = {
     status: 'error',
     // Never leak internal details for unexpected failures.
-    message: status >= 500 ? 'Internal server error' : err.message,
-  });
+    message: isServerError ? 'Internal server error' : message,
+  };
+
+  if (!isServerError && code) {
+    payload.code = code;
+  }
+
+  // Field-level validation errors (src/utils/errors.js -> ValidationError).
+  if (!isServerError && Array.isArray(err.details)) {
+    payload.errors = err.details;
+  }
+
+  res.status(status).json(payload);
 };

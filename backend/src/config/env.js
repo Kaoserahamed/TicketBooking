@@ -46,6 +46,57 @@ const config = {
     name: process.env.DB_NAME || 'ticket_booking',
     connectionLimit: toInt(process.env.DB_CONNECTION_LIMIT, 10),
   },
+  // docs/11-security.md §11.1 - JWT access token + refresh token.
+  jwt: {
+    accessSecret: process.env.JWT_SECRET || '',
+    refreshSecret: process.env.JWT_REFRESH_SECRET || '',
+    accessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m',
+    refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
+    issuer: process.env.JWT_ISSUER || 'ticket-booking-api',
+  },
+  security: {
+    // docs/11-security.md §11.2 - secure password hashing (bcrypt).
+    bcryptRounds: toInt(process.env.BCRYPT_ROUNDS, 10),
+    // docs/13-scaling.md §13.6 - per-IP rate limiting on authentication routes.
+    authRateLimit: {
+      windowMs: toInt(process.env.AUTH_RATE_LIMIT_WINDOW_MS, 15 * 60 * 1000),
+      max: toInt(process.env.AUTH_RATE_LIMIT_MAX, 20),
+    },
+  },
+  // Refresh token cookie: httpOnly + SameSite mitigate token theft and CSRF
+  // (docs/11-security.md §11.2). `secure` is enabled outside development.
+  cookie: {
+    name: process.env.REFRESH_COOKIE_NAME || 'tb_refresh_token',
+    secure: process.env.NODE_ENV === 'production' || process.env.COOKIE_SECURE === 'true',
+    sameSite: process.env.COOKIE_SAME_SITE || 'strict',
+    path: '/api/v1/auth',
+  },
 };
+
+// Development/test fallbacks. These are deliberately rejected in production so a
+// predictable secret can never reach a live deployment (docs/11-security.md §11.2).
+const DEV_ACCESS_SECRET = 'dev-only-access-secret-change-me';
+const DEV_REFRESH_SECRET = 'dev-only-refresh-secret-change-me';
+
+if (!config.jwt.accessSecret) {
+  if (config.env === 'production') {
+    throw new Error('JWT_SECRET must be set when NODE_ENV=production');
+  }
+  config.jwt.accessSecret = DEV_ACCESS_SECRET;
+}
+
+if (!config.jwt.refreshSecret) {
+  if (config.env === 'production') {
+    throw new Error('JWT_REFRESH_SECRET must be set when NODE_ENV=production');
+  }
+  config.jwt.refreshSecret = DEV_REFRESH_SECRET;
+}
+
+if (config.env === 'production') {
+  const weak = [DEV_ACCESS_SECRET, DEV_REFRESH_SECRET];
+  if (weak.includes(config.jwt.accessSecret) || weak.includes(config.jwt.refreshSecret)) {
+    throw new Error('Refusing to start: development JWT secrets are not allowed in production');
+  }
+}
 
 module.exports = config;

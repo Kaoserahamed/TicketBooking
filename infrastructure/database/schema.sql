@@ -282,6 +282,34 @@ CREATE TABLE IF NOT EXISTS tickets (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =============================================================
+-- 11. refresh_tokens  (Refresh-token rotation - docs/11-security.md)
+-- =============================================================
+-- Only the SHA-256 hash of a refresh token is stored, never the raw token, so a
+-- database leak cannot be replayed. Rotation revokes the old row and records the
+-- replacement hash, which also allows reuse detection and audit logging.
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+    id              BIGINT      PRIMARY KEY AUTO_INCREMENT,
+    user_id         BIGINT      NOT NULL,
+    token_hash      CHAR(64)    NOT NULL,
+    expires_at      DATETIME    NOT NULL,
+    revoked_at      DATETIME    NULL DEFAULT NULL,
+    replaced_by_hash CHAR(64)   NULL DEFAULT NULL,
+    user_agent      VARCHAR(255) NULL,
+    ip_address      VARCHAR(45)  NULL,
+    created_at      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_refresh_tokens_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    UNIQUE KEY uk_refresh_tokens_hash (token_hash),
+    INDEX idx_refresh_tokens_user    (user_id),
+    INDEX idx_refresh_tokens_expires (expires_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================================
 -- NOTES (from docs/03-database-design.md §3.13)
 -- =============================================================
 -- 1. Use InnoDB engine for transaction support and row-level locking.

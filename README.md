@@ -78,13 +78,42 @@ backend/
 ├── scripts/
 │   └── test-connection.js        # standalone MySQL connectivity check
 ├── src/
-│   ├── config/env.js             # reads repo-root .env (backend/.env overrides)
+│   ├── config/env.js             # env, JWT, security and cookie settings
 │   ├── database/pool.js          # mysql2 connection pool + testConnection()
-│   ├── middlewares/              # notFound, errorHandler
-│   ├── routes/health.routes.js   # /health, /health/db
+│   ├── repositories/             # data access only (parameterized SQL)
+│   │   ├── user.repository.js
+│   │   └── refresh-token.repository.js
+│   ├── services/                 # business rules (no HTTP, no SQL)
+│   │   ├── auth.service.js
+│   │   └── user.service.js
+│   ├── controllers/              # HTTP translation only
+│   │   ├── auth.controller.js
+│   │   └── admin.controller.js
+│   ├── validators/               # Zod request schemas
+│   │   └── auth.validator.js
+│   ├── middlewares/
+│   │   ├── validate.js           # schema validation
+│   │   ├── authenticate.js       # Bearer token -> req.user
+│   │   ├── authorize.js          # RBAC guard
+│   │   ├── rate-limit.js         # auth rate limiting
+│   │   ├── not-found.js
+│   │   └── error-handler.js
+│   ├── utils/                    # errors, password hashing, JWT, serializers
+│   ├── routes/
+│   │   ├── health.routes.js      # /health, /health/db
+│   │   ├── auth.routes.js        # /api/v1/auth/*
+│   │   └── admin.routes.js       # /api/v1/admin/*
 │   ├── app.js                    # Express app factory (testable)
 │   └── index.js                  # entry point - boots server, graceful shutdown
-└── tests/health.test.js          # smoke tests (node:test)
+└── tests/
+    ├── health.test.js            # connectivity smoke tests
+    └── auth.test.js              # authentication API tests
+```
+
+Requests flow in one direction only — each layer has a single responsibility:
+
+```text
+route -> validate -> controller -> service -> repository -> MySQL
 ```
 
 ### Scripts
@@ -109,7 +138,6 @@ npm test             # server + database endpoints
 | `GET /` | API metadata | `200` |
 | `GET /health` | **Server** liveness (no DB access) | `200` |
 | `GET /health/db` | **Database** readiness (`SELECT DATABASE(), VERSION()`) | `200`, or `503` when MySQL is unreachable |
-| `GET /api/v1/...` | Feature endpoints (auth, events, shows, bookings, payments, tickets, admin) — mounted as implemented | — |
 
 Example response from `GET /health/db`:
 
@@ -122,11 +150,85 @@ Example response from `GET /health/db`:
     "port": 3306,
     "database": "ticket_booking",
     "version": "26.7.0",
-    "tables": 10,
+    "tables": 11,
     "checkedAt": "2026-09-18T14:48:34.686Z"
   }
 }
 ```
+
+## Authentication & Authorization
+
+Implements [docs/04-api-design.md](docs/04-api-design.md) §4.2 and
+[docs/11-security.md](docs/11-security.md) §11.1–11.2.
+
+### Endpoints
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `POST` | `/api/v1/auth/register` | — | Create an account (always role `USER`) and sign in |
+| `POST` | `/api/v1/auth/login` | — | Exchange email + password for a token pair |
+| `POST` | `/api/v1/auth/refresh` | refresh token | Rotate the refresh token and get a new access token |
+| `POST` | `/api/v1/auth/logout` | refresh token | Revoke the refresh token (idempotent) |
+| `GET` | `/api/v1/auth/me` | Bearer access token | Current user's profile |
+| `GET` | `/api/v1/admin/users` | Bearer + `ADMIN` role | List users (`?role=`, `?status=`, `?limit=`) |
+
+### Security controls
+
+| Control | Implementation |
+|---|---|
+| Password storage | bcrypt hashing (`bcryptjs`), cost 10 — `utils/password.js` |
+| Access token | JWT, 15 min, carries `sub`/`role`/`type=access` |
+| Refresh token | JWT, 7 days, carries a unique `jti`; **only its SHA-256 hash is stored** |
+| Refresh-token rotation | Every refresh revokes the old row and records `replaced_by_hash` |
+| Reuse detection | Replaying a rotated token revokes **all** of that user's sessions |
+| Token transport | Access token in memory; refresh token also set as an `httpOnly` + `SameSite` cookie scoped to `/api/v1/auth` |
+| Input validation | Zod schemas at the edge; unknown fields (e.g. `role`) are stripped |
+| SQL injection | `pool.execute` prepared statements with bound parameters everywhere |
+| RBAC | `authorize('ADMIN')` middleware, enforced server-side |
+| Account status | `SUSPENDED`/`BLOCKED`/`INACTIVE` accounts cannot sign in (`403`) |
+| Enumeration resistance | Wrong password and unknown email return an identical `401` |
+| Rate limiting | 20 requests / 15 min per IP on credential endpoints |
+
+### Example
+
+```bash
+# Register
+curl -X POST http://localhost:4000/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Alice","email":"alice@example.com","password":"Secret123"}'
+
+# Login -> { "tokens": { "accessToken": "...", "refreshToken": "..." } }
+curl -X POST http://localhost:4000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"alice@example.com","password":"Secret123"}'
+
+# Authenticated call
+curl http://localhost:4000/api/v1/auth/me -H "Authorization: Bearer <accessToken>"
+
+# Rotate
+curl -X POST http://localhost:4000/api/v1/auth/refresh \
+  -H "Content-Type: application/json" -d '{"refreshToken":"<refreshToken>"}'
+```
+
+Error responses are uniform:
+
+```json
+{
+  "status": "error",
+  "message": "Invalid request body",
+  "code": "VALIDATION_ERROR",
+  "errors": [{ "field": "password", "message": "Password must be at least 8 characters" }]
+}
+```
+
+> **Database note:** refresh tokens live in the `refresh_tokens` table. An
+> existing database can be upgraded without a destructive reset:
+> `mysql ticket_booking < infrastructure/database/migrations/001-refresh-tokens.sql`
+> (or recreate everything with `.\tests\run-sql-tests.ps1 -Fresh`).
+
+> **Scaling note:** the rate limiter uses an in-process store, so its budget is
+> per API instance. Behind a load balancer this must move to a shared Redis store
+> ([docs/08-infrastructure-caching.md](docs/08-infrastructure-caching.md)).
 
 ## Database Tests
 
