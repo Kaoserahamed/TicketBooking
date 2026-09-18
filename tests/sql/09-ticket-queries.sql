@@ -53,6 +53,7 @@ SELECT t.id, t.ticket_number, t.status,
 FROM tickets t
 JOIN bookings b ON t.booking_id = b.id
 WHERE b.booking_reference = 'BK-RCK-00002';
+
 -- Attempt to use the same ticket again (should affect 0 rows — prevents double entry)
 UPDATE tickets t
 JOIN bookings b ON t.booking_id = b.id
