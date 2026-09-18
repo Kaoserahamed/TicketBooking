@@ -18,6 +18,8 @@ const healthRoutes = require('./routes/health.routes');
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 const eventRoutes = require('./routes/event.routes');
+const venueRoutes = require('./routes/venue.routes');
+const showRoutes = require('./routes/show.routes');
 const adminRoutes = require('./routes/admin.routes');
 const notFound = require('./middlewares/not-found');
 const errorHandler = require('./middlewares/error-handler');
@@ -74,11 +76,29 @@ function createApp() {
         listEvents: 'GET /api/v1/admin/events (ADMIN, EVENT_MANAGER)',
         createEvent: 'POST /api/v1/admin/events (ADMIN, EVENT_MANAGER)',
         updateEvent: 'PUT /api/v1/admin/events/:id (ADMIN, EVENT_MANAGER)',
+        createVenue: 'POST /api/v1/admin/venues (ADMIN, VENUE_MANAGER)',
+        updateVenue: 'PUT /api/v1/admin/venues/:id (ADMIN, VENUE_MANAGER)',
+        createSeat: 'POST /api/v1/admin/venues/:id/seats (ADMIN, VENUE_MANAGER)',
+        updateSeat: 'PUT /api/v1/admin/venues/:id/seats/:seatId (ADMIN, VENUE_MANAGER)',
+        deleteSeat: 'DELETE /api/v1/admin/venues/:id/seats/:seatId (ADMIN, VENUE_MANAGER)',
+        createShow: 'POST /api/v1/admin/shows (ADMIN, EVENT_MANAGER)',
+        updateShow: 'PUT /api/v1/admin/shows/:id (ADMIN, EVENT_MANAGER)',
       },
       events: {
         list: 'GET /api/v1/events?category=&search=&status=&limit=&offset=',
         detail: 'GET /api/v1/events/:id',
         shows: 'GET /api/v1/events/:id/shows',
+      },
+      venues: {
+        list: 'GET /api/v1/venues?city=&search=&limit=&offset=',
+        detail: 'GET /api/v1/venues/:id',
+        seats: 'GET /api/v1/venues/:id/seats',
+      },
+      shows: {
+        list: 'GET /api/v1/shows?eventId=&venueId=&status=&upcoming=&limit=&offset=',
+        detail: 'GET /api/v1/shows/:id',
+        seats: 'GET /api/v1/shows/:id/seats',
+        availability: 'GET /api/v1/shows/:id/availability',
       },
     });
   });
@@ -90,10 +110,12 @@ function createApp() {
   app.use('/api/v1/auth', authRoutes);
   app.use('/api/v1/users', userRoutes);
   app.use('/api/v1/events', eventRoutes);
+  app.use('/api/v1/venues', venueRoutes);
+  app.use('/api/v1/shows', showRoutes);
   app.use('/api/v1/admin', adminRoutes);
 
   // Remaining modules mount here as they are implemented, e.g.
-  //   app.use('/api/v1/shows', showRoutes);
+  //   app.use('/api/v1/bookings', bookingRoutes);
   //   app.use('/api/v1/bookings', bookingRoutes);
   //   app.use('/api/v1/payments', paymentRoutes);
   //   app.use('/api/v1/tickets', ticketRoutes);

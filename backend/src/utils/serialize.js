@@ -78,4 +78,136 @@ function toShow(row) {
   };
 }
 
-module.exports = { toPublicUser, toEvent, toShow };
+/**
+ * Shape a `venues` row for API responses.
+ */
+function toVenue(row) {
+  if (!row) {
+    return null;
+  }
+
+  const venue = {
+    id: Number(row.id),
+    name: row.name,
+    address: row.address,
+    city: row.city,
+    capacity: Number(row.capacity),
+    createdAt: row.created_at,
+  };
+
+  // Present only when the seat-summary join ran (detail endpoints).
+  if (row.total_seats !== undefined) {
+    venue.seats = {
+      total: Number(row.total_seats),
+      byType: {
+        VIP: Number(row.vip_seats),
+        PREMIUM: Number(row.premium_seats),
+        REGULAR: Number(row.regular_seats),
+        BALCONY: Number(row.balcony_seats),
+        BOX: Number(row.box_seats),
+      },
+    };
+  }
+
+  return venue;
+}
+
+/**
+ * Shape a `seats` row for API responses.
+ */
+function toSeat(row) {
+  if (!row) {
+    return null;
+  }
+
+  return {
+    id: Number(row.id),
+    venueId: Number(row.venue_id),
+    row: row.row_number,
+    number: row.seat_number,
+    label: `${row.row_number}${row.seat_number}`,
+    seatType: row.seat_type,
+    createdAt: row.created_at,
+  };
+}
+
+/**
+ * Shape a show row (joined with event + venue + counts) for API responses.
+ */
+function toShowDetail(row) {
+  if (!row) {
+    return null;
+  }
+
+  return {
+    id: Number(row.id),
+    eventId: Number(row.event_id),
+    event: { id: Number(row.event_id), name: row.event_name, status: row.event_status },
+    venueId: Number(row.venue_id),
+    venue: {
+      id: Number(row.venue_id),
+      name: row.venue_name,
+      address: row.venue_address,
+      city: row.venue_city,
+      capacity: Number(row.venue_capacity),
+    },
+    startTime: row.start_time,
+    endTime: row.end_time,
+    status: row.status,
+    createdAt: row.created_at,
+    seats: {
+      total: Number(row.total_seats),
+      available: Number(row.available_seats),
+      held: Number(row.held_seats),
+      booked: Number(row.booked_seats),
+      blocked: Number(row.blocked_seats),
+    },
+  };
+}
+
+/**
+ * Shape a show_seats row (joined with its seat) for the seat map.
+ */
+function toShowSeat(row) {
+  if (!row) {
+    return null;
+  }
+
+  return {
+    showSeatId: Number(row.show_seat_id),
+    showId: Number(row.show_id),
+    seatId: Number(row.seat_id),
+    row: row.row_number,
+    number: row.seat_number,
+    label: `${row.row_number}${row.seat_number}`,
+    seatType: row.seat_type,
+    price: row.price,
+    status: row.status,
+    holdExpiresAt: row.hold_expires_at,
+  };
+}
+
+/**
+ * Shape the availability response (totals + per-row breakdown).
+ */
+function toAvailability(showId, totals, byRow) {
+  const num = (v) => Number(v ?? 0);
+  return {
+    showId: Number(showId),
+    total: num(totals.total_seats),
+    available: num(totals.available),
+    held: num(totals.held),
+    booked: num(totals.booked),
+    blocked: num(totals.blocked),
+    byRow: byRow.map((r) => ({
+      row: r.row_number,
+      total: num(r.total_seats),
+      available: num(r.available),
+      held: num(r.held),
+      booked: num(r.booked),
+      blocked: num(r.blocked),
+    })),
+  };
+}
+
+module.exports = { toPublicUser, toEvent, toShow, toVenue, toSeat, toShowDetail, toShowSeat, toAvailability };

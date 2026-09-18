@@ -20,6 +20,15 @@ const {
   updateEventSchema,
   eventIdParamSchema,
 } = require('../validators/event.validator');
+const {
+  createVenueSchema,
+  updateVenueSchema,
+  venueIdParamSchema,
+  createSeatSchema,
+  updateSeatSchema,
+  seatParamSchema,
+} = require('../validators/venue.validator');
+const { createShowSchema, updateShowSchema, showIdParamSchema } = require('../validators/show.validator');
 const asyncHandler = require('../utils/async-handler');
 
 const router = express.Router();
@@ -59,6 +68,73 @@ router.put(
   validate(eventIdParamSchema, 'params'),
   validate(updateEventSchema),
   asyncHandler(adminController.adminUpdateEvent)
+);
+
+// POST /api/v1/admin/venues
+router.post(
+  '/venues',
+  authenticate,
+  authorize('ADMIN', 'VENUE_MANAGER'),
+  validate(createVenueSchema),
+  asyncHandler(adminController.adminCreateVenue)
+);
+
+// PUT /api/v1/admin/venues/:id
+router.put(
+  '/venues/:id',
+  authenticate,
+  authorize('ADMIN', 'VENUE_MANAGER'),
+  validate(venueIdParamSchema, 'params'),
+  validate(updateVenueSchema),
+  asyncHandler(adminController.adminUpdateVenue)
+);
+
+// POST /api/v1/admin/venues/:id/seats
+router.post(
+  '/venues/:id/seats',
+  authenticate,
+  authorize('ADMIN', 'VENUE_MANAGER'),
+  validate(venueIdParamSchema, 'params'),
+  validate(createSeatSchema),
+  asyncHandler(adminController.adminCreateSeat)
+);
+
+// PUT /api/v1/admin/venues/:id/seats/:seatId
+router.put(
+  '/venues/:id/seats/:seatId',
+  authenticate,
+  authorize('ADMIN', 'VENUE_MANAGER'),
+  validate(seatParamSchema, 'params'),
+  validate(updateSeatSchema),
+  asyncHandler(adminController.adminUpdateSeat)
+);
+
+// DELETE /api/v1/admin/venues/:id/seats/:seatId
+router.delete(
+  '/venues/:id/seats/:seatId',
+  authenticate,
+  authorize('ADMIN', 'VENUE_MANAGER'),
+  validate(seatParamSchema, 'params'),
+  asyncHandler(adminController.adminDeleteSeat)
+);
+
+// POST /api/v1/admin/shows
+router.post(
+  '/shows',
+  authenticate,
+  authorize('ADMIN', 'EVENT_MANAGER'),
+  validate(createShowSchema),
+  asyncHandler(adminController.adminCreateShow)
+);
+
+// PUT /api/v1/admin/shows/:id
+router.put(
+  '/shows/:id',
+  authenticate,
+  authorize('ADMIN', 'EVENT_MANAGER'),
+  validate(showIdParamSchema, 'params'),
+  validate(updateShowSchema),
+  asyncHandler(adminController.adminUpdateShow)
 );
 
 module.exports = router;
