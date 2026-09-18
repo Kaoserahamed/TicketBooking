@@ -64,6 +64,29 @@ SMTP_HOST=smtp.your-provider.com
 SMS_PROVIDER=twilio
 ```
 
+## Database Tests
+
+The SQL test/verification scripts in [`tests/sql`](tests/sql/) cover user auth, events,
+venues/seats, shows, availability, the booking flow, payments, tickets, admin reports,
+concurrency (double-booking prevention) and background workers.
+
+```powershell
+# Run every test script against the database configured in .env
+.\tests\run-sql-tests.ps1
+
+# Recreate the database from infrastructure/database/schema.sql first
+# (needed when the seed data already exists — makes the suite repeatable)
+.\tests\run-sql-tests.ps1 -Fresh
+
+# Run against another database
+.\tests\run-sql-tests.ps1 -Fresh -Database ticket_booking_test
+```
+
+With `-Fresh` the runner recreates the database from
+[`infrastructure/database/schema.sql`](infrastructure/database/schema.sql), then runs
+each file in `tests/sql/` in order. A file FAILS when MySQL reports any error, and the
+script exits with code 0 only when all files pass.
+
 ## Documentation
 
 | # | Document | Topic |
