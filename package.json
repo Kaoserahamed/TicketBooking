@@ -18,7 +18,12 @@
     "typecheck": "npm --prefix backend run typecheck && npm --prefix frontend run typecheck",
     "stack:test:up": "docker compose -f docker-compose.test.yml up -d",
     "stack:test:down": "docker compose -f docker-compose.test.yml down -v",
-    "stack:up": "docker compose up --build"
+    "stack:up": "docker compose up --build",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint:root": "eslint .",
+    "verify:repo": "node scripts/verify-repo.mjs",
+    "verify": "npm run lint && npm run lint:root && npm run format:check && npm run typecheck && npm run verify:repo && npm test"
   },
   "keywords": [
     "ticket-booking",
