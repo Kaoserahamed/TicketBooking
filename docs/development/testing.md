@@ -24,6 +24,8 @@ npm test                 # both (CI backend job)
 | `tests/unit/config.test.js` | production secret guards, coercion, silent test logs |
 | `tests/unit/env-example.test.js` | every `process.env.X` documented in `.env.example` |
 | `tests/unit/test-stack.test.js` | `docker-compose.test.yml` + `backend/.env.test.example` stay in sync |
+| `tests/unit/ci-workflow.test.js` | CI jobs, gates, action pins and Dependabot config stay in sync |
+| `tests/unit/check-coverage.test.js` | the coverage gate parses Node's table and fails on a regression |
 | `tests/unit/error-*.test.js` | envelope shape + Sentry opt-in wiring |
 | `tests/unit/logger.test.js` | JSON shape, service/env fields, credential redaction |
 | `tests/unit/metrics.test.js` | route-pattern labels, token gate, disabled-mode passthrough |
