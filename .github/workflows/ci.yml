@@ -7,7 +7,9 @@ name: CI/CD
 #      coverage-gated vitest run, then the production build
 #   3. sql      — recreate the schema on a real MySQL 8 service, then run the
 #      whole tests/sql/ suite (seed data, booking flow, concurrency, workers)
-#   4. images  — build both container images (and push to GHCR on main)
+#   4. manifests— render infrastructure/kubernetes with kustomize and validate
+#      every object against the Kubernetes API schemas (kubeconform, strict)
+#   5. images  — build both container images (and push to GHCR on main)
 #
 # Every job fails fast on lint, formatting, typecheck, coverage or audit
 # errors, so a regression cannot reach main just because tests happened to pass.
@@ -184,10 +186,36 @@ jobs:
         shell: pwsh
         run: ./tests/run-sql-tests.ps1 -Fresh -Database $env:DB_NAME -User $env:DB_USER
 
+  manifests:
+    name: Infrastructure — manifest validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install kubeconform
+        env:
+          # Pinned: a new kubeconform release must not silently change the gate.
+          KUBECONFORM_VERSION: v0.8.0
+        run: |
+          curl -sSLo kubeconform.tar.gz \
+            "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz"
+          tar -xzf kubeconform.tar.gz kubeconform
+          sudo install -m 0755 kubeconform /usr/local/bin/kubeconform
+          kubeconform -v
+
+      # `kubectl kustomize` renders exactly what
+      # `kubectl apply -k infrastructure/kubernetes` would send, so this checks
+      # the object set that actually reaches the cluster — namespace, labels and
+      # generated ConfigMap content included — not just the raw files.
+      - name: Validate the rendered manifests against the Kubernetes schemas
+        run: |
+          kubectl kustomize infrastructure/kubernetes \
+            | kubeconform -strict -summary -kubernetes-version 1.29.0
+
   docker:
     name: Docker — build & publish
     runs-on: ubuntu-latest
-    needs: [backend, frontend, sql]
+    needs: [backend, frontend, sql, manifests]
     permissions:
       contents: read
       packages: write
