@@ -23,7 +23,6 @@ export default function BookingsPage() {
   const [cancellingId, setCancellingId] = useState<number | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
 
-
   const load = async (nextOffset: number, nextStatus: '' | BookingStatus) => {
     setIsLoading(true)
     setError(null)
@@ -44,7 +43,6 @@ export default function BookingsPage() {
 
   useEffect(() => {
     void load(0, '')
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   function onStatusChange(next: '' | BookingStatus) {
@@ -120,7 +118,10 @@ export default function BookingsPage() {
                   <div>
                     <p className="font-medium text-gray-900">
                       {booking.show.event.name} · {booking.bookingReference}{' '}
-                      <Link to={`/bookings/${booking.id}`} className="text-sm font-normal text-primary-700 hover:underline">
+                      <Link
+                        to={`/bookings/${booking.id}`}
+                        className="text-sm font-normal text-primary-700 hover:underline"
+                      >
                         Details
                       </Link>
                     </p>

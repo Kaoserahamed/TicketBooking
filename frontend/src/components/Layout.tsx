@@ -1,4 +1,4 @@
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
+import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useAuthStore } from '../stores/auth'
 
 export default function Layout() {
@@ -11,8 +11,18 @@ export default function Layout() {
           <div className="flex justify-between h-16">
             <div className="flex items-center">
               <Link to="/" className="flex items-center space-x-2">
-                <svg className="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                <svg
+                  className="w-8 h-8 text-primary-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"
+                  />
                 </svg>
                 <span className="text-xl font-bold text-gray-900">Ticket Booking</span>
               </Link>
@@ -24,7 +34,9 @@ export default function Layout() {
                   end
                   className={({ isActive }) =>
                     `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                      isActive ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-gray-100'
+                      isActive
+                        ? 'bg-primary-50 text-primary-700'
+                        : 'text-gray-700 hover:bg-gray-100'
                     }`
                   }
                 >
@@ -34,7 +46,9 @@ export default function Layout() {
                   to="/events"
                   className={({ isActive }) =>
                     `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                      isActive ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-gray-100'
+                      isActive
+                        ? 'bg-primary-50 text-primary-700'
+                        : 'text-gray-700 hover:bg-gray-100'
                     }`
                   }
                 >
@@ -44,7 +58,9 @@ export default function Layout() {
                   to="/venues"
                   className={({ isActive }) =>
                     `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                      isActive ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-gray-100'
+                      isActive
+                        ? 'bg-primary-50 text-primary-700'
+                        : 'text-gray-700 hover:bg-gray-100'
                     }`
                   }
                 >
@@ -55,25 +71,31 @@ export default function Layout() {
                     to="/bookings"
                     className={({ isActive }) =>
                       `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                        isActive ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-gray-100'
+                        isActive
+                          ? 'bg-primary-50 text-primary-700'
+                          : 'text-gray-700 hover:bg-gray-100'
                       }`
                     }
                   >
                     My Bookings
                   </NavLink>
                 )}
-                {token && user && ['ADMIN', 'EVENT_MANAGER', 'VENUE_MANAGER'].includes(user.role) && (
-                  <NavLink
-                    to="/admin/events"
-                    className={({ isActive }) =>
-                      `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                        isActive ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-gray-100'
-                      }`
-                    }
-                  >
-                    Admin
-                  </NavLink>
-                )}
+                {token &&
+                  user &&
+                  ['ADMIN', 'EVENT_MANAGER', 'VENUE_MANAGER'].includes(user.role) && (
+                    <NavLink
+                      to="/admin/events"
+                      className={({ isActive }) =>
+                        `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                          isActive
+                            ? 'bg-primary-50 text-primary-700'
+                            : 'text-gray-700 hover:bg-gray-100'
+                        }`
+                      }
+                    >
+                      Admin
+                    </NavLink>
+                  )}
               </div>
               {token && user ? (
                 <div className="flex items-center space-x-2">
@@ -91,7 +113,9 @@ export default function Layout() {
                     to="/login"
                     className={({ isActive }) =>
                       `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                        isActive ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-gray-100'
+                        isActive
+                          ? 'bg-primary-50 text-primary-700'
+                          : 'text-gray-700 hover:bg-gray-100'
                       }`
                     }
                   >
@@ -118,11 +142,3 @@ export default function Layout() {
     </div>
   )
 }
-
-// Re-exported for tests: current route visibility rule.
-// Login/Register render inside the Layout outlet (no special-casing here)
-// so auth pages keep the global nav — simpler and easier to test.
-export function useLocationForTest() {
-  return useLocation()
-}
-
