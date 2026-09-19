@@ -26,12 +26,12 @@ services:
       MYSQL_USER: tbs_test
       MYSQL_PASSWORD: test-db-password
     ports:
-      - "${MYSQL_TEST_PORT:-3307}:3306"
+      - '${MYSQL_TEST_PORT:-3307}:3306'
     volumes:
       # First-boot initialization: full schema so integration tests have tables.
       - ./infrastructure/database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-ptest-db-password"]
+      test: ['CMD', 'mysqladmin', 'ping', '-h', '127.0.0.1', '-ptest-db-password']
       interval: 10s
       timeout: 5s
       retries: 10
@@ -41,11 +41,11 @@ services:
     image: redis:7-alpine
     container_name: tbs-test-redis
     # Ephemeral: no volume, no persistence — rate-limit/cache state is disposable.
-    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    command: ['redis-server', '--save', '', '--appendonly', 'no']
     ports:
-      - "${REDIS_TEST_PORT:-6380}:6379"
+      - '${REDIS_TEST_PORT:-6380}:6379'
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
       timeout: 5s
       retries: 5

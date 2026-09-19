@@ -45,21 +45,21 @@ Administrators shall be able to:
 
 ## 2.2 Non-Functional Requirements
 
-| Requirement | Target |
-|---|---|
-| Registered users | 100,000+ |
-| Peak concurrent users | 10,000+ |
-| Peak booking attempts | 1,000–5,000/sec depending on event |
-| API availability | 99.9%+ |
-| Normal API latency | <300 ms |
-| Seat availability latency | <200 ms |
-| Booking confirmation | <5 sec excluding payment-provider delays |
-| Database durability | High |
-| Data consistency | Strong for seat inventory |
-| Search consistency | Eventual consistency acceptable |
-| Horizontal scaling | Required |
-| Zero double booking | Mandatory |
-| Secure payment handling | Mandatory |
+| Requirement               | Target                                   |
+| ------------------------- | ---------------------------------------- |
+| Registered users          | 100,000+                                 |
+| Peak concurrent users     | 10,000+                                  |
+| Peak booking attempts     | 1,000–5,000/sec depending on event       |
+| API availability          | 99.9%+                                   |
+| Normal API latency        | <300 ms                                  |
+| Seat availability latency | <200 ms                                  |
+| Booking confirmation      | <5 sec excluding payment-provider delays |
+| Database durability       | High                                     |
+| Data consistency          | Strong for seat inventory                |
+| Search consistency        | Eventual consistency acceptable          |
+| Horizontal scaling        | Required                                 |
+| Zero double booking       | Mandatory                                |
+| Secure payment handling   | Mandatory                                |
 
 > The exact infrastructure capacity should ultimately be validated through load testing because "100K users" alone does not determine required server capacity.
 

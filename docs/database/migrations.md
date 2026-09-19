@@ -6,13 +6,13 @@ is in [`schema.md`](schema.md); deploy sequence in
 
 ## 1. How the pieces fit together
 
-| Piece | Path | Role |
-|-------|------|------|
-| Schema truth | `infrastructure/database/schema.sql` | full shape for a fresh DB |
-| Migrations | `infrastructure/database/migrations/*.sql` | forward-only deltas, filename order |
-| Runner | `backend/scripts/run-migrations.js` (`npm run db:migrate`) | applies pending files, records `schema_migrations` |
-| K8s init | `infrastructure/kubernetes/mysql-initdb-configmap.yaml` | same schema for first boot |
-| SQL checks | `tests/sql/*.sql` + `tests/run-sql-tests.ps1` | repeatable verification |
+| Piece        | Path                                                       | Role                                               |
+| ------------ | ---------------------------------------------------------- | -------------------------------------------------- |
+| Schema truth | `infrastructure/database/schema.sql`                       | full shape for a fresh DB                          |
+| Migrations   | `infrastructure/database/migrations/*.sql`                 | forward-only deltas, filename order                |
+| Runner       | `backend/scripts/run-migrations.js` (`npm run db:migrate`) | applies pending files, records `schema_migrations` |
+| K8s init     | `infrastructure/kubernetes/mysql-initdb-configmap.yaml`    | same schema for first boot                         |
+| SQL checks   | `tests/sql/*.sql` + `tests/run-sql-tests.ps1`              | repeatable verification                            |
 
 ## 2. Everyday commands
 
@@ -36,11 +36,11 @@ npm run db:check                   # verify MySQL is reachable
 
 ## 4. Applying per environment
 
-| Environment | Procedure |
-|-------------|-----------|
-| Local | `docker compose up -d` then `npm run db:migrate` from `backend/` |
-| Staging | back up first, then `npm run db:migrate` from the release image |
-| Production | back up, review (`--dry-run` diff), apply, verify — see production.md |
+| Environment | Procedure                                                             |
+| ----------- | --------------------------------------------------------------------- |
+| Local       | `docker compose up -d` then `npm run db:migrate` from `backend/`      |
+| Staging     | back up first, then `npm run db:migrate` from the release image       |
+| Production  | back up, review (`--dry-run` diff), apply, verify — see production.md |
 
 ## 5. Verifying and recovering
 
@@ -56,4 +56,3 @@ npm run db:check                   # verify MySQL is reachable
 
 Migrations are not backups. Take a dump first; restore path is in
 [`../operations/disaster-recovery.md`](../operations/disaster-recovery.md).
-

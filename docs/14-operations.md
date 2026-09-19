@@ -66,17 +66,17 @@ The booking remains **confirmed**. Notifications are best-effort and retried ind
 
 Different parts of the system can use different consistency models.
 
-| Component | Consistency |
-|---|---|
-| Seat inventory | Strong |
-| Booking status | Strong |
-| Payment | Strong |
-| Ticket issuance | Strong |
-| User profile | Strong |
-| Event search | Eventual |
-| Analytics | Eventual |
-| Notifications | Eventual |
-| Popular-event counters | Eventual |
+| Component              | Consistency |
+| ---------------------- | ----------- |
+| Seat inventory         | Strong      |
+| Booking status         | Strong      |
+| Payment                | Strong      |
+| Ticket issuance        | Strong      |
+| User profile           | Strong      |
+| Event search           | Eventual    |
+| Analytics              | Eventual    |
+| Notifications          | Eventual    |
+| Popular-event counters | Eventual    |
 
 ### Key Principle
 

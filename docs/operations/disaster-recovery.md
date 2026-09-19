@@ -5,18 +5,18 @@ How TicketBooking is backed up, restored and rehearsed. Scripts: SQL dumps via
 
 ## 1. What exists, and what can be lost
 
-| Asset | Where | Backed up by |
-|-------|-------|--------------|
-| Booking data (all MySQL tables) | managed MySQL / compose `mysql-data` volume | `mysqldump` dumps |
-| Secrets (`JWT_*`, `DB_PASSWORD`, `STRIPE_*`, `SENTRY_DSN`) | environment / secrets manager | the secrets manager; never a dump |
-| Release images | GHCR (`backend`/`frontend` tags) | the registry, built from a tagged commit |
-| Code and migrations | GitHub | git history |
+| Asset                                                      | Where                                       | Backed up by                             |
+| ---------------------------------------------------------- | ------------------------------------------- | ---------------------------------------- |
+| Booking data (all MySQL tables)                            | managed MySQL / compose `mysql-data` volume | `mysqldump` dumps                        |
+| Secrets (`JWT_*`, `DB_PASSWORD`, `STRIPE_*`, `SENTRY_DSN`) | environment / secrets manager               | the secrets manager; never a dump        |
+| Release images                                             | GHCR (`backend`/`frontend` tags)            | the registry, built from a tagged commit |
+| Code and migrations                                        | GitHub                                      | git history                              |
 
 **Targets** (proposals — agree real ones before relying on them):
 
-| Metric | Target |
-|--------|--------|
-| RPO (max data loss) | 24 h with daily dumps |
+| Metric                | Target                                                  |
+| --------------------- | ------------------------------------------------------- |
+| RPO (max data loss)   | 24 h with daily dumps                                   |
 | RTO (restore service) | < 2 h from a verified dump, < 30 min for image rollback |
 
 ## 2. Backups
@@ -40,12 +40,12 @@ before every migration or release.
 
 ## 4. Scenario playbook
 
-| Scenario | Action |
-|----------|--------|
-| Bad release, no data damage | roll the image back (faster): `../deployment/rollback.md` |
-| Accidental row deletion | restore dump into **scratch** DB, export affected rows, re-insert |
-| DB volume lost | provision new MySQL, restore latest dump, `npm run db:migrate`, restart API |
-| Secret leaked/lost | rotate per `../security/secrets-management.md` (new JWT secrets sign everyone out) |
+| Scenario                    | Action                                                                             |
+| --------------------------- | ---------------------------------------------------------------------------------- |
+| Bad release, no data damage | roll the image back (faster): `../deployment/rollback.md`                          |
+| Accidental row deletion     | restore dump into **scratch** DB, export affected rows, re-insert                  |
+| DB volume lost              | provision new MySQL, restore latest dump, `npm run db:migrate`, restart API        |
+| Secret leaked/lost          | rotate per `../security/secrets-management.md` (new JWT secrets sign everyone out) |
 
 ## 5. Rehearsal
 
@@ -68,4 +68,3 @@ any step that did not match this document.
 - [ ] Secrets in a manager, not in dumps or the repo
 - [ ] Latest dump restored into scratch within the last quarter
 - [ ] RTO measured; runbook updated with deviations
-

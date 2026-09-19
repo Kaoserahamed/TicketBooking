@@ -8,13 +8,13 @@ Branching, commit, review and release conventions. Local checks:
 `main` is the only long-lived branch and is always releasable — CI re-verifies
 it on every push.
 
-| Branch | Pattern | Purpose |
-|--------|---------|---------|
-| `main` | — | releasable truth; tags cut from here only |
-| Feature | `feat/<short-slug>` | new capability |
-| Fix | `fix/<short-slug>` | bug fix |
-| Docs/chore | `docs/<slug>`, `chore/<slug>` | non-behavioural changes |
-| Hotfix | `hotfix/<slug>` | production fix, merged then tagged as patch |
+| Branch     | Pattern                       | Purpose                                     |
+| ---------- | ----------------------------- | ------------------------------------------- |
+| `main`     | —                             | releasable truth; tags cut from here only   |
+| Feature    | `feat/<short-slug>`           | new capability                              |
+| Fix        | `fix/<short-slug>`            | bug fix                                     |
+| Docs/chore | `docs/<slug>`, `chore/<slug>` | non-behavioural changes                     |
+| Hotfix     | `hotfix/<slug>`               | production fix, merged then tagged as patch |
 
 1. `git switch main && git pull --ff-only`
 2. `git switch -c feat/duplicate-seat-guard`
@@ -78,4 +78,3 @@ git push origin v0.1.0
 The tag re-runs lint/test/build gates; a bad release rolls back per
 [`../deployment/rollback.md`](../deployment/rollback.md). Hotfixes follow the
 same path on a `hotfix/` branch, merged to `main`, tagged as PATCH.
-

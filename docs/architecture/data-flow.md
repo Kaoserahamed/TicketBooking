@@ -23,18 +23,17 @@ Express route (backend/src/routes/*.js)
 { status: ok, ... } or { status: error, code, message }
 ```
 
-
 ## 2. Seat write path (the most important invariant)
 
 `show_seats.status` and its `booking_items` rows are written **together, in one
 transaction**, by the feature that caused the movement:
 
-| Trigger | Endpoint | Seat transition | Ledger write |
-|---------|----------|-----------------|--------------|
-| Hold created | `POST /api/v1/bookings/hold` | `AVAILABLE -> HELD` | `bookings` + `booking_items` |
-| Hold cancelled | `POST /api/v1/bookings/:id/cancel` | `HELD -> AVAILABLE` | booking -> `CANCELLED` |
-| Hold expired | worker sweep | `HELD -> AVAILABLE` | booking -> `EXPIRED` |
-| Admin block | `POST /api/v1/admin/...` | `AVAILABLE -> BLOCKED` | none (ops action) |
+| Trigger        | Endpoint                           | Seat transition        | Ledger write                 |
+| -------------- | ---------------------------------- | ---------------------- | ---------------------------- |
+| Hold created   | `POST /api/v1/bookings/hold`       | `AVAILABLE -> HELD`    | `bookings` + `booking_items` |
+| Hold cancelled | `POST /api/v1/bookings/:id/cancel` | `HELD -> AVAILABLE`    | booking -> `CANCELLED`       |
+| Hold expired   | worker sweep                       | `HELD -> AVAILABLE`    | booking -> `EXPIRED`         |
+| Admin block    | `POST /api/v1/admin/...`           | `AVAILABLE -> BLOCKED` | none (ops action)            |
 
 `services/booking.service.js` is the **guarded** writer: it requires seat ids,
 carries the `Idempotency-Key`, and refuses oversell (`409 SEATS_UNAVAILABLE`).
@@ -43,11 +42,11 @@ inline and insert the same ledger rows in the same commit.
 
 ## 3. Other write paths
 
-| Domain | Endpoint | Writes |
-|--------|----------|--------|
-| Catalogue | `POST/PATCH /api/v1/admin/events`, `/venues`, `/shows` | Row; seat layout derived per show |
-| Identity | `POST /api/v1/auth/*`, `/api/v1/users/me` | `users`, hashed `refresh_tokens`, single-use `user_action_tokens` |
-| Platform | `npm run db:migrate` | `schema_migrations` row per file |
+| Domain    | Endpoint                                               | Writes                                                            |
+| --------- | ------------------------------------------------------ | ----------------------------------------------------------------- |
+| Catalogue | `POST/PATCH /api/v1/admin/events`, `/venues`, `/shows` | Row; seat layout derived per show                                 |
+| Identity  | `POST /api/v1/auth/*`, `/api/v1/users/me`              | `users`, hashed `refresh_tokens`, single-use `user_action_tokens` |
+| Platform  | `npm run db:migrate`                                   | `schema_migrations` row per file                                  |
 
 ## 4. Read paths
 
@@ -70,4 +69,3 @@ pages/ (route page)
 `stores/auth.ts` owns token storage; `api/` is the single place a backend
 contract change has to be mirrored, which is why
 `frontend/src/test/api-client.test.ts` asserts the refresh behaviour.
-

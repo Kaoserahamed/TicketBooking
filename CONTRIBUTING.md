@@ -21,17 +21,17 @@ This project adheres to a code of conduct. By participating, you are expected to
 
 ### Prerequisites
 
-| Tool | Version | Purpose |
-|------|---------|---------|
-| Node.js | 20+ | API, SPA, vitest |
-| npm | bundled | Package management |
-| MySQL | 8+ or Docker | Runtime + integration tests |
-| Docker | any recent | MySQL container, image builds |
-| Redis | optional | Shared rate limiting / cache |
+| Tool    | Version      | Purpose                       |
+| ------- | ------------ | ----------------------------- |
+| Node.js | 20+          | API, SPA, vitest              |
+| npm     | bundled      | Package management            |
+| MySQL   | 8+ or Docker | Runtime + integration tests   |
+| Docker  | any recent   | MySQL container, image builds |
+| Redis   | optional     | Shared rate limiting / cache  |
 
 ### Quick Setup
 
-```bash
+````bash
 # Clone the repository
 git clone https://github.com/Kaoserahamed/TicketBooking.git
 
@@ -56,9 +56,10 @@ git switch -c feat/<short-slug>
 
 # Or for fixes
 git switch -c fix/<short-slug>
-```
+````
 
 Branch naming conventions:
+
 - `feat/<slug>` — new feature
 - `fix/<slug>` — bug fix
 - `docs/<slug>` — documentation only
@@ -86,20 +87,24 @@ cd frontend && npm run verify
 
 ### PR Template
 
-```markdown
+````markdown
 ## What
+
 <!-- Brief description of the change -->
 
 ## Why
+
 <!-- Motivation and context -->
 
 ## Type of Change
+
 - [ ] Bug fix (non-breaking change fixing an issue)
 - [ ] New feature (non-breaking change adding functionality)
 - [ ] Breaking change (fix or feature that changes existing functionality)
 - [ ] Documentation update
 
 ## Verification
+
 - [ ] `npm run verify` passes (backend)
 
 ## Coding Standards
@@ -130,12 +135,13 @@ npm run test:unit        # hermetic unit tests (no DB)
 npm run test:integration # requires MySQL
 npm test                 # both
 ```
+````
 
 Unit tests must be hermetic — no external services. Integration tests target a real MySQL.
 
 ### Frontend
 
-```bash
+````bash
 
 ## Documentation
 
@@ -165,7 +171,7 @@ git tag -a vX.Y.Z -m "TicketBooking vX.Y.Z"
 # 4. Push
 git push origin main
 git push origin vX.Y.Z
-```
+````
 
 CI will rebuild and publish container images on tag push.
 
@@ -179,9 +185,10 @@ See [docs/deployment/ci-cd.md](docs/deployment/ci-cd.md) for the full pipeline.
 
 Thank you for contributing to Ticket Booking System!
 cd frontend
-npm run test:run         # single run (CI-style)
-npm run test:coverage    # with enforced thresholds
-```
+npm run test:run # single run (CI-style)
+npm run test:coverage # with enforced thresholds
+
+````
 
 Coverage thresholds (enforced in CI):
 - Lines/Statements: 90%
@@ -191,9 +198,10 @@ Coverage thresholds (enforced in CI):
 
 ```bash
 .\tests\run-sql-tests.ps1 -Fresh   # PowerShell
-```
+````
 
 Validates seed data, auth queries, booking flow, and concurrency guards.
+
 - **State**: Zustand for global state; React Query for server state
 - **API calls**: Only through `api/` modules — the single fetch layer
 - **Testing**: Use Testing Library; tests in `src/test/`
@@ -208,12 +216,14 @@ Validates seed data, auth queries, booking flow, and concurrency guards.
 - [ ] CHANGELOG.md updated
 
 ## Checklist
+
 - [ ] Branch up to date with main
 - [ ] Lint, format, typecheck pass (both stacks)
 - [ ] Tests pass with coverage floors met
 - [ ] New behavior has tests that fail without the change
 - [ ] No secrets, no build artifacts, no large binaries
 - [ ] Schema change? Migration included, reviewed, forward-only
+
 ```
 
 ### Code Review Checklist
@@ -233,6 +243,7 @@ See [docs/development/git-workflow.md](docs/development/git-workflow.md) for com
 We use [Conventional Commits](https://www.conventionalcommits.org/):
 
 ```
+
 <type>(<scope>): <subject>
 
 <optional body explaining why>
@@ -241,6 +252,7 @@ We use [Conventional Commits](https://www.conventionalcommits.org/):
 Allowed types: `feat`, `fix`, `test`, `ci`, `docs`, `chore`, `refactor`, `perf`, `sec`
 
 Examples:
+
 ```bash
 git commit -m "feat(booking): add idempotency key support"
 git commit -m "fix(auth): correct refresh token rotation"
@@ -249,28 +261,37 @@ git commit -m "docs(api): document authentication flows"
 ```
 
 Rules:
+
 1. **One logical change per commit** — never mix formatting/refactor/behavior
 2. **Every behavior change ships with a test** that fails without it
 3. **Never commit secrets or artifacts** — `.env`, `dist/`, `coverage/`, `node_modules/` are ignored
-cd TicketBooking
+   cd TicketBooking
 
 # Install dependencies
+
 cd backend && npm ci
 cd ../frontend && npm ci
 
 # Configure environment
-Copy-Item .env.example .env   # PowerShell
-# cp .env.example .env        # bash
+
+Copy-Item .env.example .env # PowerShell
+
+# cp .env.example .env # bash
 
 # Start database (optional)
+
 docker compose up -d mysql
 
 # Run migrations
+
 cd backend && npm run db:migrate
 
 # Start development servers
-cd backend && npm run dev    # API on :4000
-cd frontend && npm run dev   # SPA on :5173
+
+cd backend && npm run dev # API on :4000
+cd frontend && npm run dev # SPA on :5173
+
 ```
 
 For detailed setup, see [docs/development/setup.md](docs/development/setup.md).
+```

@@ -6,12 +6,12 @@ migrations are forward-only.
 
 ## 1. Decide first
 
-| Symptom | Action |
-|---------|--------|
-| Elevated 5xx / new error envelope spike | roll the image back |
-| Wrong behaviour, data intact | roll image back, then fix forward |
-| Migration applied, old code cannot read new schema | **roll forward** — do not downgrade |
-| Data corrupted by the bad release | stop writes, restore last verified dump |
+| Symptom                                            | Action                                  |
+| -------------------------------------------------- | --------------------------------------- |
+| Elevated 5xx / new error envelope spike            | roll the image back                     |
+| Wrong behaviour, data intact                       | roll image back, then fix forward       |
+| Migration applied, old code cannot read new schema | **roll forward** — do not downgrade     |
+| Data corrupted by the bad release                  | stop writes, restore last verified dump |
 
 Ask: **did this version change the schema?** Compare
 `git diff v<prev>..v<cur> -- infrastructure/database/migrations`. If a column
@@ -64,4 +64,3 @@ The frontend is stateless: redeploy the previous build the same way.
 - [ ] Frontend redeployed if the API contract changed
 - [ ] Regression test added and green
 - [ ] PATCH release cut, tagged, deployed
-

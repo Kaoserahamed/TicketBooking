@@ -125,33 +125,33 @@ route -> validate -> controller -> service -> repository -> MySQL
 
 ### Scripts
 
-| Command | Description |
-|---|---|
-| `npm start` | Start the API on `http://localhost:4000` |
-| `npm run dev` | Start with auto-reload (`node --watch`) |
-| `npm run db:check` | Test the MySQL connection only; exits `1` on failure |
-| `npm run lint` | ESLint 9 (flat config) over `src/`, `scripts/` and `tests/` |
-| `npm run format:check` | Verify Prettier formatting (`npm run format` fixes it) |
-| `npm run typecheck` | `tsc --noEmit` over the JavaScript sources |
-| `npm run test:unit` | Unit tests only — no MySQL or Redis required |
-| `npm run test:integration` | End-to-end API tests against a real MySQL 8 instance |
-| `npm test` | Both suites (`tests/unit` + `tests/integration`) |
-| `npm run test:coverage` | Unit tests with the enforced coverage floors (`scripts/check-coverage.js`) |
-| `npm run verify` | Lint + format + typecheck + unit tests — run before pushing |
+| Command                    | Description                                                                |
+| -------------------------- | -------------------------------------------------------------------------- |
+| `npm start`                | Start the API on `http://localhost:4000`                                   |
+| `npm run dev`              | Start with auto-reload (`node --watch`)                                    |
+| `npm run db:check`         | Test the MySQL connection only; exits `1` on failure                       |
+| `npm run lint`             | ESLint 9 (flat config) over `src/`, `scripts/` and `tests/`                |
+| `npm run format:check`     | Verify Prettier formatting (`npm run format` fixes it)                     |
+| `npm run typecheck`        | `tsc --noEmit` over the JavaScript sources                                 |
+| `npm run test:unit`        | Unit tests only — no MySQL or Redis required                               |
+| `npm run test:integration` | End-to-end API tests against a real MySQL 8 instance                       |
+| `npm test`                 | Both suites (`tests/unit` + `tests/integration`)                           |
+| `npm run test:coverage`    | Unit tests with the enforced coverage floors (`scripts/check-coverage.js`) |
+| `npm run verify`           | Lint + format + typecheck + unit tests — run before pushing                |
 
 ### Quality gates
 
 The same gates run in CI on every push and pull request
 ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)):
 
-| Gate | Backend | Frontend |
-|---|---|---|
-| Lint | `npm run lint` | `npm run lint` |
-| Formatting | `npm run format:check` | `npm run format:check` |
-| Typecheck | `npm run typecheck` | `npm run typecheck` |
-| Dependency audit | `npm audit --audit-level=high` | `npm audit --audit-level=high` |
-| Tests | `npm test` vs a real MySQL 8 service | `npm run test:coverage` |
-| Coverage floor | unit suite: 55% lines, 80% branches, 30% functions ([`scripts/check-coverage.js`](backend/scripts/check-coverage.js)) | 90% lines/statements, 75% functions/branches |
+| Gate             | Backend                                                                                                               | Frontend                                     |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| Lint             | `npm run lint`                                                                                                        | `npm run lint`                               |
+| Formatting       | `npm run format:check`                                                                                                | `npm run format:check`                       |
+| Typecheck        | `npm run typecheck`                                                                                                   | `npm run typecheck`                          |
+| Dependency audit | `npm audit --audit-level=high`                                                                                        | `npm audit --audit-level=high`               |
+| Tests            | `npm test` vs a real MySQL 8 service                                                                                  | `npm run test:coverage`                      |
+| Coverage floor   | unit suite: 55% lines, 80% branches, 30% functions ([`scripts/check-coverage.js`](backend/scripts/check-coverage.js)) | 90% lines/statements, 75% functions/branches |
 
 The frontend coverage floors are enforced by `vitest` thresholds in
 [`frontend/vite.config.ts`](frontend/vite.config.ts): a run that drops below any
@@ -160,9 +160,9 @@ of them fails the job. Dependency updates are proposed weekly by
 
 Two further jobs guard the parts that are neither half:
 
-| Job | Runs | Fails when |
-|---|---|---|
-| Database — SQL suite | [`tests/run-sql-tests.ps1`](tests/run-sql-tests.ps1) `-Fresh` against a `mysql:8.0` service | any `ERROR <code>` in a `tests/sql/` script |
+| Job                                  | Runs                                                                                                                | Fails when                                                      |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Database — SQL suite                 | [`tests/run-sql-tests.ps1`](tests/run-sql-tests.ps1) `-Fresh` against a `mysql:8.0` service                         | any `ERROR <code>` in a `tests/sql/` script                     |
 | Infrastructure — manifest validation | `kubectl kustomize` then `kubeconform -strict` (Kubernetes 1.29 schemas) plus `kube-linter lint --add-all-built-in` | a rendered object fails schema validation or trips a lint check |
 
 Both are prerequisites for the container job, so a broken schema or manifest
@@ -210,10 +210,10 @@ npm run db:check     # database connection
 npm test             # server + database endpoints
 ```
 
-| Endpoint | Purpose | Success |
-|---|---|---|
-| `GET /` | API metadata | `200` |
-| `GET /health` | **Server** liveness (no DB access) | `200` |
+| Endpoint         | Purpose                                                 | Success                                   |
+| ---------------- | ------------------------------------------------------- | ----------------------------------------- |
+| `GET /`          | API metadata                                            | `200`                                     |
+| `GET /health`    | **Server** liveness (no DB access)                      | `200`                                     |
 | `GET /health/db` | **Database** readiness (`SELECT DATABASE(), VERSION()`) | `200`, or `503` when MySQL is unreachable |
 
 Example response from `GET /health/db`:
@@ -240,31 +240,31 @@ Implements [docs/04-api-design.md](docs/04-api-design.md) §4.2 and
 
 ### Endpoints
 
-| Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| `POST` | `/api/v1/auth/register` | — | Create an account (always role `USER`) and sign in |
-| `POST` | `/api/v1/auth/login` | — | Exchange email + password for a token pair |
-| `POST` | `/api/v1/auth/refresh` | refresh token | Rotate the refresh token and get a new access token |
-| `POST` | `/api/v1/auth/logout` | refresh token | Revoke the refresh token (idempotent) |
-| `GET` | `/api/v1/auth/me` | Bearer access token | Current user's profile |
-| `GET` | `/api/v1/admin/users` | Bearer + `ADMIN` role | List users (`?role=`, `?status=`, `?limit=`) |
+| Method | Endpoint                | Auth                  | Description                                         |
+| ------ | ----------------------- | --------------------- | --------------------------------------------------- |
+| `POST` | `/api/v1/auth/register` | —                     | Create an account (always role `USER`) and sign in  |
+| `POST` | `/api/v1/auth/login`    | —                     | Exchange email + password for a token pair          |
+| `POST` | `/api/v1/auth/refresh`  | refresh token         | Rotate the refresh token and get a new access token |
+| `POST` | `/api/v1/auth/logout`   | refresh token         | Revoke the refresh token (idempotent)               |
+| `GET`  | `/api/v1/auth/me`       | Bearer access token   | Current user's profile                              |
+| `GET`  | `/api/v1/admin/users`   | Bearer + `ADMIN` role | List users (`?role=`, `?status=`, `?limit=`)        |
 
 ### Security controls
 
-| Control | Implementation |
-|---|---|
-| Password storage | bcrypt hashing (`bcryptjs`), cost 10 — `utils/password.js` |
-| Access token | JWT, 15 min, carries `sub`/`role`/`type=access` |
-| Refresh token | JWT, 7 days, carries a unique `jti`; **only its SHA-256 hash is stored** |
-| Refresh-token rotation | Every refresh revokes the old row and records `replaced_by_hash` |
-| Reuse detection | Replaying a rotated token revokes **all** of that user's sessions |
-| Token transport | Access token in memory; refresh token also set as an `httpOnly` + `SameSite` cookie scoped to `/api/v1/auth` |
-| Input validation | Zod schemas at the edge; unknown fields (e.g. `role`) are stripped |
-| SQL injection | `pool.execute` prepared statements with bound parameters everywhere |
-| RBAC | `authorize('ADMIN')` middleware, enforced server-side |
-| Account status | `SUSPENDED`/`BLOCKED`/`INACTIVE` accounts cannot sign in (`403`) |
-| Enumeration resistance | Wrong password and unknown email return an identical `401` |
-| Rate limiting | 20 requests / 15 min per IP on credential endpoints |
+| Control                | Implementation                                                                                               |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Password storage       | bcrypt hashing (`bcryptjs`), cost 10 — `utils/password.js`                                                   |
+| Access token           | JWT, 15 min, carries `sub`/`role`/`type=access`                                                              |
+| Refresh token          | JWT, 7 days, carries a unique `jti`; **only its SHA-256 hash is stored**                                     |
+| Refresh-token rotation | Every refresh revokes the old row and records `replaced_by_hash`                                             |
+| Reuse detection        | Replaying a rotated token revokes **all** of that user's sessions                                            |
+| Token transport        | Access token in memory; refresh token also set as an `httpOnly` + `SameSite` cookie scoped to `/api/v1/auth` |
+| Input validation       | Zod schemas at the edge; unknown fields (e.g. `role`) are stripped                                           |
+| SQL injection          | `pool.execute` prepared statements with bound parameters everywhere                                          |
+| RBAC                   | `authorize('ADMIN')` middleware, enforced server-side                                                        |
+| Account status         | `SUSPENDED`/`BLOCKED`/`INACTIVE` accounts cannot sign in (`403`)                                             |
+| Enumeration resistance | Wrong password and unknown email return an identical `401`                                                   |
+| Rate limiting          | 20 requests / 15 min per IP on credential endpoints                                                          |
 
 ### Example
 
@@ -339,40 +339,40 @@ client attaches the access token, retries once through `/auth/refresh` on a
 
 ### Scripts
 
-| Command | Description |
-|---|---|
-| `npm run dev` | Vite dev server on `http://localhost:5173` (proxies `/api` to `:4000`) |
-| `npm run build` | Typecheck (`tsc -b`) then produce the production bundle |
-| `npm run preview` | Serve the built bundle locally |
-| `npm run lint` | ESLint 9 flat config + react-hooks / react-refresh rules |
-| `npm run format:check` | Verify Prettier formatting (`npm run format` fixes it) |
-| `npm run typecheck` | `tsc -b` with `strict` and `noUncheckedIndexedAccess` |
-| `npm run test` | Vitest in watch mode |
-| `npm run test:run` | Vitest single run (CI-style) |
-| `npm run test:coverage` | Single run with the enforced coverage floors |
-| `npm run verify` | Lint + format + typecheck + coverage — run before pushing |
+| Command                 | Description                                                            |
+| ----------------------- | ---------------------------------------------------------------------- |
+| `npm run dev`           | Vite dev server on `http://localhost:5173` (proxies `/api` to `:4000`) |
+| `npm run build`         | Typecheck (`tsc -b`) then produce the production bundle                |
+| `npm run preview`       | Serve the built bundle locally                                         |
+| `npm run lint`          | ESLint 9 flat config + react-hooks / react-refresh rules               |
+| `npm run format:check`  | Verify Prettier formatting (`npm run format` fixes it)                 |
+| `npm run typecheck`     | `tsc -b` with `strict` and `noUncheckedIndexedAccess`                  |
+| `npm run test`          | Vitest in watch mode                                                   |
+| `npm run test:run`      | Vitest single run (CI-style)                                           |
+| `npm run test:coverage` | Single run with the enforced coverage floors                           |
+| `npm run verify`        | Lint + format + typecheck + coverage — run before pushing              |
 
 Tests live in [`frontend/src/test/`](frontend/src/test/) (Testing Library on
 `happy-dom`) and cover the pages, the API layer and the auth store.
 
 ## Documentation
 
-| # | Document | Topic |
-|---|----------|-------|
-| 01 | [Overview](docs/01-overview.md) | Project overview, objectives, NFRs, assumptions |
-| 02 | [System Architecture](docs/02-system-architecture.md) | High-level arch, components, CDN/WAF, LB, backend |
-| 03 | [Database Design](docs/03-database-design.md) | Schema, tables, relationships (MySQL) |
-| 04 | [API Design](docs/04-api-design.md) | REST endpoints and design conventions |
-| 05 | [Booking Domain](docs/05-domain-booking.md) | Double-booking prevention, seat locking, flow, state machine |
-| 06 | [Payment Domain](docs/06-domain-payment.md) | Payment architecture, webhooks, idempotency |
-| 07 | [Tickets Domain](docs/07-domain-tickets.md) | Ticket generation, QR validation |
-| 08 | [Caching](docs/08-infrastructure-caching.md) | Redis usage and caching strategy |
-| 09 | [Search](docs/09-infrastructure-search.md) | Search architecture and indexing |
-| 10 | [Notifications](docs/10-infrastructure-notifications.md) | Message queue and notification service |
-| 11 | [Security](docs/11-security.md) | Auth, authorization, security controls, rate limiting |
-| 12 | [Deployment](docs/12-deployment.md) | Deployment, CI/CD, environments, repo structure |
-| 13 | [Scaling](docs/13-scaling.md) | Hot events, waiting room, capacity, load testing, evolution |
-| 14 | [Operations](docs/14-operations.md) | Failure scenarios and consistency model |
+| #   | Document                                                 | Topic                                                        |
+| --- | -------------------------------------------------------- | ------------------------------------------------------------ |
+| 01  | [Overview](docs/01-overview.md)                          | Project overview, objectives, NFRs, assumptions              |
+| 02  | [System Architecture](docs/02-system-architecture.md)    | High-level arch, components, CDN/WAF, LB, backend            |
+| 03  | [Database Design](docs/03-database-design.md)            | Schema, tables, relationships (MySQL)                        |
+| 04  | [API Design](docs/04-api-design.md)                      | REST endpoints and design conventions                        |
+| 05  | [Booking Domain](docs/05-domain-booking.md)              | Double-booking prevention, seat locking, flow, state machine |
+| 06  | [Payment Domain](docs/06-domain-payment.md)              | Payment architecture, webhooks, idempotency                  |
+| 07  | [Tickets Domain](docs/07-domain-tickets.md)              | Ticket generation, QR validation                             |
+| 08  | [Caching](docs/08-infrastructure-caching.md)             | Redis usage and caching strategy                             |
+| 09  | [Search](docs/09-infrastructure-search.md)               | Search architecture and indexing                             |
+| 10  | [Notifications](docs/10-infrastructure-notifications.md) | Message queue and notification service                       |
+| 11  | [Security](docs/11-security.md)                          | Auth, authorization, security controls, rate limiting        |
+| 12  | [Deployment](docs/12-deployment.md)                      | Deployment, CI/CD, environments, repo structure              |
+| 13  | [Scaling](docs/13-scaling.md)                            | Hot events, waiting room, capacity, load testing, evolution  |
+| 14  | [Operations](docs/14-operations.md)                      | Failure scenarios and consistency model                      |
 
 Start with the [Documentation README](docs/README.md) for an introduction.
 
@@ -383,6 +383,7 @@ Start with the [Documentation README](docs/README.md) for an introduction.
 The system is designed for **100,000+ registered users** with **10,000+ peak concurrent users**. The primary architectural challenge is **preventing double booking** while maintaining high availability during traffic spikes.
 
 Key design decisions:
+
 - **Atomic seat reservation** using MySQL transactions with row-level locking
 - **Temporary seat holds** (5–10 min) with background cleanup workers
 - **Payment verification via secure webhooks** (never trust the frontend)

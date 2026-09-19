@@ -5,22 +5,22 @@ How to build, deploy, and operate TicketBooking per environment. Release cut
 
 ## Environments
 
-| Environment | Backend | Frontend | Database | Who deploys |
-| ----------- | ------- | -------- | -------- | ----------- |
-| Local dev | `npm run dev` (:4000) | `npm run dev` (:5173) | `docker compose up -d mysql` or local MySQL 8 | Developer |
-| Compose | `docker compose up --build` | same (nginx :8080) | compose `mysql` (schema auto-loaded) | Developer |
-| Staging | container from GHCR tag | container or `npm run build` + static host | MySQL 8, real secrets from env | Manual, reviewed |
-| Production | container from GHCR tag (`latest` or pinned) | container or static build behind reverse proxy | MySQL 8 + read replica, secrets manager | Manual, reviewed |
+| Environment | Backend                                      | Frontend                                       | Database                                      | Who deploys      |
+| ----------- | -------------------------------------------- | ---------------------------------------------- | --------------------------------------------- | ---------------- |
+| Local dev   | `npm run dev` (:4000)                        | `npm run dev` (:5173)                          | `docker compose up -d mysql` or local MySQL 8 | Developer        |
+| Compose     | `docker compose up --build`                  | same (nginx :8080)                             | compose `mysql` (schema auto-loaded)          | Developer        |
+| Staging     | container from GHCR tag                      | container or `npm run build` + static host     | MySQL 8, real secrets from env                | Manual, reviewed |
+| Production  | container from GHCR tag (`latest` or pinned) | container or static build behind reverse proxy | MySQL 8 + read replica, secrets manager       | Manual, reviewed |
 
 Deployment is **manual and reviewed** at every non-local stage. CI never pushes
 to a runtime environment on its own.
 
 ## Container images
 
-| Dockerfile | What it builds | Where CI runs it |
-| ---------- | -------------- | ---------------- |
-| `backend/Dockerfile` | API from `package-lock.json` (`npm ci`), non-root `node` | `docker` job |
-| `frontend/Dockerfile` | Vite build then nginx static + `/api` proxy | `docker` job |
+| Dockerfile            | What it builds                                           | Where CI runs it |
+| --------------------- | -------------------------------------------------------- | ---------------- |
+| `backend/Dockerfile`  | API from `package-lock.json` (`npm ci`), non-root `node` | `docker` job     |
+| `frontend/Dockerfile` | Vite build then nginx static + `/api` proxy              | `docker` job     |
 
 Run a released image locally:
 
@@ -72,4 +72,3 @@ by `npm run db:migrate` from `backend/`. Full workflow:
   `STRIPE_*`, `SENTRY_DSN`) come from the environment or a secrets manager.
 - If a secret is suspected leaked, rotate it and follow
   [`../security/secrets-management.md`](../security/secrets-management.md).
-

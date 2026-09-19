@@ -2,22 +2,22 @@
 
 ## 13.1 Key Architectural Decisions
 
-| Problem | Solution |
-|---|---|
-| 100K users | Horizontal API scaling |
-| Traffic spikes | CDN + WAF + autoscaling |
-| Double booking | DB transaction + row locking / atomic update |
-| Seat reservation | Temporary HOLD |
-| Hold expiration | Background worker |
-| Payment reliability | Provider webhook + idempotency |
-| Search load | Search engine (OpenSearch) |
-| Repeated reads | Redis cache |
-| Email/SMS delay | Message queue |
-| Ticket PDF | Object storage |
-| API failure | Multiple instances |
-| Database read load | Read replicas |
-| Popular event overload | Waiting room / rate limiting |
-| Observability | Metrics + logs + tracing |
+| Problem                | Solution                                     |
+| ---------------------- | -------------------------------------------- |
+| 100K users             | Horizontal API scaling                       |
+| Traffic spikes         | CDN + WAF + autoscaling                      |
+| Double booking         | DB transaction + row locking / atomic update |
+| Seat reservation       | Temporary HOLD                               |
+| Hold expiration        | Background worker                            |
+| Payment reliability    | Provider webhook + idempotency               |
+| Search load            | Search engine (OpenSearch)                   |
+| Repeated reads         | Redis cache                                  |
+| Email/SMS delay        | Message queue                                |
+| Ticket PDF             | Object storage                               |
+| API failure            | Multiple instances                           |
+| Database read load     | Read replicas                                |
+| Popular event overload | Waiting room / rate limiting                 |
+| Observability          | Metrics + logs + tracing                     |
 
 ## 13.2 Scaling Strategy
 

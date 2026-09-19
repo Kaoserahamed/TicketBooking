@@ -10,11 +10,11 @@ Companions: [`monitoring.md`](monitoring.md) (signals),
 
 ## Environments
 
-| Concern | Backend | Frontend |
-|---------|---------|----------|
-| Local API | `npm run dev` (:4000) | `npm run dev` (:5173) |
-| Env files | `.env` from `.env.example` | same origin via vite proxy `/api` |
-| Database | `docker compose up -d mysql`, then `npm run db:migrate` | — (calls the API) |
+| Concern   | Backend                                                 | Frontend                          |
+| --------- | ------------------------------------------------------- | --------------------------------- |
+| Local API | `npm run dev` (:4000)                                   | `npm run dev` (:5173)             |
+| Env files | `.env` from `.env.example`                              | same origin via vite proxy `/api` |
+| Database  | `docker compose up -d mysql`, then `npm run db:migrate` | — (calls the API)                 |
 
 ## Releases and container images
 
@@ -56,4 +56,3 @@ Signals detail: [`monitoring.md`](monitoring.md).
 3. Mitigate: restart the container; roll back the last deploy if the spike
    started with it.
 4. Follow up: add/extend the regression test before closing the incident.
-

@@ -2,10 +2,10 @@
 
 ## Supported Versions
 
-| Version | Supported          |
-|---------|-------------------|
-| 0.1.x   | ✅                |
-| < 0.1   | ❌                |
+| Version | Supported |
+| ------- | --------- |
+| 0.1.x   | ✅        |
+| < 0.1   | ❌        |
 
 ## Reporting a Vulnerability
 
@@ -18,6 +18,7 @@ We take security seriously. If you discover a security vulnerability, please rep
 Instead, send an email to: **security@kaoserahamed.com** (or the maintainer's designated security email)
 
 Include:
+
 - Description of the vulnerability
 - Steps to reproduce (if possible)
 - Potential impact
@@ -25,12 +26,12 @@ Include:
 
 ### What to Expect
 
-| Step | Timeline |
-|------|----------|
-| Acknowledgment | Within 2 business days |
-| Initial assessment | Within 5 business days |
-| Status update | Every 7 days |
-| Resolution target | Within 30 days for critical issues |
+| Step               | Timeline                           |
+| ------------------ | ---------------------------------- |
+| Acknowledgment     | Within 2 business days             |
+| Initial assessment | Within 5 business days             |
+| Status update      | Every 7 days                       |
+| Resolution target  | Within 30 days for critical issues |
 
 ### Disclosure Policy
 
@@ -100,11 +101,11 @@ See [docs/security/secrets-management.md](docs/security/secrets-management.md) f
 
 See [docs/security/threat-model.md](docs/security/threat-model.md) for the current threat model and known gaps:
 
-| Gap | Status |
-|-----|--------|
-| CORS currently open (`app.use(cors())`) | TODO: restrict origins per environment |
-| No upload sink yet (posters are URLs) | Allow-list + sniff when uploads land |
-| `/metrics` unauthenticated by default | Set `METRICS_TOKEN` or network-gate if exposed |
+| Gap                                     | Status                                         |
+| --------------------------------------- | ---------------------------------------------- |
+| CORS currently open (`app.use(cors())`) | TODO: restrict origins per environment         |
+| No upload sink yet (posters are URLs)   | Allow-list + sniff when uploads land           |
+| `/metrics` unauthenticated by default   | Set `METRICS_TOKEN` or network-gate if exposed |
 
 ## Security Releases
 

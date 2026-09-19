@@ -25,14 +25,14 @@ services:
       # First-boot initialization: full schema + reference data.
       - ./infrastructure/database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-p${DB_PASSWORD:-dev-db-password}"]
+      test: ['CMD', 'mysqladmin', 'ping', '-h', '127.0.0.1', '-p${DB_PASSWORD:-dev-db-password}']
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 30s
     # Not published to the host by default — only the backend talks to it.
     expose:
-      - "3306"
+      - '3306'
 
   backend:
     build: ./backend
@@ -55,7 +55,7 @@ services:
       mysql:
         condition: service_healthy
     ports:
-      - "${BACKEND_PORT:-4000}:4000"
+      - '${BACKEND_PORT:-4000}:4000'
 
   frontend:
     build: ./frontend
@@ -64,7 +64,7 @@ services:
     depends_on:
       - backend
     ports:
-      - "${FRONTEND_PORT:-8080}:80"
+      - '${FRONTEND_PORT:-8080}:80'
 
 volumes:
   mysql-data:
