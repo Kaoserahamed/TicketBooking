@@ -8,9 +8,9 @@
 process.env.NODE_ENV = 'test';
 const { test, before, after, describe } = require('node:test');
 const assert = require('node:assert/strict');
-const createApp = require('../src/app');
-const { pool, closePool } = require('../src/database/pool');
-const { hashPassword } = require('../src/utils/password');
+const createApp = require('../../src/app');
+const { pool, closePool } = require('../../src/database/pool');
+const { hashPassword } = require('../../src/utils/password');
 const stamp = `${Date.now()}${Math.floor(Math.random() * 100)}`;
 const PASSWORD = 'Secret123';
 const adminEmail = `events.admin.${stamp}@example.com`;
@@ -42,7 +42,9 @@ before(async () => {
     [`Public Concert ${stamp}`, 'Seeded public event', 'Music']
   );
   seededPublicId = Number(e.insertId);
-  const [d] = await pool.execute(`INSERT INTO events (name, status) VALUES (?, 'DRAFT')`, [`Draft Event ${stamp}`]);
+  const [d] = await pool.execute(`INSERT INTO events (name, status) VALUES (?, 'DRAFT')`, [
+    `Draft Event ${stamp}`,
+  ]);
   seededDraftId = Number(d.insertId);
   await pool.execute(
     `INSERT INTO shows (event_id, venue_id, start_time, end_time, status) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 7 DAY), DATE_ADD(DATE_ADD(NOW(), INTERVAL 7 DAY), INTERVAL 2 HOUR), 'SCHEDULED')`,
@@ -56,7 +58,10 @@ before(async () => {
   );
 });
 after(async () => {
-  await pool.execute('DELETE ss FROM show_seats ss JOIN shows s ON s.id = ss.show_id WHERE s.event_id IN (?, ?)', [seededPublicId, seededDraftId]);
+  await pool.execute(
+    'DELETE ss FROM show_seats ss JOIN shows s ON s.id = ss.show_id WHERE s.event_id IN (?, ?)',
+    [seededPublicId, seededDraftId]
+  );
   await pool.execute('DELETE FROM shows WHERE event_id IN (?, ?)', [seededPublicId, seededDraftId]);
   await pool.execute('DELETE FROM events WHERE id IN (?, ?)', [seededPublicId, seededDraftId]);
   await pool.execute(`DELETE FROM events WHERE name LIKE '%${stamp}%'`);
@@ -78,18 +83,31 @@ async function api(path, options = {}) {
   });
   const text = await res.text();
   let json = null;
-  try { json = JSON.parse(text); } catch { json = null; }
+  try {
+    json = JSON.parse(text);
+  } catch {
+    json = null;
+  }
   return { status: res.status, body: json };
 }
 async function insertUser({ name, email, role }) {
   const [r] = await pool.execute(
     `INSERT INTO users (name, email, phone, password_hash, role, status) VALUES (?, ?, ?, ?, ?, 'ACTIVE')`,
-    [name, email, `9${String(Date.now()).slice(-9)}${Math.floor(Math.random() * 10)}`, await hashPassword(PASSWORD), role]
+    [
+      name,
+      email,
+      `9${String(Date.now()).slice(-9)}${Math.floor(Math.random() * 10)}`,
+      await hashPassword(PASSWORD),
+      role,
+    ]
   );
   return r.insertId;
 }
 async function login(email) {
-  const { body } = await api('/api/v1/auth/login', { method: 'POST', body: { email, password: PASSWORD } });
+  const { body } = await api('/api/v1/auth/login', {
+    method: 'POST',
+    body: { email, password: PASSWORD },
+  });
   return body.tokens.accessToken;
 }
 describe('GET /api/v1/events', () => {
@@ -106,7 +124,9 @@ describe('GET /api/v1/events', () => {
     const cat = await api(`/api/v1/events?category=Music`);
     assert.equal(cat.status, 200);
     assert.ok(cat.body.events.some((e) => e.id === seededPublicId));
-    const search = await api(`/api/v1/events?search=${encodeURIComponent(`Public Concert ${stamp}`)}`);
+    const search = await api(
+      `/api/v1/events?search=${encodeURIComponent(`Public Concert ${stamp}`)}`
+    );
     assert.equal(search.status, 200);
     assert.ok(search.body.events.some((e) => e.id === seededPublicId));
     const miss = await api('/api/v1/events?search=zzz-no-such-event-zzz');
@@ -158,7 +178,8 @@ describe('admin /api/v1/admin/events', () => {
   test('ADMIN can create (201) and update an event', async () => {
     const name = `Admin Created ${stamp}`;
     const created = await api('/api/v1/admin/events', {
-      method: 'POST', token: adminToken,
+      method: 'POST',
+      token: adminToken,
       body: { name, category: 'Theatre', status: 'DRAFT' },
     });
     assert.equal(created.status, 201);
@@ -166,18 +187,24 @@ describe('admin /api/v1/admin/events', () => {
     assert.equal(created.body.event.status, 'DRAFT');
     const id = created.body.event.id;
     const updated = await api(`/api/v1/admin/events/${id}`, {
-      method: 'PUT', token: adminToken, body: { status: 'PUBLISHED' },
+      method: 'PUT',
+      token: adminToken,
+      body: { status: 'PUBLISHED' },
     });
     assert.equal(updated.status, 200);
     assert.equal(updated.body.event.status, 'PUBLISHED');
   });
   test('EVENT_MANAGER can create but USER cannot (403)', async () => {
     const ok = await api('/api/v1/admin/events', {
-      method: 'POST', token: managerToken, body: { name: `Manager Created ${stamp}` },
+      method: 'POST',
+      token: managerToken,
+      body: { name: `Manager Created ${stamp}` },
     });
     assert.equal(ok.status, 201);
     const denied = await api('/api/v1/admin/events', {
-      method: 'POST', token: userToken, body: { name: `User Created ${stamp}` },
+      method: 'POST',
+      token: userToken,
+      body: { name: `User Created ${stamp}` },
     });
     assert.equal(denied.status, 403);
     assert.equal(denied.body.code, 'INSUFFICIENT_ROLE');
@@ -188,17 +215,23 @@ describe('admin /api/v1/admin/events', () => {
   });
   test('rejects invalid status and empty update with 400', async () => {
     const bad = await api('/api/v1/admin/events', {
-      method: 'POST', token: adminToken, body: { name: 'Bad Status', status: 'NOPE' },
+      method: 'POST',
+      token: adminToken,
+      body: { name: 'Bad Status', status: 'NOPE' },
     });
     assert.equal(bad.status, 400);
     const empty = await api(`/api/v1/admin/events/${seededPublicId}`, {
-      method: 'PUT', token: adminToken, body: {},
+      method: 'PUT',
+      token: adminToken,
+      body: {},
     });
     assert.equal(empty.status, 400);
   });
   test('404s when updating a missing event', async () => {
     const { status, body } = await api('/api/v1/admin/events/99999999', {
-      method: 'PUT', token: adminToken, body: { status: 'ACTIVE' },
+      method: 'PUT',
+      token: adminToken,
+      body: { status: 'ACTIVE' },
     });
     assert.equal(status, 404);
     assert.equal(body.code, 'EVENT_NOT_FOUND');

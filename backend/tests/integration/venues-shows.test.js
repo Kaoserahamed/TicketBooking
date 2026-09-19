@@ -8,9 +8,9 @@
 process.env.NODE_ENV = 'test';
 const { test, before, after, describe } = require('node:test');
 const assert = require('node:assert/strict');
-const createApp = require('../src/app');
-const { pool, closePool } = require('../src/database/pool');
-const { hashPassword } = require('../src/utils/password');
+const createApp = require('../../src/app');
+const { pool, closePool } = require('../../src/database/pool');
+const { hashPassword } = require('../../src/utils/password');
 const stamp = `${Date.now()}${Math.floor(Math.random() * 100)}`;
 const PASSWORD = 'Secret123';
 const adminEmail = `venue.admin.${stamp}@example.com`;
@@ -20,7 +20,6 @@ const userEmail = `venue.user.${stamp}@example.com`;
 const createdEmails = [adminEmail, venueManagerEmail, eventManagerEmail, userEmail];
 let server;
 let baseUrl;
-let adminToken;
 let venueManagerToken;
 let eventManagerToken;
 let userToken;
@@ -38,18 +37,31 @@ async function api(path, options = {}) {
   });
   const text = await res.text();
   let json = null;
-  try { json = JSON.parse(text); } catch { json = null; }
+  try {
+    json = JSON.parse(text);
+  } catch {
+    json = null;
+  }
   return { status: res.status, body: json };
 }
 async function insertUser({ name, email, role }) {
   const [r] = await pool.execute(
     `INSERT INTO users (name, email, phone, password_hash, role, status) VALUES (?, ?, ?, ?, ?, 'ACTIVE')`,
-    [name, email, `8${String(Date.now()).slice(-9)}${Math.floor(Math.random() * 10)}`, await hashPassword(PASSWORD), role]
+    [
+      name,
+      email,
+      `8${String(Date.now()).slice(-9)}${Math.floor(Math.random() * 10)}`,
+      await hashPassword(PASSWORD),
+      role,
+    ]
   );
   return r.insertId;
 }
 async function login(email) {
-  const { body } = await api('/api/v1/auth/login', { method: 'POST', body: { email, password: PASSWORD } });
+  const { body } = await api('/api/v1/auth/login', {
+    method: 'POST',
+    body: { email, password: PASSWORD },
+  });
   return body.tokens.accessToken;
 }
 before(async () => {
@@ -60,19 +72,26 @@ before(async () => {
   await insertUser({ name: 'Venue Manager', email: venueManagerEmail, role: 'VENUE_MANAGER' });
   await insertUser({ name: 'Event Manager', email: eventManagerEmail, role: 'EVENT_MANAGER' });
   await insertUser({ name: 'Venue User', email: userEmail, role: 'USER' });
-  adminToken = await login(adminEmail);
   venueManagerToken = await login(venueManagerEmail);
   eventManagerToken = await login(eventManagerEmail);
   userToken = await login(userEmail);
-  const [v] = await pool.execute(`INSERT INTO venues (name, address, city, capacity) VALUES (?, ?, ?, ?)`, [`Test Hall ${stamp}`, '1 Test St', 'Testville', 12]);
+  const [v] = await pool.execute(
+    `INSERT INTO venues (name, address, city, capacity) VALUES (?, ?, ?, ?)`,
+    [`Test Hall ${stamp}`, '1 Test St', 'Testville', 12]
+  );
   venueId = Number(v.insertId);
   // 2 rows x 3 seats = 6 seats.
   for (const row of ['A', 'B']) {
     for (const num of ['1', '2', '3']) {
-      await pool.execute(`INSERT INTO seats (venue_id, \`row_number\`, seat_number, seat_type) VALUES (?, ?, ?, 'REGULAR')`, [venueId, row, num]);
+      await pool.execute(
+        `INSERT INTO seats (venue_id, \`row_number\`, seat_number, seat_type) VALUES (?, ?, ?, 'REGULAR')`,
+        [venueId, row, num]
+      );
     }
   }
-  const [e] = await pool.execute(`INSERT INTO events (name, status) VALUES (?, 'PUBLISHED')`, [`Venue Test Event ${stamp}`]);
+  const [e] = await pool.execute(`INSERT INTO events (name, status) VALUES (?, 'PUBLISHED')`, [
+    `Venue Test Event ${stamp}`,
+  ]);
   eventId = Number(e.insertId);
   const [s] = await pool.execute(
     `INSERT INTO shows (event_id, venue_id, start_time, end_time, status) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 9 DAY), DATE_ADD(DATE_ADD(NOW(), INTERVAL 9 DAY), INTERVAL 2 HOUR), 'SCHEDULED')`,
@@ -172,52 +191,68 @@ describe('admin venues + seats', () => {
   test('VENUE_MANAGER can create and update a venue; USER cannot (403)', async () => {
     const name = `Managed Hall ${stamp}`;
     const created = await api('/api/v1/admin/venues', {
-      method: 'POST', token: venueManagerToken,
+      method: 'POST',
+      token: venueManagerToken,
       body: { name, city: 'Managed City', capacity: 50 },
     });
     assert.equal(created.status, 201);
     assert.equal(created.body.venue.name, name);
     const id = created.body.venue.id;
     const updated = await api(`/api/v1/admin/venues/${id}`, {
-      method: 'PUT', token: venueManagerToken, body: { capacity: 60 },
+      method: 'PUT',
+      token: venueManagerToken,
+      body: { capacity: 60 },
     });
     assert.equal(updated.status, 200);
     assert.equal(updated.body.venue.capacity, 60);
     const denied = await api('/api/v1/admin/venues', {
-      method: 'POST', token: userToken, body: { name: `Nope ${stamp}`, city: 'X', capacity: 5 },
+      method: 'POST',
+      token: userToken,
+      body: { name: `Nope ${stamp}`, city: 'X', capacity: 5 },
     });
     assert.equal(denied.status, 403);
     assert.equal(denied.body.code, 'INSUFFICIENT_ROLE');
   });
   test('EVENT_MANAGER cannot manage venues (403)', async () => {
     const { status } = await api('/api/v1/admin/venues', {
-      method: 'POST', token: eventManagerToken, body: { name: `Nope ${stamp}`, city: 'X', capacity: 5 },
+      method: 'POST',
+      token: eventManagerToken,
+      body: { name: `Nope ${stamp}`, city: 'X', capacity: 5 },
     });
     assert.equal(status, 403);
   });
   test('seat CRUD: create, duplicate 409, update, delete', async () => {
     const created = await api(`/api/v1/admin/venues/${venueId}/seats`, {
-      method: 'POST', token: venueManagerToken, body: { rowNumber: 'Z', seatNumber: '9', seatType: 'VIP' },
+      method: 'POST',
+      token: venueManagerToken,
+      body: { rowNumber: 'Z', seatNumber: '9', seatType: 'VIP' },
     });
     assert.equal(created.status, 201);
     assert.equal(created.body.seat.label, 'Z9');
     const seatId = created.body.seat.id;
     const dup = await api(`/api/v1/admin/venues/${venueId}/seats`, {
-      method: 'POST', token: venueManagerToken, body: { rowNumber: 'Z', seatNumber: '9' },
+      method: 'POST',
+      token: venueManagerToken,
+      body: { rowNumber: 'Z', seatNumber: '9' },
     });
     assert.equal(dup.status, 409);
     assert.equal(dup.body.code, 'SEAT_ALREADY_EXISTS');
     const updated = await api(`/api/v1/admin/venues/${venueId}/seats/${seatId}`, {
-      method: 'PUT', token: venueManagerToken, body: { seatType: 'PREMIUM' },
+      method: 'PUT',
+      token: venueManagerToken,
+      body: { seatType: 'PREMIUM' },
     });
     assert.equal(updated.status, 200);
     assert.equal(updated.body.seat.seatType, 'PREMIUM');
     const deleted = await api(`/api/v1/admin/venues/${venueId}/seats/${seatId}`, {
-      method: 'DELETE', token: venueManagerToken,
+      method: 'DELETE',
+      token: venueManagerToken,
     });
     assert.equal(deleted.status, 200);
     const gone = await api(`/api/v1/admin/venues/${venueId}/seats/${seatId}`, {
-      method: 'PUT', token: venueManagerToken, body: { seatType: 'VIP' },
+      method: 'PUT',
+      token: venueManagerToken,
+      body: { seatType: 'VIP' },
     });
     assert.equal(gone.status, 404);
   });
@@ -226,14 +261,27 @@ describe('admin shows', () => {
   test('EVENT_MANAGER creates a show, inventory auto-provisioned; USER 403', async () => {
     const t0 = Date.now() + 12 * 24 * 3600 * 1000;
     const created = await api('/api/v1/admin/shows', {
-      method: 'POST', token: eventManagerToken,
-      body: { eventId, venueId, startTime: new Date(t0).toISOString(), endTime: new Date(t0 + 7200000).toISOString(), defaultPrice: 200 },
+      method: 'POST',
+      token: eventManagerToken,
+      body: {
+        eventId,
+        venueId,
+        startTime: new Date(t0).toISOString(),
+        endTime: new Date(t0 + 7200000).toISOString(),
+        defaultPrice: 200,
+      },
     });
     assert.equal(created.status, 201);
     assert.equal(created.body.show.seats.total, 6);
     const denied = await api('/api/v1/admin/shows', {
-      method: 'POST', token: userToken,
-      body: { eventId, venueId, startTime: new Date(t0).toISOString(), endTime: new Date(t0 + 7200000).toISOString() },
+      method: 'POST',
+      token: userToken,
+      body: {
+        eventId,
+        venueId,
+        startTime: new Date(t0).toISOString(),
+        endTime: new Date(t0 + 7200000).toISOString(),
+      },
     });
     assert.equal(denied.status, 403);
   });
@@ -242,15 +290,21 @@ describe('admin shows', () => {
     const s = new Date(t0).toISOString();
     const e = new Date(t0 + 7200000).toISOString();
     const bad = await api('/api/v1/admin/shows', {
-      method: 'POST', token: eventManagerToken, body: { eventId, venueId, startTime: e, endTime: s },
+      method: 'POST',
+      token: eventManagerToken,
+      body: { eventId, venueId, startTime: e, endTime: s },
     });
     assert.equal(bad.status, 400);
     const first = await api('/api/v1/admin/shows', {
-      method: 'POST', token: eventManagerToken, body: { eventId, venueId, startTime: s, endTime: e },
+      method: 'POST',
+      token: eventManagerToken,
+      body: { eventId, venueId, startTime: s, endTime: e },
     });
     assert.equal(first.status, 201);
     const dup = await api('/api/v1/admin/shows', {
-      method: 'POST', token: eventManagerToken, body: { eventId, venueId, startTime: s, endTime: e },
+      method: 'POST',
+      token: eventManagerToken,
+      body: { eventId, venueId, startTime: s, endTime: e },
     });
     assert.equal(dup.status, 409);
     assert.equal(dup.body.code, 'SHOW_ALREADY_EXISTS');
@@ -260,17 +314,24 @@ describe('admin shows', () => {
     const s = new Date(t0).toISOString();
     const e = new Date(t0 + 7200000).toISOString();
     const noEvent = await api('/api/v1/admin/shows', {
-      method: 'POST', token: eventManagerToken, body: { eventId: 99999999, venueId, startTime: s, endTime: e },
+      method: 'POST',
+      token: eventManagerToken,
+      body: { eventId: 99999999, venueId, startTime: s, endTime: e },
     });
     assert.equal(noEvent.status, 404);
     const noVenue = await api('/api/v1/admin/shows', {
-      method: 'POST', token: eventManagerToken, body: { eventId, venueId: 99999999, startTime: s, endTime: e },
+      method: 'POST',
+      token: eventManagerToken,
+      body: { eventId, venueId: 99999999, startTime: s, endTime: e },
     });
     assert.equal(noVenue.status, 404);
   });
 });
 after(async () => {
-  await pool.execute('DELETE ss FROM show_seats ss JOIN shows s ON s.id = ss.show_id WHERE s.venue_id = ?', [venueId]);
+  await pool.execute(
+    'DELETE ss FROM show_seats ss JOIN shows s ON s.id = ss.show_id WHERE s.venue_id = ?',
+    [venueId]
+  );
   await pool.execute('DELETE FROM shows WHERE venue_id = ?', [venueId]);
   await pool.execute('DELETE FROM events WHERE id = ?', [eventId]);
   await pool.execute(`DELETE FROM events WHERE name LIKE '%${stamp}%'`);

@@ -14,9 +14,9 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'test';
 const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 
-const createApp = require('../src/app');
-const config = require('../src/config/env');
-const { closePool } = require('../src/database/pool');
+const createApp = require('../../src/app');
+const config = require('../../src/config/env');
+const { closePool } = require('../../src/database/pool');
 
 let server;
 let baseUrl;

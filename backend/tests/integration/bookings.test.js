@@ -13,9 +13,9 @@ process.env.NODE_ENV = 'test';
 const { test, before, after, describe } = require('node:test');
 const assert = require('node:assert/strict');
 
-const createApp = require('../src/app');
-const { pool, closePool } = require('../src/database/pool');
-const { hashPassword } = require('../src/utils/password');
+const createApp = require('../../src/app');
+const { pool, closePool } = require('../../src/database/pool');
+const { hashPassword } = require('../../src/utils/password');
 
 const stamp = `${Date.now()}${Math.floor(Math.random() * 1000)}`;
 const PASSWORD = 'Secret123';
@@ -26,10 +26,14 @@ const createdEmails = [userEmail, otherEmail, adminEmail];
 
 let server;
 let baseUrl;
-let userToken; let otherToken; let adminToken;
+let userToken;
+let otherToken;
+let adminToken;
 let userId;
-let venueId; let eventId; let showId;
-let seatIds = [];
+let venueId;
+let eventId;
+let showId;
+const seatIds = [];
 
 // POST an API request -> { status, body, text }.
 async function api(path, options = {}) {
@@ -43,26 +47,41 @@ async function api(path, options = {}) {
   });
   const text = await res.text();
   let json = null;
-  try { json = JSON.parse(text); } catch { json = null; }
+  try {
+    json = JSON.parse(text);
+  } catch {
+    json = null;
+  }
   return { status: res.status, body: json, text };
 }
 
 async function insertUser({ name, email, role }) {
   const [r] = await pool.execute(
     `INSERT INTO users (name, email, phone, password_hash, role, status) VALUES (?, ?, ?, ?, ?, 'ACTIVE')`,
-    [name, email, `8${String(Date.now()).slice(-9)}${Math.floor(Math.random() * 10)}`, await hashPassword(PASSWORD), role]
+    [
+      name,
+      email,
+      `8${String(Date.now()).slice(-9)}${Math.floor(Math.random() * 10)}`,
+      await hashPassword(PASSWORD),
+      role,
+    ]
   );
   return Number(r.insertId);
 }
 
 async function login(email) {
-  const { body } = await api('/api/v1/auth/login', { method: 'POST', body: { email, password: PASSWORD } });
+  const { body } = await api('/api/v1/auth/login', {
+    method: 'POST',
+    body: { email, password: PASSWORD },
+  });
   return body.tokens.accessToken;
 }
 
 // Printed label (e.g. "A1") for a physical seat id.
 async function seatLabel(seatId) {
-  const [r] = await pool.execute('SELECT `row_number`, seat_number FROM seats WHERE id = ?', [seatId]);
+  const [r] = await pool.execute('SELECT `row_number`, seat_number FROM seats WHERE id = ?', [
+    seatId,
+  ]);
   return `${r[0].row_number}${r[0].seat_number}`;
 }
 
@@ -148,7 +167,8 @@ after(async () => {
 describe('booking authentication & authorization', () => {
   test('rejects unauthenticated POST /hold with 401', async () => {
     const { status, body } = await api('/api/v1/bookings/hold', {
-      method: 'POST', body: { showId, seatIds: [seatIds[0]] },
+      method: 'POST',
+      body: { showId, seatIds: [seatIds[0]] },
     });
     assert.equal(status, 401);
     assert.equal(body.code, 'MISSING_ACCESS_TOKEN');
@@ -185,7 +205,9 @@ describe('booking authentication & authorization', () => {
 describe('POST /api/v1/bookings/hold', () => {
   test('rejects an empty seatIds array with 400', async () => {
     const { status, body } = await api('/api/v1/bookings/hold', {
-      method: 'POST', token: userToken, body: { showId, seatIds: [] },
+      method: 'POST',
+      token: userToken,
+      body: { showId, seatIds: [] },
     });
     assert.equal(status, 400);
     assert.equal(body.code, 'VALIDATION_ERROR');
@@ -194,7 +216,9 @@ describe('POST /api/v1/bookings/hold', () => {
   test('rejects more than 20 seats with 400', async () => {
     const tooMany = Array.from({ length: 21 }, () => seatIds[0]);
     const { status, body } = await api('/api/v1/bookings/hold', {
-      method: 'POST', token: userToken, body: { showId, seatIds: tooMany },
+      method: 'POST',
+      token: userToken,
+      body: { showId, seatIds: tooMany },
     });
     assert.equal(status, 400);
     assert.equal(body.code, 'VALIDATION_ERROR');
@@ -202,21 +226,27 @@ describe('POST /api/v1/bookings/hold', () => {
 
   test('rejects a missing showId with 400', async () => {
     const { status } = await api('/api/v1/bookings/hold', {
-      method: 'POST', token: userToken, body: { seatIds: [seatIds[0]] },
+      method: 'POST',
+      token: userToken,
+      body: { seatIds: [seatIds[0]] },
     });
     assert.equal(status, 400);
   });
 
   test('rejects a non-integer showId with 400', async () => {
     const { status } = await api('/api/v1/bookings/hold', {
-      method: 'POST', token: userToken, body: { showId: 1.5, seatIds: [seatIds[0]] },
+      method: 'POST',
+      token: userToken,
+      body: { showId: 1.5, seatIds: [seatIds[0]] },
     });
     assert.equal(status, 400);
   });
 
   test('404s when the show does not exist (SHOW_NOT_FOUND)', async () => {
     const { status, body } = await api('/api/v1/bookings/hold', {
-      method: 'POST', token: userToken, body: { showId: 99999999, seatIds: [seatIds[0]] },
+      method: 'POST',
+      token: userToken,
+      body: { showId: 99999999, seatIds: [seatIds[0]] },
     });
     assert.equal(status, 404);
     assert.equal(body.code, 'SHOW_NOT_FOUND');
@@ -225,7 +255,9 @@ describe('POST /api/v1/bookings/hold', () => {
   test('404s when a seat is not part of the show (SEAT_NOT_IN_SHOW)', async () => {
     // seats[10] exists in the venue but was never provisioned as a show_seat.
     const { status, body } = await api('/api/v1/bookings/hold', {
-      method: 'POST', token: userToken, body: { showId, seatIds: [seatIds[10]] },
+      method: 'POST',
+      token: userToken,
+      body: { showId, seatIds: [seatIds[10]] },
     });
     assert.equal(status, 404);
     assert.equal(body.code, 'SEAT_NOT_IN_SHOW');
@@ -233,7 +265,8 @@ describe('POST /api/v1/bookings/hold', () => {
 
   test('holds available seats (201) and locks them against another user (409)', async () => {
     const { status, body } = await api('/api/v1/bookings/hold', {
-      method: 'POST', token: userToken,
+      method: 'POST',
+      token: userToken,
       body: { showId, seatIds: [seatIds[2], seatIds[3]] },
     });
     assert.equal(status, 201);
@@ -249,16 +282,17 @@ describe('POST /api/v1/bookings/hold', () => {
     assert.match(body.booking.bookingReference, /^BK-/);
     assert.ok(body.booking.expiresAt);
     assert.equal(body.booking.show.event.status, 'PUBLISHED');
-        assert.equal(body.items.length, 2);
+    assert.equal(body.items.length, 2);
     assert.ok(body.items.every((it) => it.price === 100));
     assert.ok(body.items.every((it) => it.seat.seatType === 'REGULAR'));
     const want = [await seatLabel(seatIds[2]), await seatLabel(seatIds[3])];
     assert.ok(body.items.every((it) => want.includes(it.seat.label)));
 
-    const { status: conflictStatus, body: conflictBody } = await api(
-      '/api/v1/bookings/hold',
-      { method: 'POST', token: otherToken, body: { showId, seatIds: [seatIds[2], seatIds[3]] } }
-    );
+    const { status: conflictStatus, body: conflictBody } = await api('/api/v1/bookings/hold', {
+      method: 'POST',
+      token: otherToken,
+      body: { showId, seatIds: [seatIds[2], seatIds[3]] },
+    });
     assert.equal(conflictStatus, 409);
     assert.equal(conflictBody.code, 'SEATS_UNAVAILABLE');
   });
@@ -266,14 +300,16 @@ describe('POST /api/v1/bookings/hold', () => {
   test('replays a duplicate idempotency key (200, idempotentReplay)', async () => {
     const key = `idem-${stamp}`;
     const first = await api('/api/v1/bookings/hold', {
-      method: 'POST', token: userToken,
+      method: 'POST',
+      token: userToken,
       body: { showId, seatIds: [seatIds[0], seatIds[1]], idempotencyKey: key },
     });
     assert.equal(first.status, 201);
     assert.equal(first.body.idempotentReplay, false);
 
     const second = await api('/api/v1/bookings/hold', {
-      method: 'POST', token: userToken,
+      method: 'POST',
+      token: userToken,
       body: { showId, seatIds: [seatIds[0], seatIds[1]], idempotencyKey: key },
     });
     assert.equal(second.status, 200);
@@ -285,14 +321,16 @@ describe('POST /api/v1/bookings/hold', () => {
   test('idempotency key is scoped per user', async () => {
     const key = `idem-other-${stamp}`;
     const first = await api('/api/v1/bookings/hold', {
-      method: 'POST', token: userToken,
+      method: 'POST',
+      token: userToken,
       body: { showId, seatIds: [seatIds[4]], idempotencyKey: key },
     });
     assert.equal(first.status, 201);
 
     // Same key, different user -> not a replay; the seat is already HELD so 409.
     const sameKey = await api('/api/v1/bookings/hold', {
-      method: 'POST', token: otherToken,
+      method: 'POST',
+      token: otherToken,
       body: { showId, seatIds: [seatIds[4]], idempotencyKey: key },
     });
     assert.equal(sameKey.status, 409);
@@ -309,7 +347,9 @@ describe('GET /api/v1/bookings/:id', () => {
 
   before(async () => {
     const { body } = await api('/api/v1/bookings/hold', {
-      method: 'POST', token: userToken, body: { showId, seatIds: [seatIds[5]] },
+      method: 'POST',
+      token: userToken,
+      body: { showId, seatIds: [seatIds[5]] },
     });
     bookingId = body.booking.id;
   });
@@ -354,12 +394,15 @@ describe('GET /api/v1/bookings/:id', () => {
 describe('POST /api/v1/bookings/:id/cancel', () => {
   test('cancels a PENDING booking and releases the hold (200)', async () => {
     const { body: held } = await api('/api/v1/bookings/hold', {
-      method: 'POST', token: userToken, body: { showId, seatIds: [seatIds[6]] },
+      method: 'POST',
+      token: userToken,
+      body: { showId, seatIds: [seatIds[6]] },
     });
     const id = held.booking.id;
 
     const { status, body } = await api(`/api/v1/bookings/${id}/cancel`, {
-      method: 'POST', token: userToken,
+      method: 'POST',
+      token: userToken,
     });
     assert.equal(status, 200);
     assert.equal(body.booking.status, 'CANCELLED');
@@ -374,32 +417,39 @@ describe('POST /api/v1/bookings/:id/cancel', () => {
 
   test('forbids another USER from cancelling (403)', async () => {
     const { body: held } = await api('/api/v1/bookings/hold', {
-      method: 'POST', token: userToken, body: { showId, seatIds: [seatIds[7]] },
+      method: 'POST',
+      token: userToken,
+      body: { showId, seatIds: [seatIds[7]] },
     });
     const id = held.booking.id;
 
     const { status, body } = await api(`/api/v1/bookings/${id}/cancel`, {
-      method: 'POST', token: otherToken,
+      method: 'POST',
+      token: otherToken,
     });
     assert.equal(status, 403);
     assert.equal(body.code, 'INSUFFICIENT_ROLE');
 
     // The owner can still cancel it afterwards.
     const { status: cancelled } = await api(`/api/v1/bookings/${id}/cancel`, {
-      method: 'POST', token: userToken,
+      method: 'POST',
+      token: userToken,
     });
     assert.equal(cancelled, 200);
   });
 
   test('rejects cancelling a CONFIRMED booking (409)', async () => {
     const { body: held } = await api('/api/v1/bookings/hold', {
-      method: 'POST', token: userToken, body: { showId, seatIds: [seatIds[8]] },
+      method: 'POST',
+      token: userToken,
+      body: { showId, seatIds: [seatIds[8]] },
     });
     const id = held.booking.id;
     await pool.execute(`UPDATE bookings SET status = 'CONFIRMED' WHERE id = ?`, [id]);
 
     const { status, body } = await api(`/api/v1/bookings/${id}/cancel`, {
-      method: 'POST', token: userToken,
+      method: 'POST',
+      token: userToken,
     });
     assert.equal(status, 409);
     assert.equal(body.code, 'BOOKING_ALREADY_CONFIRMED');
@@ -411,7 +461,8 @@ describe('POST /api/v1/bookings/:id/cancel', () => {
 
   test('404s for a missing booking', async () => {
     const { status, body } = await api('/api/v1/bookings/99999999/cancel', {
-      method: 'POST', token: userToken,
+      method: 'POST',
+      token: userToken,
     });
     assert.equal(status, 404);
     assert.equal(body.code, 'BOOKING_NOT_FOUND');
@@ -419,7 +470,9 @@ describe('POST /api/v1/bookings/:id/cancel', () => {
 
   test('rejects a non-numeric id with 400', async () => {
     const { status, body } = await api('/api/v1/bookings/abc/cancel', {
-      method: 'POST', body: {}, token: userToken,
+      method: 'POST',
+      body: {},
+      token: userToken,
     });
     assert.equal(status, 400);
     assert.equal(body.code, 'VALIDATION_ERROR');
@@ -434,7 +487,9 @@ describe('GET /api/v1/bookings (my bookings)', () => {
 
   before(async () => {
     const { body } = await api('/api/v1/bookings/hold', {
-      method: 'POST', token: userToken, body: { showId, seatIds: [seatIds[9]] },
+      method: 'POST',
+      token: userToken,
+      body: { showId, seatIds: [seatIds[9]] },
     });
     myBookingRef = body.booking.bookingReference;
   });
@@ -481,8 +536,10 @@ describe('GET /api/v1/admin/bookings', () => {
   let adminBookingRef;
 
   before(async () => {
-        const { body } = await api('/api/v1/bookings/hold', {
-      method: 'POST', token: userToken, body: { showId, seatIds: [seatIds[6]] },
+    const { body } = await api('/api/v1/bookings/hold', {
+      method: 'POST',
+      token: userToken,
+      body: { showId, seatIds: [seatIds[6]] },
     });
     adminBookingId = body.booking.id;
     adminBookingRef = body.booking.bookingReference;
@@ -510,7 +567,9 @@ describe('GET /api/v1/admin/bookings', () => {
   });
 
   test('filters by status', async () => {
-    const { status, body } = await api('/api/v1/admin/bookings?status=PENDING', { token: adminToken });
+    const { status, body } = await api('/api/v1/admin/bookings?status=PENDING', {
+      token: adminToken,
+    });
     assert.equal(status, 200);
     assert.ok(body.bookings.some((b) => b.bookingReference === adminBookingRef));
     assert.ok(body.bookings.every((b) => b.status === 'PENDING'));
@@ -518,7 +577,8 @@ describe('GET /api/v1/admin/bookings', () => {
 
   test('reflects a CANCELLED booking in the CANCELLED filter', async () => {
     const { status } = await api(`/api/v1/bookings/${adminBookingId}/cancel`, {
-      method: 'POST', token: userToken,
+      method: 'POST',
+      token: userToken,
     });
     assert.equal(status, 200);
 

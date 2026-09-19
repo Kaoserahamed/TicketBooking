@@ -17,11 +17,11 @@ const { test, before, after, describe } = require('node:test');
 const assert = require('node:assert/strict');
 const express = require('express');
 
-const createApp = require('../src/app');
-const config = require('../src/config/env');
-const { pool, closePool } = require('../src/database/pool');
-const { hashPassword } = require('../src/utils/password');
-const { authRateLimiter } = require('../src/middlewares/rate-limit');
+const createApp = require('../../src/app');
+const config = require('../../src/config/env');
+const { pool, closePool } = require('../../src/database/pool');
+const { hashPassword } = require('../../src/utils/password');
+const { authRateLimiter } = require('../../src/middlewares/rate-limit');
 
 // ---------------------------------------------------------------
 // Fixtures
@@ -70,7 +70,7 @@ async function api(path, options = {}) {
   let json = null;
   try {
     json = JSON.parse(text);
-  } catch (error) {
+  } catch {
     json = null;
   }
 
@@ -240,7 +240,11 @@ describe('POST /api/v1/auth/register', () => {
   test('rejects a password without a number or letter', async () => {
     const { status, body } = await api('/api/v1/auth/register', {
       method: 'POST',
-      body: { name: 'Weak Password', email: `auth.weak.${stamp}@example.com`, password: 'abcdefgh' },
+      body: {
+        name: 'Weak Password',
+        email: `auth.weak.${stamp}@example.com`,
+        password: 'abcdefgh',
+      },
     });
 
     assert.equal(status, 400);
@@ -487,7 +491,7 @@ describe('POST /api/v1/auth/refresh', () => {
       body: { email: primaryEmail, password: PASSWORD },
     });
 
-    const { hashToken } = require('../src/utils/token');
+    const { hashToken } = require('../../src/utils/token');
     const tokenHash = hashToken(login.body.tokens.refreshToken);
 
     await api('/api/v1/auth/refresh', {
