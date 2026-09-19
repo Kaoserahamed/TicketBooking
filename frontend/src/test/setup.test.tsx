@@ -1,8 +1,50 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import App from '../App'
 import config from '../../vite.config'
+import { eventApi } from '../api/events'
+import { showApi } from '../api/shows'
+
+vi.mock('../api/events', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../api/events')>()
+  return {
+    ...actual,
+    eventApi: {
+      listEvents: vi.fn(),
+      getEvent: vi.fn(),
+      getEventShows: vi.fn(),
+    },
+  }
+})
+
+vi.mock('../api/shows', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../api/shows')>()
+  return {
+    ...actual,
+    showApi: {
+      listShows: vi.fn(),
+      getShow: vi.fn(),
+      getSeatMap: vi.fn(),
+      getAvailability: vi.fn(),
+    },
+  }
+})
+
+vi.mocked(eventApi.listEvents).mockResolvedValue({
+  status: 'ok',
+  events: [],
+  total: 0,
+  limit: 6,
+  offset: 0,
+})
+vi.mocked(showApi.listShows).mockResolvedValue({
+  status: 'ok',
+  shows: [],
+  total: 0,
+  limit: 6,
+  offset: 0,
+})
 
 // STEP 0 — frontend baseline config check.
 // This is the mandatory "test the setup" module: it verifies the Vite + React
@@ -16,14 +58,14 @@ describe('frontend setup', () => {
     expect(config.test?.environment).toBe('happy-dom')
   })
 
-  it('renders the home page shell', () => {
+  it('renders the home page shell', async () => {
     render(
       <MemoryRouter initialEntries={['/']}>
         <App />
       </MemoryRouter>,
     )
     expect(screen.getByText('Ticket Booking System')).toBeInTheDocument()
-    expect(screen.getByText('Browse events')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Browse events' })).toBeInTheDocument()
   })
 
   it('exposes protected routes that redirect to login when unauthenticated', () => {
