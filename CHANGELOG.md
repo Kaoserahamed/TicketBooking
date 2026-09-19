@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Added
+- CI `manifests` job now also lints the overlay with
+  `kube-linter lint --add-all-built-in infrastructure/kubernetes` (pinned
+  v0.8.3 release tarball), so misconfigurations fail the build alongside
+  schema violations.
 - `backend/tests/unit/manifest-hardening.test.js` — hermetic guard for the
   Kubernetes overlay: resource requests+limits on every container, both probes
   on every workload, no privileged/host access, `imagePullPolicy: Always` on
