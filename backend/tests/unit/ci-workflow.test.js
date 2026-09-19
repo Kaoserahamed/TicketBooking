@@ -100,6 +100,14 @@ test('the manifests job validates rendered output in strict mode', () => {
   assert.match(block, /KUBECONFORM_VERSION: v\d+\.\d+\.\d+/);
 });
 
+test('the manifests job lints the rendered overlay for misconfigurations', () => {
+  const block = jobBlock(read(WORKFLOW_FILE), 'manifests');
+  assert.match(block, /kube-linter lint --add-all-built-in/);
+  // Pinned release, rendered output — the same objects the cluster receives.
+  assert.match(block, /KUBE_LINTER_VERSION: v\d+\.\d+\.\d+/);
+  assert.match(block, /kubectl kustomize infrastructure\/kubernetes/);
+});
+
 test('the manifests job also lints for misconfigurations', () => {
   const block = jobBlock(read(WORKFLOW_FILE), 'manifests');
   // kube-linter is fetched from its pinned release tarball and run with every
