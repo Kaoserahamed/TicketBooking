@@ -22,7 +22,7 @@ job needs no cluster — `kubeconform` validates against published schemas.
 
 | Job | Runs | Fails when |
 |-----|------|-----------|
-| `backend` | `npm ci`, `lint`, `format:check`, `typecheck`, `npm audit --audit-level=high`, `npm test` (unit + integration on MySQL) | lint/format/type/audit/test error |
+| `backend` | `npm ci`, `lint`, `format:check`, `typecheck`, `npm audit --audit-level=high`, `npm test` (unit + integration on MySQL), `test:coverage` | lint/format/type/audit/test error or unit coverage below floor |
 | `frontend` | `npm ci`, `lint`, `format:check`, `typecheck`, `npm audit --audit-level=high`, `test:coverage`, `build` | any gate fails or coverage below floor |
 | `sql` | `npm ci` not needed — installs the `mysql` client, recreates the DB from `schema.sql`, then `tests/run-sql-tests.ps1 -Fresh` | any `ERROR <code>` in a `tests/sql/` script |
 | `manifests` | `kubectl kustomize infrastructure/kubernetes` piped into `kubeconform -strict` (Kubernetes 1.29 schemas) | a rendered object fails schema validation |
@@ -36,6 +36,7 @@ so a broken schema or manifest cannot publish an image.
 | Gate | Floor |
 |------|-------|
 | Frontend coverage | `vite.config.ts` thresholds: lines/statements 90, functions/branches 75 |
+| Backend unit coverage | `scripts/check-coverage.js` floors: lines 55, branches 80, functions 30 |
 | Backend suite | unit hermetic (no DB) + integration on MySQL 8 |
 | SQL suite | every `tests/sql/` file runs clean against a database rebuilt from `schema.sql` |
 | Manifests | every rendered object matches the Kubernetes 1.29 API schema (strict) |

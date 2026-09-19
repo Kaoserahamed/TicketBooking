@@ -134,7 +134,7 @@ route -> validate -> controller -> service -> repository -> MySQL
 | `npm run test:unit` | Unit tests only — no MySQL or Redis required |
 | `npm run test:integration` | End-to-end API tests against a real MySQL 8 instance |
 | `npm test` | Both suites (`tests/unit` + `tests/integration`) |
-| `npm run test:coverage` | Unit tests with the Node coverage report |
+| `npm run test:coverage` | Unit tests with the enforced coverage floors (`scripts/check-coverage.js`) |
 | `npm run verify` | Lint + format + typecheck + unit tests — run before pushing |
 
 ### Quality gates
@@ -149,7 +149,7 @@ The same gates run in CI on every push and pull request
 | Typecheck | `npm run typecheck` | `npm run typecheck` |
 | Dependency audit | `npm audit --audit-level=high` | `npm audit --audit-level=high` |
 | Tests | `npm test` vs a real MySQL 8 service | `npm run test:coverage` |
-| Coverage floor | — | 90% lines/statements, 75% functions/branches |
+| Coverage floor | unit suite: 55% lines, 80% branches, 30% functions ([`scripts/check-coverage.js`](backend/scripts/check-coverage.js)) | 90% lines/statements, 75% functions/branches |
 
 The frontend coverage floors are enforced by `vitest` thresholds in
 [`frontend/vite.config.ts`](frontend/vite.config.ts): a run that drops below any

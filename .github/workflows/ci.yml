@@ -2,7 +2,8 @@ name: CI/CD
 
 # Pipeline (docs/12-deployment.md):
 #   1. backend — lockfile install, lint/format/typecheck, dependency audit,
-#      then unit + integration tests against a real MySQL 8 service
+#      then unit + integration tests against a real MySQL 8 service and a
+#      coverage-gated unit pass
 #   2. frontend — lockfile install, lint/format/typecheck, dependency audit,
 #      coverage-gated vitest run, then the production build
 #   3. sql      — recreate the schema on a real MySQL 8 service, then run the
@@ -86,6 +87,23 @@ jobs:
       - name: Run tests
         working-directory: backend
         run: npm test
+
+      # The unit suite runs a second time under the coverage reporter because
+      # this pass is what enforces the floors in scripts/check-coverage.js.
+      - name: Run unit tests with the coverage gate
+        working-directory: backend
+        run: |
+          mkdir -p coverage
+          set -o pipefail
+          npm run test:coverage 2>&1 | tee coverage/summary.txt
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-coverage
+          path: backend/coverage
+          retention-days: 7
 
   frontend:
     name: Frontend — tests + build

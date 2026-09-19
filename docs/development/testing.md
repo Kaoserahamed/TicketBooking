@@ -29,10 +29,12 @@ npm test                 # both (CI backend job)
 | `tests/unit/metrics.test.js` | route-pattern labels, token gate, disabled-mode passthrough |
 | `tests/integration/*.test.js` | register/login/refresh, holds, events, venues/shows over MySQL |
 
-Coverage is **enforced** on the frontend; backend unit tests are hermetic so
-they run anywhere. SQL checks (`tests/sql/*.sql` via `tests/run-sql-tests.ps1`)
-verify seed data, auth queries, the booking flow and the concurrency guards
-against a real MySQL, and run as their own CI job.
+Coverage is **enforced in both stacks**: `scripts/check-coverage.js` fails
+`npm run test:coverage` when the hermetic unit aggregate drops below 55% lines,
+80% branches or 30% functions, and the frontend floors live in
+`frontend/vite.config.ts`. SQL checks (`tests/sql/*.sql` via
+`tests/run-sql-tests.ps1`) verify seed data, auth queries, the booking flow and
+the concurrency guards against a real MySQL, and run as their own CI job.
 
 ## Frontend (`frontend/`, Vitest + happy-dom)
 
