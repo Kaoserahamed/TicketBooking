@@ -5,7 +5,9 @@ name: CI/CD
 #      then unit + integration tests against a real MySQL 8 service
 #   2. frontend — lockfile install, lint/format/typecheck, dependency audit,
 #      coverage-gated vitest run, then the production build
-#   3. images  — build both container images (and push to GHCR on main)
+#   3. sql      — recreate the schema on a real MySQL 8 service, then run the
+#      whole tests/sql/ suite (seed data, booking flow, concurrency, workers)
+#   4. images  — build both container images (and push to GHCR on main)
 #
 # Every job fails fast on lint, formatting, typecheck, coverage or audit
 # errors, so a regression cannot reach main just because tests happened to pass.
@@ -138,10 +140,54 @@ jobs:
           path: frontend/dist
           retention-days: 7
 
+  sql:
+    name: Database — SQL suite
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ci-root-password
+          # The runner reaches MySQL over TCP, not from inside the container, so
+          # root has to be reachable from off-host.
+          MYSQL_ROOT_HOST: "%"
+          MYSQL_DATABASE: ticket_booking_test
+          MYSQL_USER: tbs_test
+          MYSQL_PASSWORD: ci-db-password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -pci-root-password"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+          --health-start-period=30s
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: "3306"
+      DB_USER: root
+      DB_NAME: ticket_booking_test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install the mysql client
+        run: sudo apt-get update && sudo apt-get install -y mysql-client
+
+      # run-sql-tests.ps1 reads the password from the git-ignored root .env, so
+      # the runner writes one rather than the workflow hard-coding the value.
+      - name: Stage the runner credentials
+        run: echo "DB_PASSWORD=ci-root-password" > .env
+
+      # -Fresh drops and recreates the database from schema.sql first, which is
+      # what makes the suite repeatable: 01-seed-data.sql expects an empty schema.
+      - name: Recreate the schema and run every SQL suite
+        shell: pwsh
+        run: ./tests/run-sql-tests.ps1 -Fresh -Database $env:DB_NAME -User $env:DB_USER
+
   docker:
     name: Docker — build & publish
     runs-on: ubuntu-latest
-    needs: [backend, frontend]
+    needs: [backend, frontend, sql]
     permissions:
       contents: read
       packages: write
