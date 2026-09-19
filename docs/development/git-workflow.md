@@ -57,7 +57,10 @@ Reviewer checklist:
 
 ## 4. Dependency updates
 
-Dependabot (`.github/dependabot.yml`) opens weekly grouped PRs per stack.
+Dependabot (`.github/dependabot.yml`) opens weekly PRs per stack: `/backend` and
+`/frontend` for npm, plus the `github-actions` ecosystem so the pinned action
+tags stay current. Minor and patch bumps are grouped into one PR per stack;
+majors arrive individually because they need a real migration.
 A dependency PR still has to pass `npm audit --audit-level=high`; an advisory
 that cannot be closed by a bump is recorded in
 [`../security/threat-model.md`](../security/threat-model.md).

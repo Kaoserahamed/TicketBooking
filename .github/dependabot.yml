@@ -1,3 +1,8 @@
+# Dependency update automation (docs/development/git-workflow.md).
+#
+# Weekly, grouped PRs per stack. Minor and patch bumps arrive in one PR so a
+# release does not turn into twenty one-line PRs, while majors keep their own PR
+# because they need an actual migration and a green CI run of their own.
 version: 2
 updates:
   - package-ecosystem: "npm"
@@ -5,9 +10,28 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
+    groups:
+      backend-minor-and-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
 
   - package-ecosystem: "npm"
     directory: "/frontend"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
+    groups:
+      frontend-minor-and-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+
+  # The workflows pin actions to a major tag (for example actions/checkout@v4),
+  # so this entry is what surfaces patch releases and the next major.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      github-actions:
+        patterns: ["*"]
