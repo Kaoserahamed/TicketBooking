@@ -20,8 +20,8 @@ Companions: [`monitoring.md`](monitoring.md) (signals),
 
 - Cut a release from `main` when CI is green: annotated tag `vX.Y.Z`, push
   `main` and the tag. Checklist: [`../deployment/ci-cd.md`](../deployment/ci-cd.md).
-- The tag re-runs backend/frontend/docker gates; GHCR publish happens on `main`
-  pushes (see `ci.yml`).
+- The tag re-runs the backend/frontend/sql/manifests/docker gates; GHCR publish
+  happens on `main` pushes (see `ci.yml`).
 - Rollback: redeploy the previous image tag;
   [`../deployment/rollback.md`](../deployment/rollback.md) explains why
   migrations roll forward, never down.

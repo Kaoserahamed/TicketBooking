@@ -156,6 +156,16 @@ The frontend coverage floors are enforced by `vitest` thresholds in
 of them fails the job. Dependency updates are proposed weekly by
 [`.github/dependabot.yml`](.github/dependabot.yml).
 
+Two further jobs guard the parts that are neither half:
+
+| Job | Runs | Fails when |
+|---|---|---|
+| Database — SQL suite | [`tests/run-sql-tests.ps1`](tests/run-sql-tests.ps1) `-Fresh` against a `mysql:8.0` service | any `ERROR <code>` in a `tests/sql/` script |
+| Infrastructure — manifest validation | `kubectl kustomize` then `kubeconform -strict` (Kubernetes 1.29 schemas) | a rendered object fails schema validation |
+
+Both are prerequisites for the container job, so a broken schema or manifest
+cannot publish an image.
+
 ### Run the tests locally
 
 The unit suites are hermetic — they need nothing but Node. The integration
