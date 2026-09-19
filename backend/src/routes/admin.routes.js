@@ -29,6 +29,7 @@ const {
   seatParamSchema,
 } = require('../validators/venue.validator');
 const { createShowSchema, updateShowSchema, showIdParamSchema } = require('../validators/show.validator');
+const { listBookingsQuerySchema } = require('../validators/booking.validator');
 const asyncHandler = require('../utils/async-handler');
 
 const router = express.Router();
@@ -135,6 +136,15 @@ router.put(
   validate(showIdParamSchema, 'params'),
   validate(updateShowSchema),
   asyncHandler(adminController.adminUpdateShow)
+);
+
+// GET /api/v1/admin/bookings?status=&limit=&offset= (ADMIN only)
+router.get(
+  '/bookings',
+  authenticate,
+  authorize('ADMIN'),
+  validate(listBookingsQuerySchema, 'query'),
+  asyncHandler(adminController.adminListBookings)
 );
 
 module.exports = router;

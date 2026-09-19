@@ -8,6 +8,7 @@ const userService = require('../services/user.service');
 const eventService = require('../services/event.service');
 const venueService = require('../services/venue.service');
 const showService = require('../services/show.service');
+const bookingService = require('../services/booking.service');
 
 /** GET /api/v1/admin/users */
 async function listUsers(req, res) {
@@ -76,6 +77,13 @@ async function adminUpdateShow(req, res) {
   res.json({ status: 'ok', show });
 }
 
+/** GET /api/v1/admin/bookings?status=&limit=&offset= */
+async function adminListBookings(req, res) {
+  const filters = req.validatedQuery || {};
+  const { bookings, total } = await bookingService.listBookingsAdmin(filters);
+  res.json({ status: 'ok', total, bookings });
+}
+
 module.exports = {
   listUsers,
   adminListEvents,
@@ -88,4 +96,5 @@ module.exports = {
   adminDeleteSeat,
   adminCreateShow,
   adminUpdateShow,
+  adminListBookings,
 };

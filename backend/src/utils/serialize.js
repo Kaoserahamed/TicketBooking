@@ -210,4 +210,77 @@ function toAvailability(showId, totals, byRow) {
   };
 }
 
-module.exports = { toPublicUser, toEvent, toShow, toVenue, toSeat, toShowDetail, toShowSeat, toAvailability };
+/** Shape a booking + its items for API responses.
+ */
+function toBooking(row, items = []) {
+  if (!row) {
+    return null;
+  }
+
+  return {
+    id: Number(row.id),
+    userId: Number(row.user_id),
+    showId: Number(row.show_id),
+    bookingReference: row.booking_reference,
+    idempotencyKey: row.idempotency_key ?? null,
+    status: row.status,
+    subtotal: Number(row.subtotal),
+    discount: Number(row.discount),
+    totalAmount: Number(row.total_amount),
+    currency: row.currency,
+    expiresAt: row.expires_at ?? null,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    show: {
+      id: Number(row.show_id),
+      eventId: Number(row.event_id),
+      venueId: Number(row.venue_id),
+      startTime: row.show_start_time,
+      endTime: row.show_end_time,
+      status: row.show_status,
+      event: {
+        id: Number(row.event_id),
+        name: row.event_name,
+        status: row.event_status ?? null,
+      },
+      venue: {
+        id: Number(row.venue_id),
+        name: row.venue_name,
+        address: row.venue_address,
+        city: row.venue_city,
+        capacity: Number(row.venue_capacity),
+      },
+    },
+    user: row.user_name != null
+      ? { id: Number(row.user_id), name: row.user_name, email: row.user_email }
+      : null,
+    items: items.map(toBookingItem),
+  };
+}
+
+/**
+ * Shape a booking_item + its seat for API responses.
+ */
+function toBookingItem(row) {
+  if (!row) {
+    return null;
+  }
+
+  return {
+    id: Number(row.id),
+    bookingId: Number(row.booking_id),
+    showSeatId: Number(row.show_seat_id),
+    seat: row.row_number != null
+      ? {
+          id: Number(row.seat_id),
+          row: row.row_number,
+          number: row.seat_number,
+          label: `${row.row_number}${row.seat_number}`,
+          seatType: row.seat_type,
+        }
+      : { id: Number(row.seat_id) },
+    price: Number(row.price),
+  };
+}
+
+module.exports = { toPublicUser, toEvent, toShow, toVenue, toSeat, toShowDetail, toShowSeat, toAvailability, toBooking, toBookingItem };

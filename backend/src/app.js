@@ -20,6 +20,7 @@ const userRoutes = require('./routes/user.routes');
 const eventRoutes = require('./routes/event.routes');
 const venueRoutes = require('./routes/venue.routes');
 const showRoutes = require('./routes/show.routes');
+const bookingRoutes = require('./routes/booking.routes');
 const adminRoutes = require('./routes/admin.routes');
 const notFound = require('./middlewares/not-found');
 const errorHandler = require('./middlewares/error-handler');
@@ -100,6 +101,12 @@ function createApp() {
         seats: 'GET /api/v1/shows/:id/seats',
         availability: 'GET /api/v1/shows/:id/availability',
       },
+      bookings: {
+        hold: 'POST /api/v1/bookings/hold (Bearer, Idempotency-Key)',
+        detail: 'GET /api/v1/bookings/:id (Bearer)',
+        cancel: 'POST /api/v1/bookings/:id/cancel (Bearer)',
+        myBookings: 'GET /api/v1/bookings?status=&limit=&offset= (Bearer)',
+      },
     });
   });
 
@@ -112,13 +119,8 @@ function createApp() {
   app.use('/api/v1/events', eventRoutes);
   app.use('/api/v1/venues', venueRoutes);
   app.use('/api/v1/shows', showRoutes);
+  app.use('/api/v1/bookings', bookingRoutes);
   app.use('/api/v1/admin', adminRoutes);
-
-  // Remaining modules mount here as they are implemented, e.g.
-  //   app.use('/api/v1/bookings', bookingRoutes);
-  //   app.use('/api/v1/bookings', bookingRoutes);
-  //   app.use('/api/v1/payments', paymentRoutes);
-  //   app.use('/api/v1/tickets', ticketRoutes);
 
   app.use(notFound);
   app.use(errorHandler);
