@@ -1,9 +1,14 @@
 name: CI/CD
 
 # Pipeline (docs/12-deployment.md):
-#   1. backend — lockfile install + unit tests against a real MySQL 8 service
-#   2. frontend — lockfile install + vitest + typecheck/build
+#   1. backend — lockfile install, lint/format/typecheck, dependency audit,
+#      then unit + integration tests against a real MySQL 8 service
+#   2. frontend — lockfile install, lint/format/typecheck, dependency audit,
+#      coverage-gated vitest run, then the production build
 #   3. images  — build both container images (and push to GHCR on main)
+#
+# Every job fails fast on lint, formatting, typecheck, coverage or audit
+# errors, so a regression cannot reach main just because tests happened to pass.
 #
 # Docker builds also act as a second gate: the frontend image runs
 # `tsc -b && vite build` again, so a broken main can never ship an image.
@@ -58,6 +63,22 @@ jobs:
         working-directory: backend
         run: npm ci
 
+      - name: Lint
+        working-directory: backend
+        run: npm run lint
+
+      - name: Check formatting
+        working-directory: backend
+        run: npm run format:check
+
+      - name: Typecheck
+        working-directory: backend
+        run: npm run typecheck
+
+      - name: Dependency audit
+        working-directory: backend
+        run: npm audit --audit-level=high
+
       - name: Run tests
         working-directory: backend
         run: npm test
@@ -78,13 +99,37 @@ jobs:
         working-directory: frontend
         run: npm ci
 
-      - name: Run unit tests
+      - name: Lint
         working-directory: frontend
-        run: npm run test -- --run
+        run: npm run lint
+
+      - name: Check formatting
+        working-directory: frontend
+        run: npm run format:check
+
+      - name: Typecheck
+        working-directory: frontend
+        run: npm run typecheck
+
+      - name: Dependency audit
+        working-directory: frontend
+        run: npm audit --audit-level=high
+
+      - name: Run unit tests with coverage
+        working-directory: frontend
+        run: npm run test:coverage
 
       - name: Build (typecheck + bundle)
         working-directory: frontend
         run: npm run build
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-coverage
+          path: frontend/coverage
+          retention-days: 7
 
       - name: Upload dist artifact
         uses: actions/upload-artifact@v4
