@@ -15,6 +15,28 @@ import ProfilePage from './pages/ProfilePage'
 import BookingsPage from './pages/BookingsPage'
 import VenuesPage from './pages/VenuesPage'
 import VenueDetailPage from './pages/VenueDetailPage'
+import AdminUsersPage from './pages/AdminUsersPage'
+import AdminEventsPage from './pages/AdminEventsPage'
+import AdminVenuesPage from './pages/AdminVenuesPage'
+import AdminVenueSeatsPage from './pages/AdminVenueSeatsPage'
+import AdminShowsPage from './pages/AdminShowsPage'
+import AdminBookingsPage from './pages/AdminBookingsPage'
+
+// Roles allowed into the admin area. Real RBAC is enforced server-side
+// (docs/11-security.md §11.1) — this guard is UX only.
+const ADMIN_ROLES = ['ADMIN', 'EVENT_MANAGER', 'VENUE_MANAGER']
+
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { token, user } = useAuthStore()
+  const location = useLocation()
+  if (!token) {
+    return <Navigate to="/login" replace state={{ from: location }} />
+  }
+  if (user && !ADMIN_ROLES.includes(user.role)) {
+    return <Navigate to="/" replace />
+  }
+  return <>{children}</>
+}
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { token } = useAuthStore()
@@ -43,6 +65,13 @@ export default function App() {
         <Route path="bookings" element={<ProtectedRoute><BookingsPage /></ProtectedRoute>} />
         <Route path="venues" element={<VenuesPage />} />
         <Route path="venues/:id" element={<VenueDetailPage />} />
+        <Route path="admin" element={<AdminRoute><AdminUsersPage /></AdminRoute>} />
+        <Route path="admin/users" element={<AdminRoute><AdminUsersPage /></AdminRoute>} />
+        <Route path="admin/events" element={<AdminRoute><AdminEventsPage /></AdminRoute>} />
+        <Route path="admin/venues" element={<AdminRoute><AdminVenuesPage /></AdminRoute>} />
+        <Route path="admin/venues/:id/seats" element={<AdminRoute><AdminVenueSeatsPage /></AdminRoute>} />
+        <Route path="admin/shows" element={<AdminRoute><AdminShowsPage /></AdminRoute>} />
+        <Route path="admin/bookings" element={<AdminRoute><AdminBookingsPage /></AdminRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

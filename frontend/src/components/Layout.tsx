@@ -62,6 +62,18 @@ export default function Layout() {
                     My Bookings
                   </NavLink>
                 )}
+                {token && user && ['ADMIN', 'EVENT_MANAGER', 'VENUE_MANAGER'].includes(user.role) && (
+                  <NavLink
+                    to="/admin/events"
+                    className={({ isActive }) =>
+                      `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                        isActive ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-gray-100'
+                      }`
+                    }
+                  >
+                    Admin
+                  </NavLink>
+                )}
               </div>
               {token && user ? (
                 <div className="flex items-center space-x-2">

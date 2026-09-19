@@ -4,13 +4,9 @@ import api from './client'
 // and backend/src/services/venue.service.js.
 export interface VenueSeatSummary {
   total: number
-  byType: {
-    VIP: number
-    PREMIUM: number
-    REGULAR: number
-    BALCONY: number
-    BOX: number
-  }
+  // Backend builds byType by counting seat rows, so a venue with no seats
+  // (or only some types) omits the missing keys.
+  byType: Partial<Record<SeatType, number>>
 }
 
 export interface Venue {
