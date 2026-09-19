@@ -156,6 +156,40 @@ The frontend coverage floors are enforced by `vitest` thresholds in
 of them fails the job. Dependency updates are proposed weekly by
 [`.github/dependabot.yml`](.github/dependabot.yml).
 
+### Run the tests locally
+
+The unit suites are hermetic — they need nothing but Node. The integration
+suites are end-to-end and need a real MySQL 8 (the API also uses Redis for
+shared rate limiting). To get both without a pre-existing database account,
+use the throwaway stack in
+[`docker-compose.test.yml`](docker-compose.test.yml):
+
+```bash
+# 1. Start throwaway MySQL (host port 3307) + Redis (host port 6380)
+docker compose -f docker-compose.test.yml up -d
+
+# 2. Point the backend at that stack - backend/.env wins over the root .env
+Copy-Item backend/.env.test.example backend/.env   # PowerShell
+# cp backend/.env.test.example backend/.env        # bash
+
+# 3. Run everything
+cd backend && npm ci && npm test
+
+# 4. Tear down (no volumes, so this always leaves a clean slate)
+docker compose -f docker-compose.test.yml down -v
+```
+
+The non-default ports let the test stack coexist with a development stack
+already bound to `3306`/`6379`; override with `MYSQL_TEST_PORT` /
+`REDIS_TEST_PORT` if those collide too. `backend/.env` is git-ignored.
+
+Shortest path when you only want the fast, hermetic suite:
+
+```bash
+cd backend && npm run test:unit      # no MySQL or Redis required
+cd frontend && npm run test:coverage # coverage floors enforced
+```
+
 ### Verifying the connections
 
 ```bash
