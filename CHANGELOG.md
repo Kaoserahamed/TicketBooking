@@ -8,20 +8,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Added
-- Initial project structure with comprehensive documentation
-- Full CI/CD pipeline with GitHub Actions
-- Kubernetes deployment manifests
-- SQL test suite for database validation
+- Nothing yet — move entries here into a version section when they ship.
+
+## [0.1.1] - 2026-09-19
+
+### Added
+- Throwaway test stack for a fresh clone: `docker-compose.test.yml` (MySQL 8 on
+  3307, Redis on 6380) plus `backend/.env.test.example`, so the integration and
+  SQL suites run without a pre-existing database account.
+- `tests/unit/test-stack.test.js` — hermetic drift guard proving the compose
+  file, the env template and the README all describe the same stack.
+- CI job `sql`: recreates the schema on a real `mysql:8.0` service and runs every
+  `tests/sql/` script.
+- CI job `manifests`: renders `infrastructure/kubernetes` with
+  `kubectl kustomize` and validates all 13 objects with `kubeconform -strict`
+  against the Kubernetes 1.29 schemas.
 
 ### Changed
-- Established monorepo layout (backend + frontend in single repository)
-- Standardized commit conventions (Conventional Commits)
+- The `docker` job now waits for `backend`, `frontend`, `sql` and `manifests`, so
+  a broken schema or manifest can no longer publish an image.
+- README, `docs/deployment/ci-cd.md`, `docs/operations/runbook.md` and
+  `docs/development/testing.md` document the local test stack and the new gates.
 
 ### Fixed
-- N/A
-
-### Security
-- N/A
+- `docs/development/testing.md`: restored a sentence that had been split in half,
+  leaving its tail orphaned at the end of the file.
 
 ---
 
@@ -107,4 +118,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 4. Push `main` and the tag: `git push origin main && git push origin vX.Y.Z`
 5. CI rebuilds and publishes container images to GHCR
 
+[0.1.1]: https://github.com/Kaoserahamed/TicketBooking/releases/tag/v0.1.1
 [0.1.0]: https://github.com/Kaoserahamed/TicketBooking/releases/tag/v0.1.0
