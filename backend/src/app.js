@@ -10,7 +10,6 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 
 const config = require('./config/env');
@@ -22,6 +21,9 @@ const venueRoutes = require('./routes/venue.routes');
 const showRoutes = require('./routes/show.routes');
 const bookingRoutes = require('./routes/booking.routes');
 const adminRoutes = require('./routes/admin.routes');
+const { httpLogger } = require('./middlewares/http-logger');
+const { metricsMiddleware, createMetricsHandler } = require('./utils/metrics');
+const { initErrorTracking } = require('./utils/error-tracking');
 const notFound = require('./middlewares/not-found');
 const errorHandler = require('./middlewares/error-handler');
 
@@ -44,8 +46,15 @@ function createApp() {
   // Required to read the httpOnly refresh-token cookie (docs/11-security.md §11.1).
   app.use(cookieParser());
 
-  if (config.env !== 'test') {
-    app.use(morgan('dev'));
+  // Structured request logging with a per-request id header
+  // (docs/15-observability.md). Silent when NODE_ENV=test.
+  app.use(httpLogger);
+
+  // Prometheus instrumentation + scrape endpoint. METRICS_ENABLED=false turns
+  // both off; METRICS_TOKEN protects the endpoint when it is reachable.
+  if (config.observability.metrics.enabled) {
+    app.use(metricsMiddleware());
+    app.get('/metrics', createMetricsHandler());
   }
 
   // Service metadata
@@ -107,6 +116,10 @@ function createApp() {
         cancel: 'POST /api/v1/bookings/:id/cancel (Bearer)',
         myBookings: 'GET /api/v1/bookings?status=&limit=&offset= (Bearer)',
       },
+      observability: {
+        metrics: config.observability.metrics.enabled ? '/metrics (Prometheus)' : 'disabled',
+        errorTracking: config.observability.errorTracking.dsn ? 'sentry' : 'disabled',
+      },
     });
   });
 
@@ -121,6 +134,10 @@ function createApp() {
   app.use('/api/v1/shows', showRoutes);
   app.use('/api/v1/bookings', bookingRoutes);
   app.use('/api/v1/admin', adminRoutes);
+
+  // Optional Sentry integration - a no-op unless SENTRY_DSN is configured.
+  // Registered after the routes so it sees errors thrown by them.
+  initErrorTracking(app);
 
   app.use(notFound);
   app.use(errorHandler);

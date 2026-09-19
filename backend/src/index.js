@@ -9,6 +9,7 @@
 
 const createApp = require('./app');
 const config = require('./config/env');
+const { logger } = require('./utils/logger');
 const { testConnection, closePool } = require('./database/pool');
 const { initRateLimitStore } = require('./middlewares/rate-limit');
 const { closeRedis } = require('./cache/redis');
@@ -23,28 +24,42 @@ async function start() {
   // Verify the database connection before accepting traffic.
   try {
     const info = await testConnection();
-    console.log(
-      `[db] connected to "${info.database}" at ${info.host}:${info.port} ` +
-        `(MySQL ${info.version}, ${info.tables} tables)`
+    logger.info(
+      {
+        database: info.database,
+        host: info.host,
+        port: info.port,
+        mysql: info.version,
+        tables: info.tables,
+      },
+      'database connection established'
     );
   } catch (error) {
-    console.error(`[db] connection FAILED: ${error.message}`);
-    console.error('[db] server will still start - GET /health/db will report the failure.');
-    console.error('[db] check that MySQL is running and the DB_* values in .env are correct.');
+    logger.error({ err: error }, 'database connection failed - /health/db will report it');
+    logger.warn('check that MySQL is running and the DB_* values in .env are correct');
   }
 
   const server = app.listen(config.port, () => {
-    console.log(`[server] Ticket Booking API listening on http://localhost:${config.port} (${config.env})`);
-    console.log(`[server] server health: http://localhost:${config.port}/health`);
-    console.log(`[server] database health: http://localhost:${config.port}/health/db`);
+    logger.info(
+      {
+        port: config.port,
+        env: config.env,
+        health: `/health`,
+        databaseHealth: `/health/db`,
+        metrics: config.observability.metrics.enabled ? '/metrics' : 'disabled',
+        errorTracking: config.observability.errorTracking.dsn ? 'sentry' : 'disabled',
+        logLevel: config.logging.level,
+      },
+      'Ticket Booking API listening'
+    );
   });
 
   const shutdown = (signal) => {
-    console.log(`[server] ${signal} received - shutting down`);
+    logger.info({ signal }, 'shutdown signal received');
     server.close(async () => {
       await closePool();
       await closeRedis();
-      console.log('[server] shutdown complete');
+      logger.info('shutdown complete');
       process.exit(0);
     });
   };
@@ -53,6 +68,6 @@ async function start() {
 }
 
 start().catch((error) => {
-  console.error('[server] failed to start:', error);
+  logger.fatal({ err: error }, 'failed to start server');
   process.exit(1);
 });

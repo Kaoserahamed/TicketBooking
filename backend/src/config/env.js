@@ -33,8 +33,22 @@ function toInt(value, fallback) {
   return Number.isNaN(parsed) ? fallback : parsed;
 }
 
+/**
+ * Parse a floating-point environment value, falling back when absent/invalid.
+ *
+ * @param {string|undefined} value
+ * @param {number} fallback
+ * @returns {number}
+ */
+function toFloat(value, fallback) {
+  const parsed = Number.parseFloat(value);
+  return Number.isNaN(parsed) ? fallback : parsed;
+}
+
+const nodeEnv = process.env.NODE_ENV || 'development';
+
 const config = {
-  env: process.env.NODE_ENV || 'development',
+  env: nodeEnv,
   port: toInt(process.env.PORT, 4000),
   database: {
     host: process.env.DB_HOST || '127.0.0.1',
@@ -67,7 +81,7 @@ const config = {
   // (docs/11-security.md §11.2). `secure` is enabled outside development.
   cookie: {
     name: process.env.REFRESH_COOKIE_NAME || 'tb_refresh_token',
-    secure: process.env.NODE_ENV === 'production' || process.env.COOKIE_SECURE === 'true',
+    secure: nodeEnv === 'production' || process.env.COOKIE_SECURE === 'true',
     sameSite: process.env.COOKIE_SAME_SITE || 'strict',
     path: '/api/v1/auth',
     maxAgeMs: toInt(process.env.REFRESH_COOKIE_MAX_AGE_MS, 7 * 24 * 60 * 60 * 1000),
@@ -100,6 +114,26 @@ const config = {
     passwordResetTtlMinutes: toInt(process.env.PASSWORD_RESET_TTL_MINUTES, 60),
     // Used to build the links inside verification/reset emails.
     appBaseUrl: process.env.APP_BASE_URL || 'http://localhost:5173',
+  },
+  // Observability (docs/15-observability.md): structured logs, Prometheus
+  // metrics and optional error tracking.
+  logging: {
+    // Silent under test so suite output stays readable; override with LOG_LEVEL.
+    level: process.env.LOG_LEVEL || (nodeEnv === 'test' ? 'silent' : 'info'),
+    service: process.env.SERVICE_NAME || 'ticket-booking-api',
+  },
+  observability: {
+    metrics: {
+      // Set METRICS_ENABLED=false to stop recording/exposing metrics.
+      enabled: process.env.METRICS_ENABLED !== 'false',
+      // When set, GET /metrics requires `Authorization: Bearer <METRICS_TOKEN>`.
+      token: process.env.METRICS_TOKEN || '',
+    },
+    errorTracking: {
+      // Sentry is only initialised when a DSN is configured (self-contained by default).
+      dsn: process.env.SENTRY_DSN || '',
+      tracesSampleRate: toFloat(process.env.SENTRY_TRACES_SAMPLE_RATE, 0.1),
+    },
   },
 };
 

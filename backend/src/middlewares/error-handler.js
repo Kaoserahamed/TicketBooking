@@ -6,7 +6,15 @@
  *
  * Every error leaving the API has the same shape (docs/04-api-design.md §4.1):
  *   { "status": "error", "message": "...", "code": "...", "errors": [...] }
+ *
+ * Unexpected (5xx) failures are written to the structured log with the request
+ * id and reported to the error tracker when one is configured
+ * (docs/15-observability.md).
  */
+
+const { logger } = require('../utils/logger');
+const { captureException } = require('../utils/error-tracking');
+
 // eslint-disable-next-line no-unused-vars
 module.exports = function errorHandler(err, req, res, next) {
   let status = Number.isInteger(err.status) ? err.status : 500;
@@ -30,7 +38,17 @@ module.exports = function errorHandler(err, req, res, next) {
   const isServerError = status >= 500;
 
   if (isServerError) {
-    console.error(`[error] ${req.method} ${req.originalUrl} ->`, err);
+    logger.error(
+      {
+        err,
+        reqId: req.id,
+        method: req.method,
+        url: req.originalUrl,
+        statusCode: status,
+      },
+      'unhandled request error'
+    );
+    captureException(err, { requestId: req.id, method: req.method, url: req.originalUrl });
   }
 
   const payload = {
