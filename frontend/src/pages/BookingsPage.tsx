@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { bookingApi } from '../api/bookings'
 import type { Booking, BookingStatus } from '../api/bookings'
 import { extractErrorMessage } from '../api/client'
@@ -118,7 +119,10 @@ export default function BookingsPage() {
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <p className="font-medium text-gray-900">
-                      {booking.show.event.name} · {booking.bookingReference}
+                      {booking.show.event.name} · {booking.bookingReference}{' '}
+                      <Link to={`/bookings/${booking.id}`} className="text-sm font-normal text-primary-700 hover:underline">
+                        Details
+                      </Link>
                     </p>
                     <p className="text-sm text-gray-600">
                       {booking.show.venue.name} · {formatDateTime(booking.show.startTime)}
@@ -129,14 +133,30 @@ export default function BookingsPage() {
                     </p>
                   </div>
                   {(booking.status === 'PENDING' || booking.status === 'HOLDING') && (
-                    <button
-                      type="button"
-                      disabled={cancellingId === booking.id}
-                      onClick={() => void onCancel(booking)}
-                      className="rounded-md border border-red-300 px-3 py-1 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
+                    <div className="flex items-center gap-3">
+                      <Link
+                        to={`/bookings/${booking.id}/pay`}
+                        className="rounded-md bg-primary-600 px-3 py-1 text-sm font-medium text-white hover:bg-primary-700"
+                      >
+                        Pay now
+                      </Link>
+                      <button
+                        type="button"
+                        disabled={cancellingId === booking.id}
+                        onClick={() => void onCancel(booking)}
+                        className="rounded-md border border-red-300 px-3 py-1 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
+                      >
+                        {cancellingId === booking.id ? 'Cancelling…' : 'Cancel booking'}
+                      </button>
+                    </div>
+                  )}
+                  {booking.status === 'CONFIRMED' && booking.ticketId && (
+                    <Link
+                      to={`/tickets/${booking.ticketId}`}
+                      className="text-sm font-medium text-primary-700 hover:underline"
                     >
-                      {cancellingId === booking.id ? 'Cancelling…' : 'Cancel booking'}
-                    </button>
+                      View ticket →
+                    </Link>
                   )}
                 </div>
               </li>

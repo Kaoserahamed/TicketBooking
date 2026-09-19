@@ -13,6 +13,9 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import ProfilePage from './pages/ProfilePage'
 import BookingsPage from './pages/BookingsPage'
+import BookingDetailPage from './pages/BookingDetailPage'
+import PaymentPage from './pages/PaymentPage'
+import TicketDetailPage from './pages/TicketDetailPage'
 import VenuesPage from './pages/VenuesPage'
 import VenueDetailPage from './pages/VenueDetailPage'
 import AdminUsersPage from './pages/AdminUsersPage'
@@ -63,6 +66,9 @@ export default function App() {
         <Route path="reset-password" element={<ResetPasswordPage />} />
         <Route path="profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         <Route path="bookings" element={<ProtectedRoute><BookingsPage /></ProtectedRoute>} />
+        <Route path="bookings/:id" element={<ProtectedRoute><BookingDetailPage /></ProtectedRoute>} />
+        <Route path="bookings/:id/pay" element={<ProtectedRoute><PaymentPage /></ProtectedRoute>} />
+        <Route path="tickets/:id" element={<ProtectedRoute><TicketDetailPage /></ProtectedRoute>} />
         <Route path="venues" element={<VenuesPage />} />
         <Route path="venues/:id" element={<VenueDetailPage />} />
         <Route path="admin" element={<AdminRoute><AdminUsersPage /></AdminRoute>} />

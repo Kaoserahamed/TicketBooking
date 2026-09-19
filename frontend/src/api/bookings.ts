@@ -63,6 +63,8 @@ export interface Booking {
   show: BookingShow
   user: { id: number; name: string; email: string } | null
   items: BookingItem[]
+  /** Assumed addition when tickets land (§4.7): id of the issued ticket for CONFIRMED bookings. */
+  ticketId?: number | null
 }
 
 export interface HoldBookingInput {
