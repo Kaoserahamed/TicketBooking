@@ -1,0 +1,19 @@
+# Normalise text files to LF in the repository; checked-out line endings are
+# controlled per file type so Windows and Linux agree on diffs.
+
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+
+# Windows-only helper scripts keep CRLF so they run in PowerShell/CMD.
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+package-lock.json linguist-generated=true
