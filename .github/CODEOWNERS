@@ -1,0 +1,8 @@
+# Default reviewers per area. Keeps the two-stack ownership visible without
+# blocking small fixes: every rule below points at the repo owner.
+* @Kaoserahamed
+/backend/ @Kaoserahamed
+/frontend/ @Kaoserahamed
+/infrastructure/ @Kaoserahamed
+/tests/sql/ @Kaoserahamed
+/.github/ @Kaoserahamed

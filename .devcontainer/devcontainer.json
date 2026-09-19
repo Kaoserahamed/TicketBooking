@@ -1,0 +1,29 @@
+{
+  // Dev container for a one-click Codespaces / VS Code onboarding:
+  // Node 20 + MySQL client, ports for the API (4000), the SPA (5173)
+  // and MySQL (3306), plus the extensions this repo is formatted,
+  // linted and typechecked with.
+  "name": "TicketBooking",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-20-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss"
+      ]
+    }
+  },
+  "forwardPorts": [4000, 5173, 3306],
+  "portsAttributes": {
+    "4000": { "label": "API", "onAutoForward": "notify" },
+    "5173": { "label": "SPA (Vite)", "onAutoForward": "notify" },
+    "3306": { "label": "MySQL", "onAutoForward": "silent" }
+  },
+  "postCreateCommand": "npm --prefix backend ci && npm --prefix frontend ci",
+  "remoteUser": "node"
+}
