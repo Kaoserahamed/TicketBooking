@@ -104,7 +104,10 @@ export default function AdminVenueSeatsPage() {
     return (
       <div>
         <AdminNav />
-        <div role="alert" className="px-4 py-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md">
+        <div
+          role="alert"
+          className="px-4 py-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md"
+        >
           Invalid venue id
         </div>
         <Link to="/admin/venues" className="text-sm text-primary-700 hover:underline">
@@ -122,7 +125,9 @@ export default function AdminVenueSeatsPage() {
       </Link>
       <h1 className="text-2xl font-bold text-gray-900 mt-2 mb-1">Seat layout</h1>
       <p className="text-sm text-gray-500 mb-6">
-        {venue ? `${venue.name} — ${venue.city ?? ''} (capacity ${venue.capacity})` : `Venue #${venueId}`}
+        {venue
+          ? `${venue.name} — ${venue.city ?? ''} (capacity ${venue.capacity})`
+          : `Venue #${venueId}`}
       </p>
 
       <div className="bg-white shadow rounded-lg p-6 mb-8">
@@ -130,31 +135,61 @@ export default function AdminVenueSeatsPage() {
         <form className="flex flex-wrap items-end gap-3" onSubmit={handleAdd}>
           <label className="text-sm text-gray-700">
             Row
-            <input aria-label="Row number" className={`${inputClass} block mt-1`} value={rowNumber} onChange={(e) => setRowNumber(e.target.value)} required maxLength={10} />
+            <input
+              aria-label="Row number"
+              className={`${inputClass} block mt-1`}
+              value={rowNumber}
+              onChange={(e) => setRowNumber(e.target.value)}
+              required
+              maxLength={10}
+            />
           </label>
           <label className="text-sm text-gray-700">
             Seat number
-            <input aria-label="Seat number" className={`${inputClass} block mt-1`} value={seatNumber} onChange={(e) => setSeatNumber(e.target.value)} required maxLength={10} />
+            <input
+              aria-label="Seat number"
+              className={`${inputClass} block mt-1`}
+              value={seatNumber}
+              onChange={(e) => setSeatNumber(e.target.value)}
+              required
+              maxLength={10}
+            />
           </label>
           <label className="text-sm text-gray-700">
             Type
-            <select aria-label="Seat type" className={`${inputClass} block mt-1`} value={seatType} onChange={(e) => setSeatType(e.target.value as SeatType)}>
+            <select
+              aria-label="Seat type"
+              className={`${inputClass} block mt-1`}
+              value={seatType}
+              onChange={(e) => setSeatType(e.target.value as SeatType)}
+            >
               {SEAT_TYPES.map((t) => (
-                <option key={t} value={t}>{t}</option>
+                <option key={t} value={t}>
+                  {t}
+                </option>
               ))}
             </select>
           </label>
-          <button type="submit" disabled={isSaving} className="px-4 py-2 text-sm font-medium bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:opacity-50">
+          <button
+            type="submit"
+            disabled={isSaving}
+            className="px-4 py-2 text-sm font-medium bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:opacity-50"
+          >
             Add seat
           </button>
         </form>
         {notice && (
-          <p role="status" className="mt-4 text-sm text-gray-700">{notice}</p>
+          <p role="status" className="mt-4 text-sm text-gray-700">
+            {notice}
+          </p>
         )}
       </div>
 
       {error && (
-        <div role="alert" className="mb-4 px-4 py-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md">
+        <div
+          role="alert"
+          className="mb-4 px-4 py-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md"
+        >
           {error}
         </div>
       )}
@@ -188,7 +223,9 @@ export default function AdminVenueSeatsPage() {
                       onChange={(e) => handleTypeChange(s.id, e.target.value as SeatType)}
                     >
                       {SEAT_TYPES.map((t) => (
-                        <option key={t} value={t}>{t}</option>
+                        <option key={t} value={t}>
+                          {t}
+                        </option>
                       ))}
                     </select>
                   </td>
@@ -210,5 +247,3 @@ export default function AdminVenueSeatsPage() {
     </div>
   )
 }
-
-

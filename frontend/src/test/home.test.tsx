@@ -82,7 +82,7 @@ describe('home page', () => {
     render(
       <MemoryRouter initialEntries={['/']}>
         <App />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
 
     expect(mockedEventApi.listEvents).toHaveBeenCalledWith({ limit: 6 })
@@ -119,7 +119,7 @@ describe('home page', () => {
     render(
       <MemoryRouter initialEntries={['/']}>
         <App />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
 
     expect(await screen.findByText('No events published yet.')).toBeInTheDocument()
@@ -141,7 +141,7 @@ describe('home page', () => {
     render(
       <MemoryRouter initialEntries={['/']}>
         <App />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
 
     await waitFor(() => {

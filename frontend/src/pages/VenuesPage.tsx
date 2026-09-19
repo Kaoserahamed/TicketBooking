@@ -18,13 +18,17 @@ export default function VenuesPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-
   useEffect(() => {
     let cancelled = false
     setIsLoading(true)
     setError(null)
     venueApi
-      .listVenues({ search: appliedSearch || undefined, city: appliedCity || undefined, limit: PAGE_SIZE, offset })
+      .listVenues({
+        search: appliedSearch || undefined,
+        city: appliedCity || undefined,
+        limit: PAGE_SIZE,
+        offset,
+      })
       .then((result) => {
         if (cancelled) return
         setVenues(result.venues)
@@ -94,7 +98,10 @@ export default function VenuesPage() {
         <>
           <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {venues.map((venue) => (
-              <li key={venue.id} className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+              <li
+                key={venue.id}
+                className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+              >
                 <h2 className="text-lg font-semibold text-gray-900">
                   <Link to={`/venues/${venue.id}`} className="hover:underline">
                     {venue.name}

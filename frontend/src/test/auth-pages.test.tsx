@@ -67,7 +67,7 @@ describe('auth pages', () => {
     render(
       <MemoryRouter initialEntries={['/login']}>
         <App />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
 
     await userAction.type(screen.getByLabelText('Email'), 'asha@example.com')
@@ -75,7 +75,9 @@ describe('auth pages', () => {
     await userAction.click(screen.getByRole('button', { name: 'Login' }))
 
     expect(mockedAuthApi.login).toHaveBeenCalledWith('asha@example.com', 'Secret123')
-    expect(await screen.findByText('Discover events and book tickets in seconds.')).toBeInTheDocument()
+    expect(
+      await screen.findByText('Discover events and book tickets in seconds.')
+    ).toBeInTheDocument()
     expect(localStorage.getItem('accessToken')).toBe('access-123')
     expect(localStorage.getItem('refreshToken')).toBe('refresh-123')
   })
@@ -89,7 +91,7 @@ describe('auth pages', () => {
     render(
       <MemoryRouter initialEntries={['/login']}>
         <App />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
 
     await userAction.type(screen.getByLabelText('Email'), 'asha@example.com')
@@ -103,7 +105,7 @@ describe('auth pages', () => {
     render(
       <MemoryRouter initialEntries={['/profile']}>
         <App />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
     expect(screen.getByRole('heading', { name: 'Login' })).toBeInTheDocument()
   })

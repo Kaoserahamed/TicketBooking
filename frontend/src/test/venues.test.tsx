@@ -47,7 +47,12 @@ describe('venues service frontend', () => {
     mockedApi.get.mockResolvedValueOnce({
       data: { status: 'ok', venues: [venue], total: 1, limit: 12, offset: 0 },
     })
-    const result = await venueApi.listVenues({ city: 'Dhaka', search: 'hall', limit: 12, offset: 0 })
+    const result = await venueApi.listVenues({
+      city: 'Dhaka',
+      search: 'hall',
+      limit: 12,
+      offset: 0,
+    })
     expect(mockedApi.get).toHaveBeenCalledWith('/venues', {
       params: { city: 'Dhaka', search: 'hall', limit: 12, offset: 0 },
     })

@@ -67,7 +67,7 @@ describe('events pages', () => {
     render(
       <MemoryRouter initialEntries={['/events']}>
         <App />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
 
     expect(await screen.findByRole('link', { name: 'Rock Night' })).toBeInTheDocument()
@@ -102,7 +102,7 @@ describe('events pages', () => {
     render(
       <MemoryRouter initialEntries={['/events/3']}>
         <App />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
 
     expect(await screen.findByRole('heading', { name: 'Rock Night' })).toBeInTheDocument()
@@ -126,7 +126,7 @@ describe('events pages', () => {
     render(
       <MemoryRouter initialEntries={['/events/999']}>
         <App />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Event not found')

@@ -64,20 +64,33 @@ export default function AdminBookingsPage() {
       >
         <label className="text-sm text-gray-700">
           Status
-          <select aria-label="Filter by booking status" className={`${inputClass} block mt-1`} value={status} onChange={(e) => setStatus(e.target.value)}>
+          <select
+            aria-label="Filter by booking status"
+            className={`${inputClass} block mt-1`}
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+          >
             <option value="">All statuses</option>
             {STATUSES.map((s) => (
-              <option key={s} value={s}>{s}</option>
+              <option key={s} value={s}>
+                {s}
+              </option>
             ))}
           </select>
         </label>
-        <button type="submit" className="px-4 py-2 text-sm font-medium bg-primary-600 text-white rounded-md hover:bg-primary-700">
+        <button
+          type="submit"
+          className="px-4 py-2 text-sm font-medium bg-primary-600 text-white rounded-md hover:bg-primary-700"
+        >
           Apply filters
         </button>
       </form>
 
       {error && (
-        <div role="alert" className="mb-4 px-4 py-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md">
+        <div
+          role="alert"
+          className="mb-4 px-4 py-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md"
+        >
           {error}
         </div>
       )}
@@ -107,9 +120,15 @@ export default function AdminBookingsPage() {
                     {b.user ? `${b.user.name} (${b.user.email})` : `User #${b.userId}`}
                   </td>
                   <td className="px-4 py-3 text-gray-600">{b.show.event.name}</td>
-                  <td className="px-4 py-3 text-gray-600">{b.show.venue.name}, {b.show.venue.city}</td>
-                  <td className="px-4 py-3 text-gray-600">{new Date(b.show.startTime).toLocaleString()}</td>
-                  <td className="px-4 py-3 text-gray-600">{b.currency} {b.totalAmount.toFixed(2)}</td>
+                  <td className="px-4 py-3 text-gray-600">
+                    {b.show.venue.name}, {b.show.venue.city}
+                  </td>
+                  <td className="px-4 py-3 text-gray-600">
+                    {new Date(b.show.startTime).toLocaleString()}
+                  </td>
+                  <td className="px-4 py-3 text-gray-600">
+                    {b.currency} {b.totalAmount.toFixed(2)}
+                  </td>
                   <td className="px-4 py-3 text-gray-600">{b.status}</td>
                 </tr>
               ))}
@@ -119,13 +138,23 @@ export default function AdminBookingsPage() {
       )}
       {!isLoading && !error && (
         <div className="mt-3 flex items-center gap-4 text-sm text-gray-500">
-          <button type="button" className="px-3 py-1 border border-gray-300 rounded-md disabled:opacity-40" disabled={offset === 0} onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}>
+          <button
+            type="button"
+            className="px-3 py-1 border border-gray-300 rounded-md disabled:opacity-40"
+            disabled={offset === 0}
+            onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}
+          >
             Previous
           </button>
           <span>
             Page {currentPage} of {totalPages} ({total} bookings)
           </span>
-          <button type="button" className="px-3 py-1 border border-gray-300 rounded-md disabled:opacity-40" disabled={offset + PAGE_SIZE >= total} onClick={() => setOffset(offset + PAGE_SIZE)}>
+          <button
+            type="button"
+            className="px-3 py-1 border border-gray-300 rounded-md disabled:opacity-40"
+            disabled={offset + PAGE_SIZE >= total}
+            onClick={() => setOffset(offset + PAGE_SIZE)}
+          >
             Next
           </button>
         </div>

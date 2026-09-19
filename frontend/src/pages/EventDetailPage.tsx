@@ -91,7 +91,10 @@ export default function EventDetailPage() {
       {event.description && <p className="mt-4 text-gray-700">{event.description}</p>}
 
       <h2 className="mt-8 text-xl font-semibold text-gray-900">
-        Shows {totalShows > 0 && <span className="text-sm font-normal text-gray-500">({totalShows})</span>}
+        Shows{' '}
+        {totalShows > 0 && (
+          <span className="text-sm font-normal text-gray-500">({totalShows})</span>
+        )}
       </h2>
       {shows.length === 0 ? (
         <p className="mt-2 text-sm text-gray-600">No shows scheduled yet.</p>

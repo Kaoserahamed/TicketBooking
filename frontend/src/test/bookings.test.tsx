@@ -38,8 +38,20 @@ const booking = {
   },
   user: { id: 7, name: 'Asha Example', email: 'asha@example.com' },
   items: [
-    { id: 1, bookingId: 5, showSeatId: 101, seat: { id: 1, row: 'A', number: '1', label: 'A1', seatType: 'REGULAR' }, price: 100 },
-    { id: 2, bookingId: 5, showSeatId: 102, seat: { id: 2, row: 'A', number: '2', label: 'A2', seatType: 'REGULAR' }, price: 100 },
+    {
+      id: 1,
+      bookingId: 5,
+      showSeatId: 101,
+      seat: { id: 1, row: 'A', number: '1', label: 'A1', seatType: 'REGULAR' },
+      price: 100,
+    },
+    {
+      id: 2,
+      bookingId: 5,
+      showSeatId: 102,
+      seat: { id: 2, row: 'A', number: '2', label: 'A2', seatType: 'REGULAR' },
+      price: 100,
+    },
   ],
 }
 
@@ -55,7 +67,11 @@ describe('booking service frontend', () => {
     mockedApi.post.mockResolvedValueOnce({
       data: { status: 'ok', booking, items: booking.items, idempotentReplay: false },
     })
-    const result = await bookingApi.holdSeats({ showId: 11, seatIds: [1, 2], idempotencyKey: 'key-1' })
+    const result = await bookingApi.holdSeats({
+      showId: 11,
+      seatIds: [1, 2],
+      idempotencyKey: 'key-1',
+    })
     expect(mockedApi.post).toHaveBeenCalledWith('/bookings/hold', {
       showId: 11,
       seatIds: [1, 2],
@@ -76,7 +92,13 @@ describe('booking service frontend', () => {
 
   it('cancels a booking and returns released + message', async () => {
     mockedApi.post.mockResolvedValueOnce({
-      data: { status: 'ok', booking: { ...booking, status: 'CANCELLED' }, items: booking.items, released: 2, message: 'Booking cancelled and seats released' },
+      data: {
+        status: 'ok',
+        booking: { ...booking, status: 'CANCELLED' },
+        items: booking.items,
+        released: 2,
+        message: 'Booking cancelled and seats released',
+      },
     })
     const result = await bookingApi.cancelBooking(5)
     expect(mockedApi.post).toHaveBeenCalledWith('/bookings/5/cancel')

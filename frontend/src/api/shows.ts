@@ -96,7 +96,7 @@ function cleanShowParams(params: {
     Object.entries(params).filter((entry): entry is [string, string | number | boolean] => {
       const [, v] = entry
       return v !== undefined && v !== null && v !== ''
-    }),
+    })
   )
 }
 
@@ -120,7 +120,7 @@ export const showApi = {
 
   getAvailability: async (id: number): Promise<Availability> => {
     const { data } = await api.get<{ status: string; availability: Availability }>(
-      `/shows/${id}/availability`,
+      `/shows/${id}/availability`
     )
     return data.availability
   },

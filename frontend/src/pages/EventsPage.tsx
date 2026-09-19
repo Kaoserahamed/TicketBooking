@@ -22,7 +22,12 @@ export default function EventsPage() {
     setIsLoading(true)
     setError(null)
     eventApi
-      .listEvents({ search: appliedSearch || undefined, category: category || undefined, limit: PAGE_SIZE, offset })
+      .listEvents({
+        search: appliedSearch || undefined,
+        category: category || undefined,
+        limit: PAGE_SIZE,
+        offset,
+      })
       .then((result) => {
         if (cancelled) return
         setEvents(result.events)
@@ -94,7 +99,10 @@ export default function EventsPage() {
         <>
           <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {events.map((event) => (
-              <li key={event.id} className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+              <li
+                key={event.id}
+                className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+              >
                 {event.posterUrl && (
                   <img
                     src={event.posterUrl}

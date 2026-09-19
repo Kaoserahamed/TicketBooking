@@ -11,7 +11,12 @@ vi.mock('../api/shows', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../api/shows')>()
   return {
     ...actual,
-    showApi: { listShows: vi.fn(), getShow: vi.fn(), getSeatMap: vi.fn(), getAvailability: vi.fn() },
+    showApi: {
+      listShows: vi.fn(),
+      getShow: vi.fn(),
+      getSeatMap: vi.fn(),
+      getAvailability: vi.fn(),
+    },
   }
 })
 
@@ -19,7 +24,12 @@ vi.mock('../api/bookings', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../api/bookings')>()
   return {
     ...actual,
-    bookingApi: { holdSeats: vi.fn(), getBooking: vi.fn(), cancelBooking: vi.fn(), listMyBookings: vi.fn() },
+    bookingApi: {
+      holdSeats: vi.fn(),
+      getBooking: vi.fn(),
+      cancelBooking: vi.fn(),
+      listMyBookings: vi.fn(),
+    },
   }
 })
 
@@ -40,8 +50,30 @@ const show = {
 }
 
 const seats = [
-  { showSeatId: 101, showId: 11, seatId: 1, row: 'A', number: '1', label: 'A1', seatType: 'REGULAR', price: '100.00', status: 'AVAILABLE' as const, holdExpiresAt: null },
-  { showSeatId: 102, showId: 11, seatId: 2, row: 'A', number: '2', label: 'A2', seatType: 'REGULAR', price: '100.00', status: 'BOOKED' as const, holdExpiresAt: null },
+  {
+    showSeatId: 101,
+    showId: 11,
+    seatId: 1,
+    row: 'A',
+    number: '1',
+    label: 'A1',
+    seatType: 'REGULAR',
+    price: '100.00',
+    status: 'AVAILABLE' as const,
+    holdExpiresAt: null,
+  },
+  {
+    showSeatId: 102,
+    showId: 11,
+    seatId: 2,
+    row: 'A',
+    number: '2',
+    label: 'A2',
+    seatType: 'REGULAR',
+    price: '100.00',
+    status: 'BOOKED' as const,
+    holdExpiresAt: null,
+  },
 ]
 
 const booking = {
@@ -59,26 +91,47 @@ const booking = {
   createdAt: '2026-02-01T18:00:00.000Z',
   updatedAt: '2026-02-01T18:00:00.000Z',
   show: {
-    id: 11, eventId: 3, venueId: 2,
-    startTime: '2026-02-01T18:00:00.000Z', endTime: '2026-02-01T20:00:00.000Z', status: 'SCHEDULED',
+    id: 11,
+    eventId: 3,
+    venueId: 2,
+    startTime: '2026-02-01T18:00:00.000Z',
+    endTime: '2026-02-01T20:00:00.000Z',
+    status: 'SCHEDULED',
     event: { id: 3, name: 'Rock Night', status: 'PUBLISHED' },
     venue: { id: 2, name: 'Grand Hall', address: '1 Main St', city: 'Dhaka', capacity: 500 },
   },
   user: { id: 7, name: 'Asha Example', email: 'asha@example.com' },
   items: [
-    { id: 1, bookingId: 5, showSeatId: 101, seat: { id: 1, row: 'A', number: '1', label: 'A1', seatType: 'REGULAR' }, price: 100 },
+    {
+      id: 1,
+      bookingId: 5,
+      showSeatId: 101,
+      seat: { id: 1, row: 'A', number: '1', label: 'A1', seatType: 'REGULAR' },
+      price: 100,
+    },
   ],
 }
 
 function signIn() {
-  useAuthStore.setState({ token: 'access-123', refreshToken: 'refresh-123', user: null, error: null })
+  useAuthStore.setState({
+    token: 'access-123',
+    refreshToken: 'refresh-123',
+    user: null,
+    error: null,
+  })
 }
 
 describe('booking pages', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     localStorage.clear()
-    useAuthStore.setState({ user: null, token: null, refreshToken: null, error: null, isLoading: false })
+    useAuthStore.setState({
+      user: null,
+      token: null,
+      refreshToken: null,
+      error: null,
+      isLoading: false,
+    })
   })
 
   it('holds seats from the book page with physical seat ids', async () => {
@@ -98,7 +151,7 @@ describe('booking pages', () => {
     render(
       <MemoryRouter initialEntries={['/book/11']}>
         <App />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
 
     await userAction.click(await screen.findByRole('button', { name: /Seat A1/ }))
@@ -120,7 +173,7 @@ describe('booking pages', () => {
     render(
       <MemoryRouter initialEntries={['/book/11']}>
         <App />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
 
     await userAction.click(await screen.findByRole('button', { name: /Seat A1/ }))
@@ -132,7 +185,11 @@ describe('booking pages', () => {
   it('lists my bookings and cancels a pending one', async () => {
     const userAction = userEvent.setup()
     signIn()
-    mockedBookingApi.listMyBookings.mockResolvedValue({ status: 'ok', total: 1, bookings: [booking] })
+    mockedBookingApi.listMyBookings.mockResolvedValue({
+      status: 'ok',
+      total: 1,
+      bookings: [booking],
+    })
     mockedBookingApi.cancelBooking.mockResolvedValueOnce({
       status: 'ok',
       booking: { ...booking, status: 'CANCELLED' },
@@ -144,7 +201,7 @@ describe('booking pages', () => {
     render(
       <MemoryRouter initialEntries={['/bookings']}>
         <App />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
 
     expect(await screen.findByText(/BK-ABC123/)).toBeInTheDocument()

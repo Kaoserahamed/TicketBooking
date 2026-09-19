@@ -111,7 +111,7 @@ export default function VenueDetailPage() {
             <p className="mt-2 text-sm text-gray-600">
               Seats: {venue.seats.total} total
               {Object.entries(venue.seats.byType).map(([type, count]) =>
-                count > 0 ? ` · ${count} ${type}` : '',
+                count > 0 ? ` · ${count} ${type}` : ''
               )}
             </p>
           )}

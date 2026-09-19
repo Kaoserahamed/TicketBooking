@@ -35,9 +35,42 @@ const show = {
 }
 
 const seats = [
-  { showSeatId: 101, showId: 11, seatId: 1, row: 'A', number: '1', label: 'A1', seatType: 'REGULAR', price: '100.00', status: 'AVAILABLE' as const, holdExpiresAt: null },
-  { showSeatId: 102, showId: 11, seatId: 2, row: 'A', number: '2', label: 'A2', seatType: 'VIP', price: '250.00', status: 'BOOKED' as const, holdExpiresAt: null },
-  { showSeatId: 103, showId: 11, seatId: 3, row: 'B', number: '1', label: 'B1', seatType: 'REGULAR', price: '100.00', status: 'HELD' as const, holdExpiresAt: null },
+  {
+    showSeatId: 101,
+    showId: 11,
+    seatId: 1,
+    row: 'A',
+    number: '1',
+    label: 'A1',
+    seatType: 'REGULAR',
+    price: '100.00',
+    status: 'AVAILABLE' as const,
+    holdExpiresAt: null,
+  },
+  {
+    showSeatId: 102,
+    showId: 11,
+    seatId: 2,
+    row: 'A',
+    number: '2',
+    label: 'A2',
+    seatType: 'VIP',
+    price: '250.00',
+    status: 'BOOKED' as const,
+    holdExpiresAt: null,
+  },
+  {
+    showSeatId: 103,
+    showId: 11,
+    seatId: 3,
+    row: 'B',
+    number: '1',
+    label: 'B1',
+    seatType: 'REGULAR',
+    price: '100.00',
+    status: 'HELD' as const,
+    holdExpiresAt: null,
+  },
 ]
 
 const availability = {
@@ -68,7 +101,7 @@ describe('show detail page', () => {
     render(
       <MemoryRouter initialEntries={['/shows/11']}>
         <App />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
 
     expect(await screen.findByRole('heading', { name: 'Rock Night' })).toBeInTheDocument()
@@ -89,7 +122,7 @@ describe('show detail page', () => {
     render(
       <MemoryRouter initialEntries={['/shows/11']}>
         <App />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
 
     expect(await screen.findByText('to book seats for this show.')).toBeInTheDocument()
@@ -100,13 +133,18 @@ describe('show detail page', () => {
     mockedShowApi.getShow.mockRejectedValueOnce({
       response: { data: { message: 'Show not found' } },
     })
-    mockedShowApi.getSeatMap.mockResolvedValueOnce({ status: 'ok', showId: 11, total: 0, seats: [] })
+    mockedShowApi.getSeatMap.mockResolvedValueOnce({
+      status: 'ok',
+      showId: 11,
+      total: 0,
+      seats: [],
+    })
     mockedShowApi.getAvailability.mockResolvedValueOnce({ ...availability, total: 0 })
 
     render(
       <MemoryRouter initialEntries={['/shows/999']}>
         <App />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Show not found')

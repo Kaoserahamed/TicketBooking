@@ -27,9 +27,16 @@ describe('payment service frontend', () => {
       data: {
         status: 'ok',
         payment: {
-          id: 9, bookingId: 5, provider: 'BKASH', amount: 200, currency: 'USD',
-          status: 'PENDING', trxId: null, ticketId: null,
-          createdAt: '2026-02-01T18:01:00.000Z', updatedAt: '2026-02-01T18:01:00.000Z',
+          id: 9,
+          bookingId: 5,
+          provider: 'BKASH',
+          amount: 200,
+          currency: 'USD',
+          status: 'PENDING',
+          trxId: null,
+          ticketId: null,
+          createdAt: '2026-02-01T18:01:00.000Z',
+          updatedAt: '2026-02-01T18:01:00.000Z',
         },
       },
     })
@@ -39,7 +46,7 @@ describe('payment service frontend', () => {
     expect(mockedApi.post).toHaveBeenCalledWith(
       '/payments/create',
       { bookingId: 5, provider: 'BKASH' },
-      { headers: { 'Idempotency-Key': 'idem-1' } },
+      { headers: { 'Idempotency-Key': 'idem-1' } }
     )
     expect(payment.status).toBe('PENDING')
     expect(payment.provider).toBe('BKASH')
@@ -50,9 +57,16 @@ describe('payment service frontend', () => {
       data: {
         status: 'ok',
         payment: {
-          id: 10, bookingId: 5, provider: 'NAGAD', amount: 200, currency: 'USD',
-          status: 'INITIATED', trxId: null, ticketId: null,
-          createdAt: '', updatedAt: '',
+          id: 10,
+          bookingId: 5,
+          provider: 'NAGAD',
+          amount: 200,
+          currency: 'USD',
+          status: 'INITIATED',
+          trxId: null,
+          ticketId: null,
+          createdAt: '',
+          updatedAt: '',
         },
       },
     })
@@ -62,7 +76,7 @@ describe('payment service frontend', () => {
     expect(mockedApi.post).toHaveBeenCalledWith(
       '/payments/create',
       { bookingId: 5, provider: 'NAGAD', payerPhone: '01712345678' },
-      undefined,
+      undefined
     )
   })
 
@@ -71,9 +85,16 @@ describe('payment service frontend', () => {
       data: {
         status: 'ok',
         payment: {
-          id: 9, bookingId: 5, provider: 'BKASH', amount: 200, currency: 'USD',
-          status: 'COMPLETED', trxId: 'TRX-77', ticketId: 3,
-          createdAt: '', updatedAt: '',
+          id: 9,
+          bookingId: 5,
+          provider: 'BKASH',
+          amount: 200,
+          currency: 'USD',
+          status: 'COMPLETED',
+          trxId: 'TRX-77',
+          ticketId: 3,
+          createdAt: '',
+          updatedAt: '',
         },
       },
     })
@@ -100,8 +121,13 @@ describe('tickets service frontend', () => {
       data: {
         status: 'ok',
         ticket: {
-          id: 3, bookingId: 5, ticketNumber: 'TKT-00000003', qrCode: 'qr://ticket/3',
-          status: 'ISSUED', issuedAt: '2026-02-01T18:05:00.000Z', usedAt: null,
+          id: 3,
+          bookingId: 5,
+          ticketNumber: 'TKT-00000003',
+          qrCode: 'qr://ticket/3',
+          status: 'ISSUED',
+          issuedAt: '2026-02-01T18:05:00.000Z',
+          usedAt: null,
         },
       },
     })

@@ -23,12 +23,7 @@ import type { BookingStatus } from './bookings'
 
 export type PaymentProvider = 'BKASH' | 'NAGAD'
 
-export type PaymentStatus =
-  | 'INITIATED'
-  | 'PENDING'
-  | 'COMPLETED'
-  | 'FAILED'
-  | 'CANCELLED'
+export type PaymentStatus = 'INITIATED' | 'PENDING' | 'COMPLETED' | 'FAILED' | 'CANCELLED'
 
 /** Statuses that stop polling. */
 export const TERMINAL_PAYMENT_STATUSES: PaymentStatus[] = ['COMPLETED', 'FAILED', 'CANCELLED']
@@ -67,7 +62,7 @@ export const paymentApi = {
     const { data } = await api.post<PaymentEnvelope>(
       '/payments/create',
       input,
-      idempotencyKey ? { headers: { 'Idempotency-Key': idempotencyKey } } : undefined,
+      idempotencyKey ? { headers: { 'Idempotency-Key': idempotencyKey } } : undefined
     )
     return data.payment
   },

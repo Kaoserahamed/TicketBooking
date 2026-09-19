@@ -78,10 +78,13 @@ describe('venues pages', () => {
     render(
       <MemoryRouter initialEntries={['/venues']}>
         <App />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
 
-    expect(await screen.findByRole('link', { name: 'Grand Hall' })).toHaveAttribute('href', '/venues/2')
+    expect(await screen.findByRole('link', { name: 'Grand Hall' })).toHaveAttribute(
+      'href',
+      '/venues/2'
+    )
     expect(screen.getByText('Page 1 of 2 (13 venues)')).toBeInTheDocument()
 
     await userAction.type(screen.getByLabelText('Filter by city'), 'Dhaka')
@@ -112,7 +115,7 @@ describe('venues pages', () => {
     render(
       <MemoryRouter initialEntries={['/venues/2']}>
         <App />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
 
     expect(await screen.findByRole('heading', { name: 'Grand Hall' })).toBeInTheDocument()
@@ -147,7 +150,7 @@ describe('venues pages', () => {
     render(
       <MemoryRouter initialEntries={['/venues/2']}>
         <App />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
 
     await screen.findByRole('heading', { name: 'Grand Hall' })
@@ -176,7 +179,7 @@ describe('venues pages', () => {
     render(
       <MemoryRouter initialEntries={['/venues/999']}>
         <App />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Venue not found')

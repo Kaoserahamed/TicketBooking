@@ -68,29 +68,49 @@ export default function AdminUsersPage() {
       >
         <label className="text-sm text-gray-700">
           Role
-          <select aria-label="Filter by role" className={`${inputClass} block mt-1`} value={role} onChange={(e) => setRole(e.target.value)}>
+          <select
+            aria-label="Filter by role"
+            className={`${inputClass} block mt-1`}
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+          >
             <option value="">All roles</option>
             {ROLES.map((r) => (
-              <option key={r} value={r}>{r}</option>
+              <option key={r} value={r}>
+                {r}
+              </option>
             ))}
           </select>
         </label>
         <label className="text-sm text-gray-700">
           Status
-          <select aria-label="Filter by status" className={`${inputClass} block mt-1`} value={status} onChange={(e) => setStatus(e.target.value)}>
+          <select
+            aria-label="Filter by status"
+            className={`${inputClass} block mt-1`}
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+          >
             <option value="">All statuses</option>
             {STATUSES.map((s) => (
-              <option key={s} value={s}>{s}</option>
+              <option key={s} value={s}>
+                {s}
+              </option>
             ))}
           </select>
         </label>
-        <button type="submit" className="px-4 py-2 text-sm font-medium bg-primary-600 text-white rounded-md hover:bg-primary-700">
+        <button
+          type="submit"
+          className="px-4 py-2 text-sm font-medium bg-primary-600 text-white rounded-md hover:bg-primary-700"
+        >
           Apply filters
         </button>
       </form>
 
       {error && (
-        <div role="alert" className="mb-4 px-4 py-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md">
+        <div
+          role="alert"
+          className="mb-4 px-4 py-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md"
+        >
           {error}
         </div>
       )}

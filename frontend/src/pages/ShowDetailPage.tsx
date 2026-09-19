@@ -25,7 +25,6 @@ export default function ShowDetailPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-
   useEffect(() => {
     if (!Number.isInteger(showId) || showId <= 0) {
       setIsLoading(false)

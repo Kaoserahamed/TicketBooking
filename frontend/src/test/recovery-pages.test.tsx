@@ -32,20 +32,22 @@ describe('VerifyEmailPage', () => {
     render(
       <MemoryRouter initialEntries={['/verify-email?token=tok123']}>
         <VerifyEmailPage />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
 
     await waitFor(() => {
       expect(authApiMock.verifyEmail).toHaveBeenCalledWith('tok123')
     })
-    expect(await screen.findByText('Email address verified. You can now sign in.')).toBeInTheDocument()
+    expect(
+      await screen.findByText('Email address verified. You can now sign in.')
+    ).toBeInTheDocument()
   })
 
   it('shows an alert when the token is missing', () => {
     render(
       <MemoryRouter initialEntries={['/verify-email']}>
         <VerifyEmailPage />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
 
     expect(screen.getByRole('alert')).toHaveTextContent('Missing verification token.')
@@ -60,7 +62,7 @@ describe('ForgotPasswordPage', () => {
     render(
       <MemoryRouter initialEntries={['/forgot-password']}>
         <ForgotPasswordPage />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
 
     const user = userEvent.setup()
@@ -81,7 +83,7 @@ describe('ForgotPasswordPage', () => {
     render(
       <MemoryRouter initialEntries={['/forgot-password']}>
         <ForgotPasswordPage />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
 
     const user = userEvent.setup()
@@ -99,7 +101,7 @@ describe('ResetPasswordPage', () => {
     render(
       <MemoryRouter initialEntries={['/reset-password?token=abc123']}>
         <ResetPasswordPage />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
 
     const user = userEvent.setup()
@@ -116,7 +118,7 @@ describe('ResetPasswordPage', () => {
     render(
       <MemoryRouter initialEntries={['/reset-password']}>
         <ResetPasswordPage />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
 
     expect(screen.getByRole('alert')).toHaveTextContent('Missing reset token.')

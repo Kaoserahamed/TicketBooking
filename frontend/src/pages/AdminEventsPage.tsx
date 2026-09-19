@@ -15,7 +15,13 @@ interface EventForm {
   status: EventStatus
 }
 
-const EMPTY_FORM: EventForm = { name: '', category: '', description: '', posterUrl: '', status: 'DRAFT' }
+const EMPTY_FORM: EventForm = {
+  name: '',
+  category: '',
+  description: '',
+  posterUrl: '',
+  status: 'DRAFT',
+}
 
 // GET/POST /api/v1/admin/events, PUT /api/v1/admin/events/:id
 export default function AdminEventsPage() {
@@ -25,7 +31,11 @@ export default function AdminEventsPage() {
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('')
   const [status, setStatus] = useState('')
-  const [applied, setApplied] = useState<{ search?: string; category?: string; status?: EventStatus }>({})
+  const [applied, setApplied] = useState<{
+    search?: string
+    category?: string
+    status?: EventStatus
+  }>({})
   const [form, setForm] = useState<EventForm>(EMPTY_FORM)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [isSaving, setIsSaving] = useState(false)
@@ -151,7 +161,9 @@ export default function AdminEventsPage() {
               onChange={(e) => setForm({ ...form, status: e.target.value as EventStatus })}
             >
               {STATUSES.map((s) => (
-                <option key={s} value={s}>{s}</option>
+                <option key={s} value={s}>
+                  {s}
+                </option>
               ))}
             </select>
           </label>
@@ -202,7 +214,10 @@ export default function AdminEventsPage() {
       />
 
       {error && (
-        <div role="alert" className="mb-4 px-4 py-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md">
+        <div
+          role="alert"
+          className="mb-4 px-4 py-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md"
+        >
           {error}
         </div>
       )}
@@ -328,15 +343,18 @@ function FilterBar(props: {
         >
           <option value="">All statuses</option>
           {STATUSES.map((s) => (
-            <option key={s} value={s}>{s}</option>
+            <option key={s} value={s}>
+              {s}
+            </option>
           ))}
         </select>
       </label>
-      <button type="submit" className="px-4 py-2 text-sm font-medium bg-primary-600 text-white rounded-md hover:bg-primary-700">
+      <button
+        type="submit"
+        className="px-4 py-2 text-sm font-medium bg-primary-600 text-white rounded-md hover:bg-primary-700"
+      >
         Apply filters
       </button>
     </form>
   )
 }
-
-

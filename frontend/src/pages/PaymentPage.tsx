@@ -66,7 +66,9 @@ export default function PaymentPage() {
           setNotice('Payment completed! Your booking is confirmed.')
         } else if (TERMINAL_PAYMENT_STATUSES.includes(updated.status)) {
           stopPolling()
-          setError(`Payment ${updated.status.toLowerCase()}. No money was captured — you can try again.`)
+          setError(
+            `Payment ${updated.status.toLowerCase()}. No money was captured — you can try again.`
+          )
         }
       } catch (err) {
         setError(extractErrorMessage(err, 'Could not check payment status'))
@@ -74,7 +76,7 @@ export default function PaymentPage() {
         setIsChecking(false)
       }
     },
-    [stopPolling],
+    [stopPolling]
   )
 
   function startPolling(paymentId: number) {
@@ -100,16 +102,18 @@ export default function PaymentPage() {
           provider,
           ...(payerPhone ? { payerPhone } : {}),
         },
-        newIdempotencyKey(),
+        newIdempotencyKey()
       )
       setPayment(created)
       if (created.status === 'COMPLETED') {
         setNotice('Payment completed! Your booking is confirmed.')
       } else if (TERMINAL_PAYMENT_STATUSES.includes(created.status)) {
-        setError(`Payment ${created.status.toLowerCase()} immediately. No money was captured — you can try again.`)
+        setError(
+          `Payment ${created.status.toLowerCase()} immediately. No money was captured — you can try again.`
+        )
       } else {
         setNotice(
-          `Payment initiated via ${PROVIDERS.find((p) => p.value === created.provider)?.label ?? created.provider}. Approve it on your phone, then check the status below.`,
+          `Payment initiated via ${PROVIDERS.find((p) => p.value === created.provider)?.label ?? created.provider}. Approve it on your phone, then check the status below.`
         )
         startPolling(created.id)
       }
@@ -125,8 +129,12 @@ export default function PaymentPage() {
   if (!Number.isInteger(bookingId) || bookingId <= 0) {
     return (
       <div className="max-w-2xl">
-        <div role="alert" className="text-sm text-red-600">Invalid booking id</div>
-        <Link to="/bookings" className="text-sm text-primary-700 hover:underline">← Back to my bookings</Link>
+        <div role="alert" className="text-sm text-red-600">
+          Invalid booking id
+        </div>
+        <Link to="/bookings" className="text-sm text-primary-700 hover:underline">
+          ← Back to my bookings
+        </Link>
       </div>
     )
   }
@@ -186,7 +194,13 @@ export default function PaymentPage() {
           )}
         </div>
       ) : (
-        <form className="rounded-lg border border-gray-200 bg-white p-6" onSubmit={(e) => { e.preventDefault(); void onPay() }}>
+        <form
+          className="rounded-lg border border-gray-200 bg-white p-6"
+          onSubmit={(e) => {
+            e.preventDefault()
+            void onPay()
+          }}
+        >
           <fieldset className="mb-4">
             <legend className="text-sm font-medium text-gray-700 mb-2">Payment method</legend>
             <div className="flex gap-4">
@@ -220,7 +234,9 @@ export default function PaymentPage() {
             disabled={isPaying}
             className="mt-4 rounded-md bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50"
           >
-            {isPaying ? 'Starting payment…' : `Pay ${booking ? `${booking.currency} ${booking.totalAmount.toFixed(2)}` : ''}`}
+            {isPaying
+              ? 'Starting payment…'
+              : `Pay ${booking ? `${booking.currency} ${booking.totalAmount.toFixed(2)}` : ''}`}
           </button>
         </form>
       )}
@@ -244,4 +260,3 @@ export default function PaymentPage() {
     </div>
   )
 }
-

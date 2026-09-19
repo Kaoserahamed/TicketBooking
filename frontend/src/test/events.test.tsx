@@ -46,7 +46,12 @@ describe('events service frontend', () => {
     mockedApi.get.mockResolvedValueOnce({
       data: { status: 'ok', events: [event], total: 1, limit: 12, offset: 0 },
     })
-    const result = await eventApi.listEvents({ search: 'rock', category: 'Music', limit: 12, offset: 0 })
+    const result = await eventApi.listEvents({
+      search: 'rock',
+      category: 'Music',
+      limit: 12,
+      offset: 0,
+    })
     expect(mockedApi.get).toHaveBeenCalledWith('/events', {
       params: { search: 'rock', category: 'Music', limit: 12, offset: 0 },
     })

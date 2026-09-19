@@ -101,7 +101,9 @@ export default function RegisterPage() {
             onChange={(e) => setPassword(e.target.value)}
             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none"
           />
-          <p className="mt-1 text-xs text-gray-500">At least 8 characters with a letter and a number.</p>
+          <p className="mt-1 text-xs text-gray-500">
+            At least 8 characters with a letter and a number.
+          </p>
         </div>
         {error && (
           <p role="alert" className="text-sm text-red-600">

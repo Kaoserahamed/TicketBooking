@@ -63,20 +63,31 @@ afterEach(() => {
 describe('AdminShowsPage', () => {
   it('renders the shows table and the create form dropdowns', async () => {
     showApiMock.listShows.mockResolvedValueOnce({
-      status: 'ok', shows: [showRow], total: 1, limit: 10, offset: 0,
+      status: 'ok',
+      shows: [showRow],
+      total: 1,
+      limit: 10,
+      offset: 0,
     })
     eventApiMock.listEvents.mockResolvedValueOnce({
-      status: 'ok', events: [{ id: 3, name: 'Rock Night' } as never], total: 1, limit: 100, offset: 0,
+      status: 'ok',
+      events: [{ id: 3, name: 'Rock Night' } as never],
+      total: 1,
+      limit: 100,
+      offset: 0,
     })
     venueApiMock.listVenues.mockResolvedValueOnce({
-      status: 'ok', venues: [{ id: 4, name: 'Grand Hall', city: 'Dhaka' } as never],
-      total: 1, limit: 100, offset: 0,
+      status: 'ok',
+      venues: [{ id: 4, name: 'Grand Hall', city: 'Dhaka' } as never],
+      total: 1,
+      limit: 100,
+      offset: 0,
     })
 
     render(
       <MemoryRouter initialEntries={['/admin/shows']}>
         <AdminShowsPage />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
 
     await waitFor(() => {
@@ -89,21 +100,32 @@ describe('AdminShowsPage', () => {
 
   it('creates a show with a backend-formatted datetime', async () => {
     showApiMock.listShows.mockResolvedValue({
-      status: 'ok', shows: [], total: 0, limit: 10, offset: 0,
+      status: 'ok',
+      shows: [],
+      total: 0,
+      limit: 10,
+      offset: 0,
     })
     eventApiMock.listEvents.mockResolvedValue({
-      status: 'ok', events: [{ id: 3, name: 'Rock Night' } as never], total: 1, limit: 100, offset: 0,
+      status: 'ok',
+      events: [{ id: 3, name: 'Rock Night' } as never],
+      total: 1,
+      limit: 100,
+      offset: 0,
     })
     venueApiMock.listVenues.mockResolvedValue({
-      status: 'ok', venues: [{ id: 4, name: 'Grand Hall', city: 'Dhaka' } as never],
-      total: 1, limit: 100, offset: 0,
+      status: 'ok',
+      venues: [{ id: 4, name: 'Grand Hall', city: 'Dhaka' } as never],
+      total: 1,
+      limit: 100,
+      offset: 0,
     })
     adminApiMock.createShow.mockResolvedValueOnce(showRow as never)
 
     render(
       <MemoryRouter initialEntries={['/admin/shows']}>
         <AdminShowsPage />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
     await waitFor(() => {
       expect(screen.getByLabelText('Show event')).toBeInTheDocument()
@@ -116,8 +138,12 @@ describe('AdminShowsPage', () => {
     const user = userEvent.setup()
     await user.selectOptions(screen.getByLabelText('Show event'), '3')
     await user.selectOptions(screen.getByLabelText('Show venue'), '4')
-    fireEvent.change(screen.getByLabelText('Show start time'), { target: { value: '2026-12-01T18:00' } })
-    fireEvent.change(screen.getByLabelText('Show end time'), { target: { value: '2026-12-01T21:00' } })
+    fireEvent.change(screen.getByLabelText('Show start time'), {
+      target: { value: '2026-12-01T18:00' },
+    })
+    fireEvent.change(screen.getByLabelText('Show end time'), {
+      target: { value: '2026-12-01T21:00' },
+    })
     // happy-dom blocks click-submits on this form (datetime-local/select
     // constraint validation quirks) — dispatch the submit event directly.
     fireEvent.submit(screen.getByRole('button', { name: 'Create show' }).closest('form')!)
@@ -139,20 +165,32 @@ describe('AdminShowsPage', () => {
 
   it('changes a show status inline via updateShow', async () => {
     showApiMock.listShows.mockResolvedValueOnce({
-      status: 'ok', shows: [showRow], total: 1, limit: 10, offset: 0,
+      status: 'ok',
+      shows: [showRow],
+      total: 1,
+      limit: 10,
+      offset: 0,
     })
     eventApiMock.listEvents.mockResolvedValueOnce({
-      status: 'ok', events: [], total: 0, limit: 100, offset: 0,
+      status: 'ok',
+      events: [],
+      total: 0,
+      limit: 100,
+      offset: 0,
     })
     venueApiMock.listVenues.mockResolvedValueOnce({
-      status: 'ok', venues: [], total: 0, limit: 100, offset: 0,
+      status: 'ok',
+      venues: [],
+      total: 0,
+      limit: 100,
+      offset: 0,
     })
     adminApiMock.updateShow.mockResolvedValueOnce({ ...showRow, status: 'ONGOING' } as never)
 
     render(
       <MemoryRouter initialEntries={['/admin/shows']}>
         <AdminShowsPage />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
     await waitFor(() => {
       expect(screen.getByLabelText('Status for show 11')).toBeInTheDocument()
@@ -170,8 +208,14 @@ describe('AdminShowsPage', () => {
 
 describe('AdminVenueSeatsPage', () => {
   const venueRow = {
-    id: 4, name: 'Grand Hall', address: '12 Road', city: 'Dhaka',
-    capacity: 500, createdAt: '', updatedAt: '', seats: { total: 1, byType: {} },
+    id: 4,
+    name: 'Grand Hall',
+    address: '12 Road',
+    city: 'Dhaka',
+    capacity: 500,
+    createdAt: '',
+    updatedAt: '',
+    seats: { total: 1, byType: {} },
   }
   const seatsResponse = {
     status: 'ok' as const,
@@ -186,7 +230,13 @@ describe('AdminVenueSeatsPage', () => {
     venueApiMock.getVenue.mockResolvedValueOnce(venueRow)
     venueApiMock.listSeats.mockResolvedValue(seatsResponse as never)
     adminApiMock.createSeat.mockResolvedValueOnce({
-      id: 13, venueId: 4, row: 'B', number: '1', label: 'B1', seatType: 'REGULAR', createdAt: '',
+      id: 13,
+      venueId: 4,
+      row: 'B',
+      number: '1',
+      label: 'B1',
+      seatType: 'REGULAR',
+      createdAt: '',
     } as never)
 
     render(
@@ -194,7 +244,7 @@ describe('AdminVenueSeatsPage', () => {
         <Routes>
           <Route path="/admin/venues/:id/seats" element={<AdminVenueSeatsPage />} />
         </Routes>
-      </MemoryRouter>,
+      </MemoryRouter>
     )
 
     await waitFor(() => {
@@ -230,7 +280,7 @@ describe('AdminVenueSeatsPage', () => {
         <Routes>
           <Route path="/admin/venues/:id/seats" element={<AdminVenueSeatsPage />} />
         </Routes>
-      </MemoryRouter>,
+      </MemoryRouter>
     )
     expect(await screen.findByText('A5')).toBeInTheDocument()
 
@@ -256,9 +306,8 @@ describe('AdminVenueSeatsPage', () => {
         <Routes>
           <Route path="/admin/venues/:id/seats" element={<AdminVenueSeatsPage />} />
         </Routes>
-      </MemoryRouter>,
+      </MemoryRouter>
     )
     expect(screen.getByRole('alert')).toHaveTextContent('Invalid venue id')
   })
 })
-

@@ -41,8 +41,9 @@ export function clearTokens() {
 
 /** Pull a human message out of the backend error envelope. */
 export function extractErrorMessage(error: unknown, fallback: string): string {
-  const data = (error as { response?: { data?: { message?: string; errors?: { message?: string }[] } } })
-    ?.response?.data
+  const data = (
+    error as { response?: { data?: { message?: string; errors?: { message?: string }[] } } }
+  )?.response?.data
   if (data?.message) return data.message
   if (data?.errors?.[0]?.message) return data.errors[0].message as string
   if (error instanceof Error && error.message) return error.message
@@ -68,7 +69,8 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const originalRequest = error.config as { _retry?: boolean; url?: string; headers: { Authorization?: string } } | undefined
+    const originalRequest = error.config as
+      { _retry?: boolean; url?: string; headers: { Authorization?: string } } | undefined
 
     const isAuthEndpoint =
       originalRequest?.url?.includes('/auth/refresh') ||
@@ -88,7 +90,7 @@ api.interceptors.response.use(
         const { data } = await axios.post(
           '/api/v1/auth/refresh',
           { refreshToken: getRefreshToken() },
-          { withCredentials: true },
+          { withCredentials: true }
         )
         // Backend envelope: { status:'ok', user, tokens:{ accessToken, refreshToken } }
         const tokens = data?.tokens ?? data
@@ -98,7 +100,11 @@ api.interceptors.response.use(
       } catch {
         clearTokens()
         // Never hard-redirect during tests — it breaks happy-dom.
-        if (typeof window !== 'undefined' && !isTestEnv() && window.location.pathname !== '/login') {
+        if (
+          typeof window !== 'undefined' &&
+          !isTestEnv() &&
+          window.location.pathname !== '/login'
+        ) {
           window.location.href = '/login'
         }
       }

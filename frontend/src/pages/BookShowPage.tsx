@@ -71,16 +71,14 @@ export default function BookShowPage() {
 
   const selectedTotal = useMemo(
     () =>
-      seats
-        .filter((s) => selected.includes(s.seatId))
-        .reduce((sum, s) => sum + Number(s.price), 0),
-    [seats, selected],
+      seats.filter((s) => selected.includes(s.seatId)).reduce((sum, s) => sum + Number(s.price), 0),
+    [seats, selected]
   )
 
   function toggleSeat(seat: ShowSeat) {
     if (seat.status !== 'AVAILABLE') return
     setSelected((prev) =>
-      prev.includes(seat.seatId) ? prev.filter((s) => s !== seat.seatId) : [...prev, seat.seatId],
+      prev.includes(seat.seatId) ? prev.filter((s) => s !== seat.seatId) : [...prev, seat.seatId]
     )
   }
 
@@ -202,7 +200,9 @@ export default function BookShowPage() {
           onClick={() => void onHold()}
           className="rounded-md bg-primary-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
         >
-          {isHolding ? 'Holding…' : `Hold ${selected.length} seat(s) · ${formatMoney(selectedTotal)}`}
+          {isHolding
+            ? 'Holding…'
+            : `Hold ${selected.length} seat(s) · ${formatMoney(selectedTotal)}`}
         </button>
         {selected.length > 0 && (
           <button

@@ -120,7 +120,7 @@ export const adminApi = {
   createEvent: async (input: CreateEventInput): Promise<Event> => {
     const { data } = await api.post<{ status: string; event: Event }>(
       '/admin/events',
-      cleanAdminBody(input),
+      cleanAdminBody(input)
     )
     return data.event
   },
@@ -129,20 +129,26 @@ export const adminApi = {
   updateEvent: async (id: number, input: UpdateEventInput): Promise<Event> => {
     const { data } = await api.put<{ status: string; event: Event }>(
       `/admin/events/${id}`,
-      cleanAdminBody(input),
+      cleanAdminBody(input)
     )
     return data.event
   },
 
   // POST /api/v1/admin/venues → 201 { status, venue } (venue includes seat summary)
   createVenue: async (input: CreateVenueInput): Promise<Venue> => {
-    const { data } = await api.post<{ status: string; venue: Venue }>('/admin/venues', cleanAdminBody(input))
+    const { data } = await api.post<{ status: string; venue: Venue }>(
+      '/admin/venues',
+      cleanAdminBody(input)
+    )
     return data.venue
   },
 
   // PUT /api/v1/admin/venues/:id → { status, venue }
   updateVenue: async (id: number, input: UpdateVenueInput): Promise<Venue> => {
-    const { data } = await api.put<{ status: string; venue: Venue }>(`/admin/venues/${id}`, cleanAdminBody(input))
+    const { data } = await api.put<{ status: string; venue: Venue }>(
+      `/admin/venues/${id}`,
+      cleanAdminBody(input)
+    )
     return data.venue
   },
 
@@ -150,7 +156,7 @@ export const adminApi = {
   createSeat: async (venueId: number, input: CreateSeatInput): Promise<VenueSeat> => {
     const { data } = await api.post<{ status: string; seat: VenueSeat }>(
       `/admin/venues/${venueId}/seats`,
-      cleanAdminBody(input),
+      cleanAdminBody(input)
     )
     return data.seat
   },
@@ -159,7 +165,7 @@ export const adminApi = {
   updateSeat: async (venueId: number, seatId: number, seatType: SeatType): Promise<VenueSeat> => {
     const { data } = await api.put<{ status: string; seat: VenueSeat }>(
       `/admin/venues/${venueId}/seats/${seatId}`,
-      { seatType },
+      { seatType }
     )
     return data.seat
   },
@@ -167,7 +173,7 @@ export const adminApi = {
   // DELETE /api/v1/admin/venues/:id/seats/:seatId → { status, message: 'Seat deleted' }
   deleteSeat: async (venueId: number, seatId: number): Promise<string> => {
     const { data } = await api.delete<{ status: string; message: string }>(
-      `/admin/venues/${venueId}/seats/${seatId}`,
+      `/admin/venues/${venueId}/seats/${seatId}`
     )
     return data.message
   },
@@ -180,12 +186,17 @@ export const adminApi = {
 
   // PUT /api/v1/admin/shows/:id → { status, show }
   updateShow: async (id: number, input: UpdateShowInput): Promise<ShowDetail> => {
-    const { data } = await api.put<{ status: string; show: ShowDetail }>(`/admin/shows/${id}`, input)
+    const { data } = await api.put<{ status: string; show: ShowDetail }>(
+      `/admin/shows/${id}`,
+      input
+    )
     return data.show
   },
 
   // GET /api/v1/admin/bookings?status=&limit=&offset= (ADMIN only)
-  listBookings: async (params: AdminListBookingsParams = {}): Promise<AdminListBookingsResponse> => {
+  listBookings: async (
+    params: AdminListBookingsParams = {}
+  ): Promise<AdminListBookingsResponse> => {
     const { data } = await api.get<AdminListBookingsResponse>('/admin/bookings', {
       params: cleanAdminParams(params),
     })
@@ -198,14 +209,14 @@ function cleanAdminParams(params: object) {
   return Object.fromEntries(
     Object.entries(params).filter(
       (entry): entry is [string, string | number | boolean] =>
-        entry[1] !== undefined && entry[1] !== null && entry[1] !== '',
-    ),
+        entry[1] !== undefined && entry[1] !== null && entry[1] !== ''
+    )
   )
 }
 
 /** Body cleaner: drop empty strings so nullable-optional fields stay absent. */
 function cleanAdminBody<T extends object>(body: T): Partial<T> {
   return Object.fromEntries(
-    Object.entries(body).filter(([, v]) => v !== undefined && v !== null && v !== ''),
+    Object.entries(body).filter(([, v]) => v !== undefined && v !== null && v !== '')
   ) as Partial<T>
 }

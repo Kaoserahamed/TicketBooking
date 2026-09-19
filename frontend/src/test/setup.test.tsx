@@ -52,8 +52,7 @@ vi.mocked(showApi.listShows).mockResolvedValue({
 describe('frontend setup', () => {
   it('has the dev-server proxy for /api and happy-dom test env', () => {
     expect(config.server?.port).toBe(5173)
-    const target = (config.server?.proxy as Record<string, { target: string }>)['/api']
-      ?.target
+    const target = (config.server?.proxy as Record<string, { target: string }>)['/api']?.target
     expect(target).toBe('http://localhost:4000')
     expect(config.test?.environment).toBe('happy-dom')
   })
@@ -62,7 +61,7 @@ describe('frontend setup', () => {
     render(
       <MemoryRouter initialEntries={['/']}>
         <App />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
     expect(screen.getByText('Ticket Booking System')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Browse events' })).toBeInTheDocument()
@@ -73,7 +72,7 @@ describe('frontend setup', () => {
     render(
       <MemoryRouter initialEntries={['/bookings']}>
         <App />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
     expect(screen.getByRole('heading', { name: 'Login' })).toBeInTheDocument()
   })

@@ -1,6 +1,13 @@
 import { describe, expect, it, vi } from 'vitest'
 import api from '../api/client'
-import { adminApi, type AdminRole, type CreateVenueInput, type CreateSeatInput, type CreateShowInput, type UpdateShowInput } from '../api/admin'
+import {
+  adminApi,
+  type AdminRole,
+  type CreateVenueInput,
+  type CreateSeatInput,
+  type CreateShowInput,
+  type UpdateShowInput,
+} from '../api/admin'
 
 vi.mock('../api/client', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../api/client')>()
@@ -28,8 +35,30 @@ describe('adminApi.listUsers', () => {
         status: 'ok',
         total: 2,
         users: [
-          { id: 1, name: 'Admin One', email: 'admin@tbs.local', phone: null, role: 'ADMIN', status: 'ACTIVE', emailVerified: true, emailVerifiedAt: '2026-01-01T00:00:00.000Z', createdAt: '', updatedAt: '' },
-          { id: 2, name: 'Regular Guy', email: 'guy@tbs.local', phone: '0170000000', role: 'USER', status: 'INACTIVE', emailVerified: false, emailVerifiedAt: null, createdAt: '', updatedAt: '' },
+          {
+            id: 1,
+            name: 'Admin One',
+            email: 'admin@tbs.local',
+            phone: null,
+            role: 'ADMIN',
+            status: 'ACTIVE',
+            emailVerified: true,
+            emailVerifiedAt: '2026-01-01T00:00:00.000Z',
+            createdAt: '',
+            updatedAt: '',
+          },
+          {
+            id: 2,
+            name: 'Regular Guy',
+            email: 'guy@tbs.local',
+            phone: '0170000000',
+            role: 'USER',
+            status: 'INACTIVE',
+            emailVerified: false,
+            emailVerifiedAt: null,
+            createdAt: '',
+            updatedAt: '',
+          },
         ],
       },
     })
@@ -65,11 +94,28 @@ describe('adminApi events', () => {
         total: 1,
         limit: 20,
         offset: 0,
-        events: [{ id: 3, name: 'Rock Night', description: null, category: 'Concert', posterUrl: null, status: 'PUBLISHED', createdAt: '', updatedAt: '' }],
+        events: [
+          {
+            id: 3,
+            name: 'Rock Night',
+            description: null,
+            category: 'Concert',
+            posterUrl: null,
+            status: 'PUBLISHED',
+            createdAt: '',
+            updatedAt: '',
+          },
+        ],
       },
     })
 
-    const data = await adminApi.listEvents({ search: '', category: undefined, status: 'PUBLISHED', limit: 20, offset: 0 })
+    const data = await adminApi.listEvents({
+      search: '',
+      category: undefined,
+      status: 'PUBLISHED',
+      limit: 20,
+      offset: 0,
+    })
 
     expect(mockedGet).toHaveBeenCalledWith('/admin/events', {
       params: { status: 'PUBLISHED', limit: 20, offset: 0 },
@@ -79,23 +125,60 @@ describe('adminApi events', () => {
 
   it('createEvent posts the body and unwraps 201 { event }', async () => {
     mockedPost.mockResolvedValueOnce({
-      data: { status: 'ok', event: { id: 9, name: 'New Gig', description: 'Desc', category: 'Concert', posterUrl: null, status: 'DRAFT', createdAt: '', updatedAt: '' } },
+      data: {
+        status: 'ok',
+        event: {
+          id: 9,
+          name: 'New Gig',
+          description: 'Desc',
+          category: 'Concert',
+          posterUrl: null,
+          status: 'DRAFT',
+          createdAt: '',
+          updatedAt: '',
+        },
+      },
     })
 
-    const event = await adminApi.createEvent({ name: 'New Gig', description: 'Desc', category: 'Concert', status: 'DRAFT' })
+    const event = await adminApi.createEvent({
+      name: 'New Gig',
+      description: 'Desc',
+      category: 'Concert',
+      status: 'DRAFT',
+    })
 
-    expect(mockedPost).toHaveBeenCalledWith('/admin/events', { name: 'New Gig', description: 'Desc', category: 'Concert', status: 'DRAFT' })
+    expect(mockedPost).toHaveBeenCalledWith('/admin/events', {
+      name: 'New Gig',
+      description: 'Desc',
+      category: 'Concert',
+      status: 'DRAFT',
+    })
     expect(event.id).toBe(9)
   })
 
   it('updateEvent PUTs only provided fields (backend requires ≥1 field)', async () => {
     mockedPut.mockResolvedValueOnce({
-      data: { status: 'ok', event: { id: 3, name: 'Renamed', description: null, category: null, posterUrl: null, status: 'INACTIVE', createdAt: '', updatedAt: '' } },
+      data: {
+        status: 'ok',
+        event: {
+          id: 3,
+          name: 'Renamed',
+          description: null,
+          category: null,
+          posterUrl: null,
+          status: 'INACTIVE',
+          createdAt: '',
+          updatedAt: '',
+        },
+      },
     })
 
     const event = await adminApi.updateEvent(3, { name: 'Renamed', status: 'INACTIVE' })
 
-    expect(mockedPut).toHaveBeenCalledWith('/admin/events/3', { name: 'Renamed', status: 'INACTIVE' })
+    expect(mockedPut).toHaveBeenCalledWith('/admin/events/3', {
+      name: 'Renamed',
+      status: 'INACTIVE',
+    })
     expect(event.status).toBe('INACTIVE')
   })
 })
@@ -104,11 +187,26 @@ describe('adminApi events', () => {
 // Admin venues — create/update + seat CRUD
 // ---------------------------------------------------------------------------
 describe('adminApi venues and seats', () => {
-  const venueInput: CreateVenueInput = { name: 'Grand Hall', city: 'Dhaka', address: '12 Road', capacity: 500 }
+  const venueInput: CreateVenueInput = {
+    name: 'Grand Hall',
+    city: 'Dhaka',
+    address: '12 Road',
+    capacity: 500,
+  }
 
   it('createVenue posts the body and unwraps 201 { venue }', async () => {
     mockedPost.mockResolvedValueOnce({
-      data: { status: 'ok', venue: { id: 4, name: 'Grand Hall', address: '12 Road', city: 'Dhaka', capacity: 500, seats: { total: 0, byType: {} } } },
+      data: {
+        status: 'ok',
+        venue: {
+          id: 4,
+          name: 'Grand Hall',
+          address: '12 Road',
+          city: 'Dhaka',
+          capacity: 500,
+          seats: { total: 0, byType: {} },
+        },
+      },
     })
 
     const venue = await adminApi.createVenue(venueInput)
@@ -119,18 +217,35 @@ describe('adminApi venues and seats', () => {
 
   it('updateVenue PUTs partial changes and unwraps { venue }', async () => {
     mockedPut.mockResolvedValueOnce({
-      data: { status: 'ok', venue: { id: 4, name: 'Grand Hall Renamed', address: null, city: 'Dhaka', capacity: 700 } },
+      data: {
+        status: 'ok',
+        venue: { id: 4, name: 'Grand Hall Renamed', address: null, city: 'Dhaka', capacity: 700 },
+      },
     })
 
     const venue = await adminApi.updateVenue(4, { name: 'Grand Hall Renamed', capacity: 700 })
 
-    expect(mockedPut).toHaveBeenCalledWith('/admin/venues/4', { name: 'Grand Hall Renamed', capacity: 700 })
+    expect(mockedPut).toHaveBeenCalledWith('/admin/venues/4', {
+      name: 'Grand Hall Renamed',
+      capacity: 700,
+    })
     expect(venue.capacity).toBe(700)
   })
 
   it('createSeat posts { rowNumber, seatNumber, seatType } and unwraps 201 { seat }', async () => {
     mockedPost.mockResolvedValueOnce({
-      data: { status: 'ok', seat: { id: 12, venueId: 4, row: 'A', number: '5', label: 'A5', seatType: 'VIP', createdAt: '' } },
+      data: {
+        status: 'ok',
+        seat: {
+          id: 12,
+          venueId: 4,
+          row: 'A',
+          number: '5',
+          label: 'A5',
+          seatType: 'VIP',
+          createdAt: '',
+        },
+      },
     })
 
     const seat: CreateSeatInput = { rowNumber: 'A', seatNumber: '5', seatType: 'VIP' }
@@ -142,7 +257,18 @@ describe('adminApi venues and seats', () => {
 
   it('updateSeat PUTs { seatType } and deleteSeat unwraps { message }', async () => {
     mockedPut.mockResolvedValueOnce({
-      data: { status: 'ok', seat: { id: 12, venueId: 4, row: 'A', number: '5', label: 'A5', seatType: 'BOX', createdAt: '' } },
+      data: {
+        status: 'ok',
+        seat: {
+          id: 12,
+          venueId: 4,
+          row: 'A',
+          number: '5',
+          label: 'A5',
+          seatType: 'BOX',
+          createdAt: '',
+        },
+      },
     })
     mockedDelete.mockResolvedValueOnce({
       data: { status: 'ok', message: 'Seat deleted' },
@@ -174,7 +300,29 @@ describe('adminApi shows', () => {
 
   it('createShow posts the body and unwraps 201 { show } with seat summary', async () => {
     mockedPost.mockResolvedValueOnce({
-      data: { status: 'ok', show: { id: 11, eventId: 3, venueId: 4, startTime: '2026-12-01 18:00:00', endTime: '2026-12-01 21:00:00', status: 'SCHEDULED', event: { id: 3, name: 'Rock Night', description: null, category: 'Concert', posterUrl: null, status: 'PUBLISHED', createdAt: '', updatedAt: '' }, venue: { id: 4, name: 'Grand Hall', address: null, city: 'Dhaka', capacity: 500 }, seats: { total: 500, available: 500, held: 0, booked: 0, blocked: 0, byType: {} } } },
+      data: {
+        status: 'ok',
+        show: {
+          id: 11,
+          eventId: 3,
+          venueId: 4,
+          startTime: '2026-12-01 18:00:00',
+          endTime: '2026-12-01 21:00:00',
+          status: 'SCHEDULED',
+          event: {
+            id: 3,
+            name: 'Rock Night',
+            description: null,
+            category: 'Concert',
+            posterUrl: null,
+            status: 'PUBLISHED',
+            createdAt: '',
+            updatedAt: '',
+          },
+          venue: { id: 4, name: 'Grand Hall', address: null, city: 'Dhaka', capacity: 500 },
+          seats: { total: 500, available: 500, held: 0, booked: 0, blocked: 0, byType: {} },
+        },
+      },
     })
 
     const show = await adminApi.createShow(showInput)
@@ -185,7 +333,29 @@ describe('adminApi shows', () => {
 
   it('updateShow PUTs partial changes and unwraps { show }', async () => {
     mockedPut.mockResolvedValueOnce({
-      data: { status: 'ok', show: { id: 11, eventId: 3, venueId: 4, startTime: '2026-12-02 18:00:00', endTime: '2026-12-02 21:00:00', status: 'CANCELLED', event: { id: 3, name: 'Rock Night', description: null, category: null, posterUrl: null, status: 'PUBLISHED', createdAt: '', updatedAt: '' }, venue: { id: 4, name: 'Grand Hall', address: null, city: 'Dhaka', capacity: 500 }, seats: { total: 500, available: 0, held: 0, booked: 0, blocked: 0, byType: {} } } },
+      data: {
+        status: 'ok',
+        show: {
+          id: 11,
+          eventId: 3,
+          venueId: 4,
+          startTime: '2026-12-02 18:00:00',
+          endTime: '2026-12-02 21:00:00',
+          status: 'CANCELLED',
+          event: {
+            id: 3,
+            name: 'Rock Night',
+            description: null,
+            category: null,
+            posterUrl: null,
+            status: 'PUBLISHED',
+            createdAt: '',
+            updatedAt: '',
+          },
+          venue: { id: 4, name: 'Grand Hall', address: null, city: 'Dhaka', capacity: 500 },
+          seats: { total: 500, available: 0, held: 0, booked: 0, blocked: 0, byType: {} },
+        },
+      },
     })
 
     const changes: UpdateShowInput = { status: 'CANCELLED' }
@@ -205,14 +375,35 @@ describe('adminApi.listBookings', () => {
       data: {
         status: 'ok',
         total: 1,
-        bookings: [{
-          id: 5, userId: 2, showId: 11, bookingReference: 'BK-202609-0001', idempotencyKey: null,
-          status: 'CONFIRMED', subtotal: 300, discount: 0, totalAmount: 300, currency: 'BDT',
-          expiresAt: null, createdAt: '', updatedAt: '',
-          show: { id: 11, eventId: 3, venueId: 4, startTime: '2026-12-01 18:00:00', endTime: '2026-12-01 21:00:00', status: 'SCHEDULED', event: { id: 3, name: 'Rock Night', status: 'PUBLISHED' }, venue: { id: 4, name: 'Grand Hall', address: null, city: 'Dhaka', capacity: 500 } },
-          user: { id: 2, name: 'Regular Guy', email: 'guy@tbs.local' },
-          items: [],
-        }],
+        bookings: [
+          {
+            id: 5,
+            userId: 2,
+            showId: 11,
+            bookingReference: 'BK-202609-0001',
+            idempotencyKey: null,
+            status: 'CONFIRMED',
+            subtotal: 300,
+            discount: 0,
+            totalAmount: 300,
+            currency: 'BDT',
+            expiresAt: null,
+            createdAt: '',
+            updatedAt: '',
+            show: {
+              id: 11,
+              eventId: 3,
+              venueId: 4,
+              startTime: '2026-12-01 18:00:00',
+              endTime: '2026-12-01 21:00:00',
+              status: 'SCHEDULED',
+              event: { id: 3, name: 'Rock Night', status: 'PUBLISHED' },
+              venue: { id: 4, name: 'Grand Hall', address: null, city: 'Dhaka', capacity: 500 },
+            },
+            user: { id: 2, name: 'Regular Guy', email: 'guy@tbs.local' },
+            items: [],
+          },
+        ],
       },
     })
 
@@ -225,5 +416,3 @@ describe('adminApi.listBookings', () => {
     expect(data.bookings[0]!.user?.email).toBe('guy@tbs.local')
   })
 })
-
-

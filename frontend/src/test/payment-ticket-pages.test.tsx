@@ -12,7 +12,12 @@ vi.mock('../api/bookings', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../api/bookings')>()
   return {
     ...actual,
-    bookingApi: { holdSeats: vi.fn(), getBooking: vi.fn(), cancelBooking: vi.fn(), listMyBookings: vi.fn() },
+    bookingApi: {
+      holdSeats: vi.fn(),
+      getBooking: vi.fn(),
+      cancelBooking: vi.fn(),
+      listMyBookings: vi.fn(),
+    },
   }
 })
 
@@ -51,14 +56,24 @@ const booking = {
   createdAt: '2026-02-01T18:00:00.000Z',
   updatedAt: '2026-02-01T18:00:00.000Z',
   show: {
-    id: 11, eventId: 3, venueId: 2,
-    startTime: '2026-02-01T18:00:00.000Z', endTime: '2026-02-01T20:00:00.000Z', status: 'SCHEDULED',
+    id: 11,
+    eventId: 3,
+    venueId: 2,
+    startTime: '2026-02-01T18:00:00.000Z',
+    endTime: '2026-02-01T20:00:00.000Z',
+    status: 'SCHEDULED',
     event: { id: 3, name: 'Rock Night', status: 'PUBLISHED' },
     venue: { id: 2, name: 'Grand Hall', address: '1 Main St', city: 'Dhaka', capacity: 500 },
   },
   user: { id: 7, name: 'Asha Example', email: 'asha@example.com' },
   items: [
-    { id: 1, bookingId: 5, showSeatId: 101, seat: { id: 1, row: 'A', number: '1', label: 'A1', seatType: 'REGULAR' }, price: 100 },
+    {
+      id: 1,
+      bookingId: 5,
+      showSeatId: 101,
+      seat: { id: 1, row: 'A', number: '1', label: 'A1', seatType: 'REGULAR' },
+      price: 100,
+    },
   ],
 }
 
@@ -93,14 +108,19 @@ const ticket = {
 }
 
 function signIn() {
-  useAuthStore.setState({ token: 'access-123', refreshToken: 'refresh-123', user: null, error: null })
+  useAuthStore.setState({
+    token: 'access-123',
+    refreshToken: 'refresh-123',
+    user: null,
+    error: null,
+  })
 }
 
 function renderAt(route: string) {
   return render(
     <MemoryRouter initialEntries={[route]}>
       <App />
-    </MemoryRouter>,
+    </MemoryRouter>
   )
 }
 
@@ -108,13 +128,23 @@ describe('payment page', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     localStorage.clear()
-    useAuthStore.setState({ user: null, token: null, refreshToken: null, isLoading: false, error: null })
+    useAuthStore.setState({
+      user: null,
+      token: null,
+      refreshToken: null,
+      isLoading: false,
+      error: null,
+    })
     signIn()
   })
 
   it('pays with the selected provider, then polls status to completion', async () => {
     const user = userEvent.setup()
-    mockedBookingApi.getBooking.mockResolvedValueOnce({ status: 'ok', booking, items: booking.items })
+    mockedBookingApi.getBooking.mockResolvedValueOnce({
+      status: 'ok',
+      booking,
+      items: booking.items,
+    })
     mockedPaymentApi.createPayment.mockResolvedValueOnce(pendingPayment)
     mockedPaymentApi.getPayment.mockResolvedValueOnce(completedPayment)
 
@@ -129,7 +159,7 @@ describe('payment page', () => {
 
     expect(mockedPaymentApi.createPayment).toHaveBeenCalledWith(
       { bookingId: 5, provider: 'NAGAD' },
-      expect.any(String),
+      expect.any(String)
     )
     expect(await screen.findByText(/Payment initiated via Nagad/)).toBeInTheDocument()
 
@@ -137,13 +167,22 @@ describe('payment page', () => {
     await user.click(screen.getByRole('button', { name: 'Check status now' }))
     expect(mockedPaymentApi.getPayment).toHaveBeenCalledWith(9)
 
-    expect(await screen.findByText('Payment completed! Your booking is confirmed.')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /View your ticket/ })).toHaveAttribute('href', '/tickets/3')
+    expect(
+      await screen.findByText('Payment completed! Your booking is confirmed.')
+    ).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /View your ticket/ })).toHaveAttribute(
+      'href',
+      '/tickets/3'
+    )
   })
 
   it('rejects an invalid wallet number without calling the API', async () => {
     const user = userEvent.setup()
-    mockedBookingApi.getBooking.mockResolvedValueOnce({ status: 'ok', booking, items: booking.items })
+    mockedBookingApi.getBooking.mockResolvedValueOnce({
+      status: 'ok',
+      booking,
+      items: booking.items,
+    })
 
     renderAt('/bookings/5/pay')
     await screen.findByText('BK-ABC123')
@@ -174,8 +213,14 @@ describe('ticket detail page', () => {
 
     expect(await screen.findByText('TKT-00000003')).toBeInTheDocument()
     expect(screen.getByText('ISSUED')).toBeInTheDocument()
-    expect(screen.getByAltText('QR code for ticket TKT-00000003')).toHaveAttribute('src', 'blob:qr-1')
-    expect(screen.getByRole('link', { name: /View booking #5/ })).toHaveAttribute('href', '/bookings/5')
+    expect(screen.getByAltText('QR code for ticket TKT-00000003')).toHaveAttribute(
+      'src',
+      'blob:qr-1'
+    )
+    expect(screen.getByRole('link', { name: /View booking #5/ })).toHaveAttribute(
+      'href',
+      '/bookings/5'
+    )
   })
 
   it('shows a backend error in the alert region', async () => {
@@ -197,7 +242,11 @@ describe('booking detail page', () => {
   })
 
   it('links a pending booking to the payment page', async () => {
-    mockedBookingApi.getBooking.mockResolvedValueOnce({ status: 'ok', booking, items: booking.items })
+    mockedBookingApi.getBooking.mockResolvedValueOnce({
+      status: 'ok',
+      booking,
+      items: booking.items,
+    })
 
     renderAt('/bookings/5')
 
@@ -220,4 +269,3 @@ describe('booking detail page', () => {
     expect(screen.queryByRole('link', { name: 'Pay now' })).not.toBeInTheDocument()
   })
 })
-

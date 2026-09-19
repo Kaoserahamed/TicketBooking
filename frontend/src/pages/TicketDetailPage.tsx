@@ -55,8 +55,12 @@ export default function TicketDetailPage() {
   if (invalid) {
     return (
       <div className="max-w-2xl">
-        <div role="alert" className="text-sm text-red-600">Invalid ticket id</div>
-        <Link to="/bookings" className="text-sm text-primary-700 hover:underline">← Back to my bookings</Link>
+        <div role="alert" className="text-sm text-red-600">
+          Invalid ticket id
+        </div>
+        <Link to="/bookings" className="text-sm text-primary-700 hover:underline">
+          ← Back to my bookings
+        </Link>
       </div>
     )
   }
@@ -106,7 +110,10 @@ export default function TicketDetailPage() {
             </div>
           </div>
           <p className="mt-6">
-            <Link to={`/bookings/${ticket.bookingId}`} className="text-sm text-primary-700 hover:underline">
+            <Link
+              to={`/bookings/${ticket.bookingId}`}
+              className="text-sm text-primary-700 hover:underline"
+            >
               View booking #{ticket.bookingId} →
             </Link>
           </p>
@@ -115,4 +122,3 @@ export default function TicketDetailPage() {
     </div>
   )
 }
-

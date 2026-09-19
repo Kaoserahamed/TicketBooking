@@ -96,38 +96,79 @@ export default function AdminVenuesPage() {
         <form className="grid grid-cols-1 md:grid-cols-2 gap-4" onSubmit={handleSave}>
           <label className="text-sm text-gray-700">
             Name
-            <input aria-label="Venue name" className={`${inputClass} block w-full mt-1`} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+            <input
+              aria-label="Venue name"
+              className={`${inputClass} block w-full mt-1`}
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              required
+            />
           </label>
           <label className="text-sm text-gray-700">
             City
-            <input aria-label="Venue city" className={`${inputClass} block w-full mt-1`} value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} required />
+            <input
+              aria-label="Venue city"
+              className={`${inputClass} block w-full mt-1`}
+              value={form.city}
+              onChange={(e) => setForm({ ...form, city: e.target.value })}
+              required
+            />
           </label>
           <label className="text-sm text-gray-700">
             Address
-            <input aria-label="Venue address" className={`${inputClass} block w-full mt-1`} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+            <input
+              aria-label="Venue address"
+              className={`${inputClass} block w-full mt-1`}
+              value={form.address}
+              onChange={(e) => setForm({ ...form, address: e.target.value })}
+            />
           </label>
           <label className="text-sm text-gray-700">
             Capacity
-            <input aria-label="Venue capacity" type="number" min={1} className={`${inputClass} block w-full mt-1`} value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} required />
+            <input
+              aria-label="Venue capacity"
+              type="number"
+              min={1}
+              className={`${inputClass} block w-full mt-1`}
+              value={form.capacity}
+              onChange={(e) => setForm({ ...form, capacity: e.target.value })}
+              required
+            />
           </label>
           <div className="md:col-span-2 flex gap-3">
-            <button type="submit" disabled={isSaving} className="px-4 py-2 text-sm font-medium bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:opacity-50">
+            <button
+              type="submit"
+              disabled={isSaving}
+              className="px-4 py-2 text-sm font-medium bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:opacity-50"
+            >
               {editingId === null ? 'Create venue' : 'Save changes'}
             </button>
             {editingId !== null && (
-              <button type="button" className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200" onClick={() => { setEditingId(null); setForm(EMPTY_FORM) }}>
+              <button
+                type="button"
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                onClick={() => {
+                  setEditingId(null)
+                  setForm(EMPTY_FORM)
+                }}
+              >
                 Cancel edit
               </button>
             )}
           </div>
         </form>
         {notice && (
-          <p role="status" className="mt-4 text-sm text-gray-700">{notice}</p>
+          <p role="status" className="mt-4 text-sm text-gray-700">
+            {notice}
+          </p>
         )}
       </div>
 
       {error && (
-        <div role="alert" className="mb-4 px-4 py-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md">
+        <div
+          role="alert"
+          className="mb-4 px-4 py-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md"
+        >
           {error}
         </div>
       )}
@@ -162,13 +203,21 @@ export default function AdminVenuesPage() {
                       className="text-sm font-medium text-primary-700 hover:underline"
                       onClick={() => {
                         setEditingId(v.id)
-                        setForm({ name: v.name, city: v.city ?? '', address: v.address ?? '', capacity: String(v.capacity) })
+                        setForm({
+                          name: v.name,
+                          city: v.city ?? '',
+                          address: v.address ?? '',
+                          capacity: String(v.capacity),
+                        })
                         setNotice(null)
                       }}
                     >
                       Edit
                     </button>
-                    <Link to={`/admin/venues/${v.id}/seats`} className="text-sm font-medium text-primary-700 hover:underline">
+                    <Link
+                      to={`/admin/venues/${v.id}/seats`}
+                      className="text-sm font-medium text-primary-700 hover:underline"
+                    >
                       Seats
                     </Link>
                   </td>
@@ -180,13 +229,23 @@ export default function AdminVenuesPage() {
       )}
       {!isLoading && !error && (
         <div className="mt-3 flex items-center gap-4 text-sm text-gray-500">
-          <button type="button" className="px-3 py-1 border border-gray-300 rounded-md disabled:opacity-40" disabled={offset === 0} onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}>
+          <button
+            type="button"
+            className="px-3 py-1 border border-gray-300 rounded-md disabled:opacity-40"
+            disabled={offset === 0}
+            onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}
+          >
             Previous
           </button>
           <span>
             Page {currentPage} of {totalPages} ({total} venues)
           </span>
-          <button type="button" className="px-3 py-1 border border-gray-300 rounded-md disabled:opacity-40" disabled={offset + PAGE_SIZE >= total} onClick={() => setOffset(offset + PAGE_SIZE)}>
+          <button
+            type="button"
+            className="px-3 py-1 border border-gray-300 rounded-md disabled:opacity-40"
+            disabled={offset + PAGE_SIZE >= total}
+            onClick={() => setOffset(offset + PAGE_SIZE)}
+          >
             Next
           </button>
         </div>
@@ -194,5 +253,3 @@ export default function AdminVenuesPage() {
     </div>
   )
 }
-
-

@@ -73,7 +73,7 @@ function cleanVenueParams(params: {
     Object.entries(params).filter((entry): entry is [string, string | number] => {
       const [, v] = entry
       return v !== undefined && v !== null && v !== ''
-    }),
+    })
   )
 }
 

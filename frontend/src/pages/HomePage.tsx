@@ -88,7 +88,10 @@ export default function HomePage() {
             ) : (
               <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {events.map((event) => (
-                  <li key={event.id} className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+                  <li
+                    key={event.id}
+                    className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+                  >
                     {event.posterUrl && (
                       <img
                         src={event.posterUrl}
@@ -101,7 +104,9 @@ export default function HomePage() {
                         {event.name}
                       </Link>
                     </h3>
-                    <p className="mt-1 text-sm text-gray-600">{event.category ?? 'Uncategorised'}</p>
+                    <p className="mt-1 text-sm text-gray-600">
+                      {event.category ?? 'Uncategorised'}
+                    </p>
                   </li>
                 ))}
               </ul>
@@ -131,7 +136,8 @@ export default function HomePage() {
                         </Link>
                       </h3>
                       <p className="mt-1 text-sm text-gray-600">
-                        {show.venue.name}, {show.venue.city ?? '—'} · {formatDateTime(show.startTime)}
+                        {show.venue.name}, {show.venue.city ?? '—'} ·{' '}
+                        {formatDateTime(show.startTime)}
                       </p>
                     </div>
                     <div className="text-right">
@@ -155,4 +161,3 @@ export default function HomePage() {
     </div>
   )
 }
-

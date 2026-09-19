@@ -58,26 +58,117 @@ export default function App() {
         <Route path="events" element={<EventsPage />} />
         <Route path="events/:id" element={<EventDetailPage />} />
         <Route path="shows/:id" element={<ShowDetailPage />} />
-        <Route path="book/:showId" element={<ProtectedRoute><BookShowPage /></ProtectedRoute>} />
+        <Route
+          path="book/:showId"
+          element={
+            <ProtectedRoute>
+              <BookShowPage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
         <Route path="verify-email" element={<VerifyEmailPage />} />
         <Route path="forgot-password" element={<ForgotPasswordPage />} />
         <Route path="reset-password" element={<ResetPasswordPage />} />
-        <Route path="profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-        <Route path="bookings" element={<ProtectedRoute><BookingsPage /></ProtectedRoute>} />
-        <Route path="bookings/:id" element={<ProtectedRoute><BookingDetailPage /></ProtectedRoute>} />
-        <Route path="bookings/:id/pay" element={<ProtectedRoute><PaymentPage /></ProtectedRoute>} />
-        <Route path="tickets/:id" element={<ProtectedRoute><TicketDetailPage /></ProtectedRoute>} />
+        <Route
+          path="profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="bookings"
+          element={
+            <ProtectedRoute>
+              <BookingsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="bookings/:id"
+          element={
+            <ProtectedRoute>
+              <BookingDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="bookings/:id/pay"
+          element={
+            <ProtectedRoute>
+              <PaymentPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="tickets/:id"
+          element={
+            <ProtectedRoute>
+              <TicketDetailPage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="venues" element={<VenuesPage />} />
         <Route path="venues/:id" element={<VenueDetailPage />} />
-        <Route path="admin" element={<AdminRoute><AdminUsersPage /></AdminRoute>} />
-        <Route path="admin/users" element={<AdminRoute><AdminUsersPage /></AdminRoute>} />
-        <Route path="admin/events" element={<AdminRoute><AdminEventsPage /></AdminRoute>} />
-        <Route path="admin/venues" element={<AdminRoute><AdminVenuesPage /></AdminRoute>} />
-        <Route path="admin/venues/:id/seats" element={<AdminRoute><AdminVenueSeatsPage /></AdminRoute>} />
-        <Route path="admin/shows" element={<AdminRoute><AdminShowsPage /></AdminRoute>} />
-        <Route path="admin/bookings" element={<AdminRoute><AdminBookingsPage /></AdminRoute>} />
+        <Route
+          path="admin"
+          element={
+            <AdminRoute>
+              <AdminUsersPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="admin/users"
+          element={
+            <AdminRoute>
+              <AdminUsersPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="admin/events"
+          element={
+            <AdminRoute>
+              <AdminEventsPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="admin/venues"
+          element={
+            <AdminRoute>
+              <AdminVenuesPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="admin/venues/:id/seats"
+          element={
+            <AdminRoute>
+              <AdminVenueSeatsPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="admin/shows"
+          element={
+            <AdminRoute>
+              <AdminShowsPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="admin/bookings"
+          element={
+            <AdminRoute>
+              <AdminBookingsPage />
+            </AdminRoute>
+          }
+        />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

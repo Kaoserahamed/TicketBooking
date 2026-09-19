@@ -64,31 +64,30 @@ export const authApi = {
   verifyEmail: async (token: string): Promise<User> => {
     const { data } = await api.post<{ status: string; message: string; user: User }>(
       '/auth/verify-email',
-      { token },
+      { token }
     )
     return data.user
   },
 
   resendVerification: async (): Promise<string> => {
     const { data } = await api.post<{ status: string; message: string }>(
-      '/auth/resend-verification',
+      '/auth/resend-verification'
     )
     return data.message
   },
 
   forgotPassword: async (email: string): Promise<string> => {
-    const { data } = await api.post<{ status: string; message: string }>(
-      '/auth/forgot-password',
-      { email },
-    )
+    const { data } = await api.post<{ status: string; message: string }>('/auth/forgot-password', {
+      email,
+    })
     return data.message
   },
 
   resetPassword: async (token: string, newPassword: string): Promise<string> => {
-    const { data } = await api.post<{ status: string; message: string }>(
-      '/auth/reset-password',
-      { token, newPassword },
-    )
+    const { data } = await api.post<{ status: string; message: string }>('/auth/reset-password', {
+      token,
+      newPassword,
+    })
     return data.message
   },
 }
@@ -118,4 +117,3 @@ export const userApi = {
     return data.message
   },
 }
-

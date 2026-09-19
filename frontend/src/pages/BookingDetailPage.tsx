@@ -50,8 +50,12 @@ export default function BookingDetailPage() {
   if (invalid) {
     return (
       <div className="max-w-2xl">
-        <div role="alert" className="text-sm text-red-600">Invalid booking id</div>
-        <Link to="/bookings" className="text-sm text-primary-700 hover:underline">← Back to my bookings</Link>
+        <div role="alert" className="text-sm text-red-600">
+          Invalid booking id
+        </div>
+        <Link to="/bookings" className="text-sm text-primary-700 hover:underline">
+          ← Back to my bookings
+        </Link>
       </div>
     )
   }
@@ -76,17 +80,23 @@ export default function BookingDetailPage() {
         <p className="text-sm text-gray-600">Loading booking…</p>
       ) : booking ? (
         <div className="rounded-lg border border-gray-200 bg-white p-6">
-          <p className="text-sm text-gray-600">Status: <span className="font-medium text-gray-900">{booking.status}</span></p>
+          <p className="text-sm text-gray-600">
+            Status: <span className="font-medium text-gray-900">{booking.status}</span>
+          </p>
           <p className="mt-1 text-sm text-gray-600">
             {booking.show.event.name} — {booking.show.venue.name}, {booking.show.venue.city}
           </p>
-          <p className="mt-1 text-sm text-gray-600">Show time: {formatDateTime(booking.show.startTime)}</p>
+          <p className="mt-1 text-sm text-gray-600">
+            Show time: {formatDateTime(booking.show.startTime)}
+          </p>
           <p className="mt-1 text-sm text-gray-600">
             Seats: {booking.items.map((i) => i.seat.label ?? `#${i.seat.id}`).join(', ')}
           </p>
           <p className="mt-1 text-sm text-gray-600">
             Total: {booking.currency} {booking.totalAmount.toFixed(2)}
-            {booking.discount > 0 ? ` (discount ${booking.currency} ${booking.discount.toFixed(2)})` : ''}
+            {booking.discount > 0
+              ? ` (discount ${booking.currency} ${booking.discount.toFixed(2)})`
+              : ''}
           </p>
           <p className="mt-1 text-sm text-gray-600">Expires: {formatDateTime(booking.expiresAt)}</p>
 
@@ -100,7 +110,10 @@ export default function BookingDetailPage() {
               </Link>
             )}
             {booking.status === 'CONFIRMED' && booking.ticketId && (
-              <Link to={`/tickets/${booking.ticketId}`} className="text-sm font-medium text-primary-700 hover:underline">
+              <Link
+                to={`/tickets/${booking.ticketId}`}
+                className="text-sm font-medium text-primary-700 hover:underline"
+              >
                 View ticket →
               </Link>
             )}
