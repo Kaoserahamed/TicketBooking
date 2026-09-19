@@ -7,18 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+(nothing yet — `0.1.2` below is the latest cut.)
+
+## [0.1.2] - 2026-09-20
+
 ### Added
+
 - CI `manifests` job now also lints the overlay with
   `kube-linter lint --add-all-built-in infrastructure/kubernetes` (pinned
   v0.8.3 release tarball), so misconfigurations fail the build alongside
   schema violations.
-- `backend/tests/unit/manifest-hardening.test.js` — hermetic guard for the
-  Kubernetes overlay: resource requests+limits on every container, both probes
-  on every workload, no privileged/host access, `imagePullPolicy: Always` on
-  `:latest`, placeholder-only secrets, the non-root node-user pin, and MySQL
-  persistence.
+- `backend/tests/unit/ci-workflow.test.js` now covers the kube-linter gate:
+  `--add-all-built-in`, the pinned `KUBE_LINTER_VERSION`, and linting the
+  kustomize-rendered overlay.
+- Dev container (`.devcontainer/devcontainer.json`): one-click Node 20
+  environment with the API/SPA/MySQL ports forwarded and
+  ESLint+Prettier+Tailwind extensions preinstalled.
+- `.github/CODEOWNERS`: explicit per-area review ownership.
+- Both stacks pin `engines.node >= 20`, matching the Node 20 CI runners and
+  the `node:20-alpine` images.
 
 ### Fixed
+
 - `infrastructure/kubernetes/backend.yaml`: the `wait-for-mysql` init
   container now declares `limits` alongside `requests`, so the new guard
   passes against a real quota, and the pod-level `runAsUser`/`runAsGroup`
@@ -27,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.1] - 2026-09-19
 
 ### Added
+
 - Throwaway test stack for a fresh clone: `docker-compose.test.yml` (MySQL 8 on
   3307, Redis on 6380) plus `backend/.env.test.example`, so the integration and
   SQL suites run without a pre-existing database account.
@@ -39,12 +50,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   against the Kubernetes 1.29 schemas.
 
 ### Changed
+
 - The `docker` job now waits for `backend`, `frontend`, `sql` and `manifests`, so
   a broken schema or manifest can no longer publish an image.
 - README, `docs/deployment/ci-cd.md`, `docs/operations/runbook.md` and
   `docs/development/testing.md` document the local test stack and the new gates.
 
 ### Fixed
+
 - `docs/development/testing.md`: restored a sentence that had been split in half,
   leaving its tail orphaned at the end of the file.
 
@@ -53,6 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-09-19
 
 ### Added
+
 - **Backend (Express.js + Node.js)**
   - Authentication system with JWT access + rotating refresh tokens
   - User registration, login, logout, refresh, and password recovery flows
@@ -105,12 +119,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Architecture Decision Records (ADRs)
 
 ### Changed
+
 - N/A
 
 ### Fixed
+
 - N/A
 
 ### Security
+
 - bcrypt password hashing (cost factor configurable via `BCRYPT_ROUNDS`)
 - JWT access tokens with 15-minute expiry
 - Rotating refresh tokens with SHA-256 hash storage
