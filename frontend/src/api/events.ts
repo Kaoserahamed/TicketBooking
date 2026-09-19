@@ -102,24 +102,4 @@ export const eventApi = {
   },
 }
 
-export const showApi = {
-  listShows: async (params?: { eventId?: number; page?: number; limit?: number; date?: string }) => {
-    const { data } = await api.get('/shows', { params })
-    return data
-  },
-
-  getShow: async (id: number) => {
-    const { data } = await api.get(`/shows/${id}`)
-    return data
-  },
-
-  getSeatMap: async (id: number) => {
-    const { data } = await api.get(`/shows/${id}/seats`)
-    return data
-  },
-
-  getAvailability: async (id: number) => {
-    const { data } = await api.get(`/shows/${id}/availability`)
-    return data
-  },
-}
+export { showApi } from './shows'
