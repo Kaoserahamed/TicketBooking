@@ -1,0 +1,6 @@
+# Generated / vendored output — never format
+node_modules/
+dist/
+coverage/
+*.log
+package-lock.json
