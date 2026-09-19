@@ -8,7 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Added
-- Nothing yet — move entries here into a version section when they ship.
+- `backend/tests/unit/manifest-hardening.test.js` — hermetic guard for the
+  Kubernetes overlay: resource requests+limits on every container, both probes
+  on every workload, no privileged/host access, `imagePullPolicy: Always` on
+  `:latest`, placeholder-only secrets, the non-root node-user pin, and MySQL
+  persistence.
+
+### Fixed
+- `infrastructure/kubernetes/backend.yaml`: the `wait-for-mysql` init
+  container now declares `limits` alongside `requests`, so the new guard
+  passes against a real quota, and the pod-level `runAsUser`/`runAsGroup`
+  pin is documented against `backend/Dockerfile` (`USER node`, UID 1000).
 
 ## [0.1.1] - 2026-09-19
 
