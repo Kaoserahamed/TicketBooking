@@ -1,5 +1,7 @@
 ﻿# Ticket Booking System
 
+![CI/CD](https://github.com/Kaoserahamed/TicketBooking/actions/workflows/ci.yml/badge.svg)
+
 A scalable ticket booking web application built with **MySQL**, **Node.js + Express.js**, and **React + TypeScript + Vite**.
 
 > **Documentation:** See the [`docs/`](docs/) directory for the full system design documentation.
@@ -8,36 +10,53 @@ A scalable ticket booking web application built with **MySQL**, **Node.js + Expr
 
 ### Prerequisites
 
-- Node.js 20+ (both stacks pin it via `engines`; CI runs Node 20)
-- MySQL 8+
-- Redis
-- Docker (optional, for containerized development)
+- Node.js 20+ (every `package.json` pins it via `engines`; `.nvmrc` pins `20`)
+- MySQL 8+ and Redis (only for the integration/SQL suites — the unit suites
+  need nothing but Node)
+- Docker (optional, for the throwaway test stack or the full containerized run)
 - VS Code + Dev Containers extension (optional: one-click Node 20 environment,
   see [`.devcontainer/devcontainer.json`](.devcontainer/devcontainer.json))
 
-### Development Setup
+### Five commands from a fresh clone
 
 ```bash
-# Clone the repository
-git clone <repo-url>
-cd ticket-booking
+git clone https://github.com/Kaoserahamed/TicketBooking.git
+cd TicketBooking
 
-# Configure environment (see Environment Variables below)
-Copy-Item .env.example .env    # PowerShell
-# cp .env.example .env         # bash
+npm run setup    # npm ci at the root plus both stacks (lockfile-exact)
+npm test         # hermetic suites only: backend node:test units + frontend vitest run
+npm run verify   # same as CI's fresh-clone job: lint + format + typecheck + repo guard + npm test
+```
 
-# Backend
-cd backend
-npm install
-npm run dev    # starts Express server on http://localhost:4000
+`npm test` needs no MySQL, no Redis and no Docker — that is the point: the
+repository proves itself on a machine that has never seen it. The full
+integration path (backend integration suite + SQL suite) needs a real MySQL 8,
+which the throwaway stack provides:
 
-# Frontend
-cd ../frontend
-npm install
-npm run dev    # starts Vite dev server on http://localhost:5173
+```bash
+npm run stack:test:up        # MySQL 8 on 3307 + Redis on 6380 (throwaway)
+npm run test:integration     # backend end-to-end suite against that stack
+npm run stack:test:down      # tears the stack down (no volumes, no leftovers)
+```
 
-# Start MySQL & Redis with Docker (optional)
-docker-compose up -d
+| Command                 | What it does                                             |
+| ----------------------- | -------------------------------------------------------- |
+| `npm run setup`         | `npm ci` for root, backend and frontend (lockfile-exact) |
+| `npm test`              | hermetic suites: backend units + frontend vitest run     |
+| `npm run test:unit`     | backend `tests/unit/` only (no services required)        |
+| `npm run test:web`      | frontend `vitest run` only                               |
+| `npm run test:coverage` | both coverage gates (fails below the documented floors)  |
+| `npm run verify`        | lint + format + typecheck + `verify:repo` + `npm test`   |
+| `npm run stack:test:up` | throwaway MySQL + Redis for the integration/SQL suites   |
+
+### Local development
+
+Run the services while you work:
+
+```bash
+cd backend && npm run dev       # Express API on http://localhost:4000
+cd frontend && npm run dev      # Vite dev server on http://localhost:5173
+docker compose up -d mysql      # database (skip if MySQL already runs on :3306)
 ```
 
 ### Environment Variables

@@ -3,6 +3,17 @@
 How to run the suites, what they cover, and how to read output. Setup is in
 [`setup.md`](setup.md); CI jobs in [`../deployment/ci-cd.md`](../deployment/ci-cd.md).
 
+## From the repository root (no services)
+
+```bash
+npm run setup    # once per clone: npm ci at the root plus both stacks
+npm test         # hermetic suites: backend node:test units + frontend vitest run
+npm run verify   # lint + format + typecheck + repo-layout guard + npm test (same as CI's fresh-clone job)
+```
+
+The root `test` script is deliberately hermetic — it is the suite a fresh
+clone can run with no MySQL, no Redis and no Docker.
+
 ## Backend (`backend/`, node:test)
 
 ```bash

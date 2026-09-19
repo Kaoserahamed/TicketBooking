@@ -17,10 +17,10 @@ must pass: [`testing.md`](testing.md). Branching rules:
 ## 2. Install
 
 ```bash
-git clone <repo-url> TicketBookingSystem
+git clone https://github.com/Kaoserahamed/TicketBooking.git TicketBookingSystem
 cd TicketBookingSystem
-cd backend && npm ci
-cd ../frontend && npm ci
+npm run setup                # npm ci at the root plus both stacks (lockfile-exact)
+npm test                     # hermetic suites: no MySQL, no Redis, no Docker
 ```
 
 ## 3. Configure
