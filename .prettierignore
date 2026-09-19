@@ -1,0 +1,24 @@
+# Root Prettier ignore list.
+#
+# Checked by `npm run format:check` from the repository root: the stacks each
+# own their own `.prettierrc.json`, but nothing checked the root-level files
+# (README, CHANGELOG, docs/, workflows) before.
+
+# No source installed here; rely on the local npm hooks instead.
+node_modules/
+
+# npm's own serialisation is the source of truth for lockfiles.
+**/package-lock.json
+package-lock.json
+
+# Build / coverage output.
+dist/
+build/
+coverage/
+frontend/coverage/
+backend/coverage/
+
+# Secret-bearing files are never formatted in place.
+.env
+.env.local
+.env.*.local
