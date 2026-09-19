@@ -8,8 +8,9 @@ name: CI/CD
 #      coverage-gated vitest run, then the production build
 #   3. sql      — recreate the schema on a real MySQL 8 service, then run the
 #      whole tests/sql/ suite (seed data, booking flow, concurrency, workers)
-#   4. manifests— render infrastructure/kubernetes with kustomize and validate
-#      every object against the Kubernetes API schemas (kubeconform, strict)
+#   4. manifests— render infrastructure/kubernetes with kustomize, validate
+#      every object against the Kubernetes API schemas (kubeconform, strict),
+#      then lint the overlay for misconfigurations (kube-linter)
 #   5. images  — build both container images (and push to GHCR on main)
 #
 # Every job fails fast on lint, formatting, typecheck, coverage or audit
@@ -229,6 +230,21 @@ jobs:
         run: |
           kubectl kustomize infrastructure/kubernetes \
             | kubeconform -strict -summary -kubernetes-version 1.29.0
+
+      # kubeconform proves the objects are *valid*; kube-linter proves they are
+      # not *misconfigured* (privilege escalation, missing probes, unset memory
+      # requirements...). The pinned version keeps the rule set stable.
+      - name: Lint the rendered manifests for misconfigurations
+        env:
+          KUBE_LINTER_VERSION: v0.8.3
+        run: |
+          LOCATION="https://github.com/stackrox/kube-linter/releases/download/${KUBE_LINTER_VERSION}/kube-linter-linux.tar.gz"
+          curl -sSLo kube-linter-linux.tar.gz "$LOCATION"
+          mkdir -p kube-linter
+          tar -xf kube-linter-linux.tar.gz -C kube-linter/
+          sudo install -m 0755 kube-linter/kube-linter /usr/local/bin/kube-linter
+          kube-linter version
+          kube-linter lint --add-all-built-in infrastructure/kubernetes
 
   docker:
     name: Docker — build & publish

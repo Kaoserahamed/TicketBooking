@@ -25,7 +25,7 @@ job needs no cluster — `kubeconform` validates against published schemas.
 | `backend` | `npm ci`, `lint`, `format:check`, `typecheck`, `npm audit --audit-level=high`, `npm test` (unit + integration on MySQL), `test:coverage` | lint/format/type/audit/test error or unit coverage below floor |
 | `frontend` | `npm ci`, `lint`, `format:check`, `typecheck`, `npm audit --audit-level=high`, `test:coverage`, `build` | any gate fails or coverage below floor |
 | `sql` | `npm ci` not needed — installs the `mysql` client, recreates the DB from `schema.sql`, then `tests/run-sql-tests.ps1 -Fresh` | any `ERROR <code>` in a `tests/sql/` script |
-| `manifests` | `kubectl kustomize infrastructure/kubernetes` piped into `kubeconform -strict` (Kubernetes 1.29 schemas) | a rendered object fails schema validation |
+| `manifests` | `kubectl kustomize infrastructure/kubernetes` piped into `kubeconform -strict` (Kubernetes 1.29 schemas), then `kube-linter lint --add-all-built-in infrastructure/kubernetes` | a rendered object fails schema validation or trips a built-in lint check |
 | `docker` | builds `./backend` + `./frontend` images (pushes to GHCR on `main`) | any image fails to build |
 
 `docker` runs only after `backend`, `frontend`, `sql` and `manifests` are green,
@@ -39,7 +39,7 @@ so a broken schema or manifest cannot publish an image.
 | Backend unit coverage | `scripts/check-coverage.js` floors: lines 55, branches 80, functions 30 |
 | Backend suite | unit hermetic (no DB) + integration on MySQL 8 |
 | SQL suite | every `tests/sql/` file runs clean against a database rebuilt from `schema.sql` |
-| Manifests | every rendered object matches the Kubernetes 1.29 API schema (strict) |
+| Manifests | every rendered object matches the Kubernetes 1.29 API schema (strict), and every built-in kube-linter check passes |
 | Dependency audit | `npm audit --audit-level=high` clean in both stacks |
 | Reproducibility | `npm ci` from committed `package-lock.json` only |
 
@@ -53,6 +53,7 @@ cd backend && npm run verify        # lint + format + typecheck + unit tests
 cd ../frontend && npm run verify    # lint + format + typecheck + coverage
 .\tests\run-sql-tests.ps1 -Fresh    # SQL checks against a rebuilt DB
 kubectl kustomize infrastructure/kubernetes | kubeconform -strict -summary
+kube-linter lint --add-all-built-in infrastructure/kubernetes
 docker compose up --build           # whole-stack parity check
 ```
 

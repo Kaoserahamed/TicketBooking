@@ -100,6 +100,15 @@ test('the manifests job validates rendered output in strict mode', () => {
   assert.match(block, /KUBECONFORM_VERSION: v\d+\.\d+\.\d+/);
 });
 
+test('the manifests job also lints for misconfigurations', () => {
+  const block = jobBlock(read(WORKFLOW_FILE), 'manifests');
+  // kube-linter is fetched from its pinned release tarball and run with every
+  // built-in check against the kustomize overlay.
+  assert.match(block, /KUBE_LINTER_VERSION: v\d+\.\d+\.\d+/);
+  assert.match(block, /kube-linter-linux\.tar\.gz/);
+  assert.match(block, /kube-linter lint --add-all-built-in infrastructure\/kubernetes/);
+});
+
 test('publishing an image waits for all four verification jobs', () => {
   const block = jobBlock(read(WORKFLOW_FILE), 'docker');
   const needs = /needs: \[([^\]]+)\]/.exec(block);
