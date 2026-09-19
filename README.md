@@ -8,10 +8,12 @@ A scalable ticket booking web application built with **MySQL**, **Node.js + Expr
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 20+ (both stacks pin it via `engines`; CI runs Node 20)
 - MySQL 8+
 - Redis
 - Docker (optional, for containerized development)
+- VS Code + Dev Containers extension (optional: one-click Node 20 environment,
+  see [`.devcontainer/devcontainer.json`](.devcontainer/devcontainer.json))
 
 ### Development Setup
 
@@ -161,7 +163,7 @@ Two further jobs guard the parts that are neither half:
 | Job | Runs | Fails when |
 |---|---|---|
 | Database — SQL suite | [`tests/run-sql-tests.ps1`](tests/run-sql-tests.ps1) `-Fresh` against a `mysql:8.0` service | any `ERROR <code>` in a `tests/sql/` script |
-| Infrastructure — manifest validation | `kubectl kustomize` then `kubeconform -strict` (Kubernetes 1.29 schemas) | a rendered object fails schema validation |
+| Infrastructure — manifest validation | `kubectl kustomize` then `kubeconform -strict` (Kubernetes 1.29 schemas) plus `kube-linter lint --add-all-built-in` | a rendered object fails schema validation or trips a lint check |
 
 Both are prerequisites for the container job, so a broken schema or manifest
 cannot publish an image.
