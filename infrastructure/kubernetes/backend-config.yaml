@@ -1,0 +1,25 @@
+# Non-secret backend configuration (docs/12-deployment.md).
+# Secrets (DB password, JWT secrets) live in backend-secrets.yaml — never put
+# them here.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tbs-backend-config
+  namespace: ticket-booking
+  labels:
+    app.kubernetes.io/name: backend
+    app.kubernetes.io/part-of: ticket-booking
+data:
+  NODE_ENV: "production"
+  PORT: "4000"
+  # Service DNS name of the MySQL StatefulSet service (same namespace).
+  DB_HOST: "mysql"
+  DB_PORT: "3306"
+  DB_USER: "tbs_app"
+  DB_NAME: "ticket_booking"
+  # Where account-recovery email links point (the public web origin).
+  APP_BASE_URL: "http://ticketbooking.local"
+  # Redis is optional (docs/08-infrastructure-caching.md). Leave empty to use
+  # in-process rate limiting; set to redis://redis:6379 when a Redis service
+  # exists in the namespace.
+  REDIS_URL: ""

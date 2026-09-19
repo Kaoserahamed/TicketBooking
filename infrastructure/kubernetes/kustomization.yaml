@@ -1,0 +1,20 @@
+# One-command deploy:  kubectl apply -k infrastructure/kubernetes
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: ticket-booking
+resources:
+  - namespace.yaml
+  - backend-config.yaml
+  - backend-secrets.yaml
+  - mysql-initdb-configmap.yaml
+  - mysql.yaml
+  - backend.yaml
+  - frontend.yaml
+  - ingress.yaml
+  - hpa.yaml
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: ticket-booking
+      app.kubernetes.io/managed-by: kustomize
+    includeSelectors: false
+    includeTemplates: true

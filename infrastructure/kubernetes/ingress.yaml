@@ -1,0 +1,31 @@
+# Ingress: single public entry point. /api does NOT terminate here — the
+# frontend pods proxy /api to the backend Service internally (same behavior
+# as the Vite dev proxy and the docker-compose nginx).
+# Requires an ingress controller, e.g.:
+#   helm upgrade --install ingress-nginx ingress-nginx \
+#     --repo https://kubernetes.github.io/ingress-nginx \
+#     -n ingress-nginx --create-namespace
+# Point ticketbooking.local at the controller's external IP (or use a real
+# DNS name + cert-manager for TLS).
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tbs-web
+  namespace: ticket-booking
+  labels:
+    app.kubernetes.io/part-of: ticket-booking
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 1m
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: ticketbooking.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80

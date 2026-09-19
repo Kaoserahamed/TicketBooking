@@ -1,0 +1,64 @@
+# Frontend web — static SPA behind nginx (image also reverse-proxies /api to
+# the `backend` Service). Deployment + ClusterIP Service.
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: ticket-booking
+  labels:
+    app.kubernetes.io/name: frontend
+    app.kubernetes.io/part-of: ticket-booking
+spec:
+  selector:
+    app.kubernetes.io/name: frontend
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: ticket-booking
+  labels:
+    app.kubernetes.io/name: frontend
+    app.kubernetes.io/part-of: ticket-booking
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: frontend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: frontend
+        app.kubernetes.io/part-of: ticket-booking
+    spec:
+      containers:
+        - name: frontend
+          # Published by the CI pipeline (ghcr.io/<repo>/frontend:latest).
+          image: ghcr.io/kaoserahamed/ticketbooking/frontend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 20

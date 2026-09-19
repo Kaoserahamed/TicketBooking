@@ -1,0 +1,101 @@
+# MySQL 8 — StatefulSet with a persistent volume and first-boot schema init.
+# The full schema (infrastructure/database/schema.sql) is delivered via the
+# tbs-mysql-initdb ConfigMap and executed by the official image entrypoint on
+# first boot only (empty datadir).
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: ticket-booking
+  labels:
+    app.kubernetes.io/name: mysql
+    app.kubernetes.io/part-of: ticket-booking
+spec:
+  # Headless: the StatefulSet pod is reached directly via its stable DNS name.
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: mysql
+  ports:
+    - name: mysql
+      port: 3306
+      targetPort: 3306
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql
+  namespace: ticket-booking
+  labels:
+    app.kubernetes.io/name: mysql
+    app.kubernetes.io/part-of: ticket-booking
+spec:
+  serviceName: mysql
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mysql
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mysql
+        app.kubernetes.io/part-of: ticket-booking
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          ports:
+            - containerPort: 3306
+              name: mysql
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: tbs-backend-secrets
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_DATABASE
+              value: "ticket_booking"
+            - name: MYSQL_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: tbs-backend-config
+                  key: DB_USER
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: tbs-backend-secrets
+                  key: DB_PASSWORD
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/mysql
+            - name: initdb
+              mountPath: /docker-entrypoint-initdb.d
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          readinessProbe:
+            exec:
+              command: ["mysqladmin", "ping", "-h", "127.0.0.1"]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 12
+          livenessProbe:
+            exec:
+              command: ["mysqladmin", "ping", "-h", "127.0.0.1"]
+            initialDelaySeconds: 60
+            periodSeconds: 20
+      volumes:
+        - name: initdb
+          configMap:
+            name: tbs-mysql-initdb
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 5Gi

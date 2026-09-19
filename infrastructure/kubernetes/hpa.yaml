@@ -1,0 +1,50 @@
+# Horizontal pod autoscalers (docs/13-scaling.md).
+# Requires metrics-server in the cluster:
+#   helm upgrade --install metrics-server metrics-server \
+#     --repo https://kubernetes-sigs.github.io/metrics-server/ \
+#     -n kube-system
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: backend
+  namespace: ticket-booking
+  labels:
+    app.kubernetes.io/name: backend
+    app.kubernetes.io/part-of: ticket-booking
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: backend
+  minReplicas: 2
+  maxReplicas: 6
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: frontend
+  namespace: ticket-booking
+  labels:
+    app.kubernetes.io/name: frontend
+    app.kubernetes.io/part-of: ticket-booking
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: frontend
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
