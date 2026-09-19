@@ -20,7 +20,7 @@ const REPO_ROOT = path.resolve(__dirname, '..', '..', '..');
 const WORKFLOW_FILE = path.join(REPO_ROOT, '.github', 'workflows', 'ci.yml');
 const DEPENDABOT_FILE = path.join(REPO_ROOT, '.github', 'dependabot.yml');
 
-const JOBS = ['backend', 'frontend', 'sql', 'manifests', 'docker'];
+const JOBS = ['backend', 'frontend', 'sql', 'manifests', 'fresh-clone', 'docker'];
 
 const read = (file) => fs.readFileSync(file, 'utf8');
 
@@ -117,7 +117,17 @@ test('the manifests job also lints for misconfigurations', () => {
   assert.match(block, /kube-linter lint --add-all-built-in infrastructure\/kubernetes/);
 });
 
-test('publishing an image waits for all four verification jobs', () => {
+test('the fresh-clone job proves the README recipe on a cold install', () => {
+  const block = jobBlock(read(WORKFLOW_FILE), 'fresh-clone');
+  // No services, no npm cache: this job is a machine that has never seen the repo.
+  assert.doesNotMatch(block, /services:/);
+  assert.doesNotMatch(block, /cache: npm/);
+  assert.match(block, /npm run setup/);
+  assert.match(block, /npm run verify:repo/);
+  assert.match(block, /npm run verify/);
+});
+
+test('publishing an image waits for all five verification jobs', () => {
   const block = jobBlock(read(WORKFLOW_FILE), 'docker');
   const needs = /needs: \[([^\]]+)\]/.exec(block);
   assert.ok(needs, 'the docker job must declare needs');
@@ -126,7 +136,7 @@ test('publishing an image waits for all four verification jobs', () => {
     .split(',')
     .map((name) => name.trim())
     .sort();
-  assert.deepEqual(required, ['backend', 'frontend', 'manifests', 'sql']);
+  assert.deepEqual(required, ['backend', 'fresh-clone', 'frontend', 'manifests', 'sql']);
 });
 
 test('actions are pinned to a release tag, never a branch', () => {
@@ -152,23 +162,26 @@ test('Dependabot covers both npm stacks on a weekly schedule', () => {
   const config = read(DEPENDABOT_FILE);
   assert.match(config, /^version: 2$/m);
 
-  ['"/backend"', '"/frontend"'].forEach((directory) => {
-    const entry = new RegExp(`package-ecosystem: "npm"\\s*\\n\\s*directory: ${directory}`);
+  ['/backend', '/frontend'].forEach((directory) => {
+    const entry = new RegExp(
+      `package-ecosystem: ['"]npm['"]\\s*\\n\\s*directory: ['"]${directory}['"]`
+    );
     assert.match(config, entry, `Dependabot must watch ${directory}`);
   });
 
-  const weekly = config.match(/interval: "weekly"/g) || [];
+  const weekly = config.match(/interval: ['"]weekly['"]/g) || [];
   assert.ok(weekly.length >= 2, 'both npm stacks should be checked weekly');
 });
 
 test('Dependabot also keeps the GitHub Actions pinned', () => {
   const config = read(DEPENDABOT_FILE);
-  assert.match(config, /package-ecosystem: "github-actions"\s*\n\s*directory: "\/"/);
+  assert.match(config, /package-ecosystem: ['"]github-actions['"]\s*\n\s*directory: ['"]\/['"]/);
 });
 
 test('minor and patch bumps are grouped, as the workflow docs claim', () => {
   const config = read(DEPENDABOT_FILE);
-  const groups = config.match(/update-types: \["minor", "patch"\]/g) || [];
-  assert.equal(groups.length, 2, 'each npm stack needs a minor/patch group');
+  const updateLines = config.match(/update-types:[^\n]*/g) || [];
+  const grouped = updateLines.filter((line) => line.includes('minor') && line.includes('patch'));
+  assert.equal(grouped.length, 2, 'each npm stack needs a minor/patch group');
   assert.match(config, /^\s+groups:$/m);
 });

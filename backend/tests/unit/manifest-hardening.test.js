@@ -148,7 +148,7 @@ test('committed secret values are obvious placeholders', () => {
 
   const entries = secretBodies[0]
     .split(/\r?\n/)
-    .map((line) => /^\s*([A-Z0-9_]+):\s*"?([^"]*)"?\s*$/.exec(line))
+    .map((line) => /^\s*([A-Z0-9_]+):\s*['"]?([^'"]*)['"]?\s*$/.exec(line))
     .filter(Boolean)
     .map(([, key, value]) => [key, value]);
 
@@ -170,7 +170,7 @@ test('the API pod is pinned to the unprivileged node user', () => {
   assert.match(manifest, /runAsUser: 1000/);
   assert.match(manifest, /runAsGroup: 1000/);
   assert.match(manifest, /allowPrivilegeEscalation: false/);
-  assert.match(manifest, /drop:\s*\["ALL"\]/, 'the container must drop every capability');
+  assert.match(manifest, /drop:\s*\[['"]ALL['"]\]/, 'the container must drop every capability');
 });
 
 test('MySQL keeps its data on a persistent volume', () => {

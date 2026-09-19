@@ -46,7 +46,9 @@ for (const line of ['', 'backend', 'frontend']) {
   }
   const lock = readJson(lockfile);
   if (lock.name !== manifest.name || lock.version !== manifest.version) {
-    fail(`${lockfile} describes ${lock.name}@${lock.version}, expected ${manifest.name}@${manifest.version}`);
+    fail(
+      `${lockfile} describes ${lock.name}@${lock.version}, expected ${manifest.name}@${manifest.version}`
+    );
   }
 }
 
