@@ -1,0 +1,38 @@
+{
+  "name": "ticket-booking-system",
+  "version": "0.1.2",
+  "private": true,
+  "description": "Ticket Booking System monorepo root: one-command install, test, lint and verification across the backend (Express + MySQL) and frontend (React + Vite) stacks. See README.md.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "setup": "npm ci && npm ci --prefix backend && npm ci --prefix frontend",
+    "test": "npm run test:unit && npm run test:web",
+    "test:unit": "node --test backend/tests/unit/",
+    "test:web": "npm --prefix frontend run test:run",
+    "test:integration": "npm --prefix backend run test:integration",
+    "test:coverage": "npm --prefix backend run test:coverage && npm --prefix frontend run test:coverage",
+    "test:all": "npm --prefix backend test && npm --prefix frontend run test:run",
+    "lint": "npm --prefix backend run lint && npm --prefix frontend run lint",
+    "typecheck": "npm --prefix backend run typecheck && npm --prefix frontend run typecheck",
+    "stack:test:up": "docker compose -f docker-compose.test.yml up -d",
+    "stack:test:down": "docker compose -f docker-compose.test.yml down -v",
+    "stack:up": "docker compose up --build"
+  },
+  "keywords": [
+    "ticket-booking",
+    "express",
+    "react",
+    "vite",
+    "mysql"
+  ],
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@eslint/js": "^9.16.0",
+    "eslint": "^9.16.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^15.0.0",
+    "prettier": "^3.9.8"
+  }
+}
