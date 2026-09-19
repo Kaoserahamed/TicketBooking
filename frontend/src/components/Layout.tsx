@@ -55,7 +55,7 @@ export default function Layout() {
               </div>
               {token && user ? (
                 <div className="flex items-center space-x-2">
-                  <span className="text-sm text-gray-700">{user.firstName}</span>
+                  <span className="text-sm text-gray-700">{user.name}</span>
                   <button
                     onClick={() => logout()}
                     className="px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
