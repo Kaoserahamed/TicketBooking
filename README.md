@@ -99,15 +99,20 @@ backend/
 │   │   ├── not-found.js
 │   │   └── error-handler.js
 │   ├── utils/                    # errors, password hashing, JWT, serializers
+│   │   ├── logger.js             # pino structured logging (LOG_LEVEL)
+│   │   ├── metrics.js            # prom-client registry + /metrics endpoint
+│   │   └── error-tracking.js     # optional Sentry wiring (SENTRY_DSN)
 │   ├── routes/
 │   │   ├── health.routes.js      # /health, /health/db
 │   │   ├── auth.routes.js        # /api/v1/auth/*
 │   │   └── admin.routes.js       # /api/v1/admin/*
 │   ├── app.js                    # Express app factory (testable)
 │   └── index.js                  # entry point - boots server, graceful shutdown
-└── tests/
-    ├── health.test.js            # connectivity smoke tests
-    └── auth.test.js              # authentication API tests
+├── tests/
+│   ├── unit/                     # no external services required
+│   └── integration/              # real Express app + real MySQL
+├── eslint.config.js              # ESLint 9 flat config
+└── tsconfig.json                 # typecheck-only config (`npm run typecheck`)
 ```
 
 Requests flow in one direction only — each layer has a single responsibility:
@@ -123,7 +128,33 @@ route -> validate -> controller -> service -> repository -> MySQL
 | `npm start` | Start the API on `http://localhost:4000` |
 | `npm run dev` | Start with auto-reload (`node --watch`) |
 | `npm run db:check` | Test the MySQL connection only; exits `1` on failure |
-| `npm test` | Run the API smoke tests (`node --test`) |
+| `npm run lint` | ESLint 9 (flat config) over `src/`, `scripts/` and `tests/` |
+| `npm run format:check` | Verify Prettier formatting (`npm run format` fixes it) |
+| `npm run typecheck` | `tsc --noEmit` over the JavaScript sources |
+| `npm run test:unit` | Unit tests only — no MySQL or Redis required |
+| `npm run test:integration` | End-to-end API tests against a real MySQL 8 instance |
+| `npm test` | Both suites (`tests/unit` + `tests/integration`) |
+| `npm run test:coverage` | Unit tests with the Node coverage report |
+| `npm run verify` | Lint + format + typecheck + unit tests — run before pushing |
+
+### Quality gates
+
+The same gates run in CI on every push and pull request
+([`.github/workflows/ci.yml`](.github/workflows/ci.yml)):
+
+| Gate | Backend | Frontend |
+|---|---|---|
+| Lint | `npm run lint` | `npm run lint` |
+| Formatting | `npm run format:check` | `npm run format:check` |
+| Typecheck | `npm run typecheck` | `npm run typecheck` |
+| Dependency audit | `npm audit --audit-level=high` | `npm audit --audit-level=high` |
+| Tests | `npm test` vs a real MySQL 8 service | `npm run test:coverage` |
+| Coverage floor | — | 90% lines/statements, 75% functions/branches |
+
+The frontend coverage floors are enforced by `vitest` thresholds in
+[`frontend/vite.config.ts`](frontend/vite.config.ts): a run that drops below any
+of them fails the job. Dependency updates are proposed weekly by
+[`.github/dependabot.yml`](.github/dependabot.yml).
 
 ### Verifying the connections
 
@@ -252,6 +283,31 @@ With `-Fresh` the runner recreates the database from
 [`infrastructure/database/schema.sql`](infrastructure/database/schema.sql), then runs
 each file in `tests/sql/` in order. A file FAILS when MySQL reports any error, and the
 script exits with code 0 only when all files pass.
+
+## Frontend (React + TypeScript + Vite)
+
+The SPA lives in `frontend/src` and talks to the API through a typed axios layer
+(`src/api/client.ts` and one module per resource) backed by Zustand stores. The
+client attaches the access token, retries once through `/auth/refresh` on a
+`401`, and drops the session when the refresh fails.
+
+### Scripts
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Vite dev server on `http://localhost:5173` (proxies `/api` to `:4000`) |
+| `npm run build` | Typecheck (`tsc -b`) then produce the production bundle |
+| `npm run preview` | Serve the built bundle locally |
+| `npm run lint` | ESLint 9 flat config + react-hooks / react-refresh rules |
+| `npm run format:check` | Verify Prettier formatting (`npm run format` fixes it) |
+| `npm run typecheck` | `tsc -b` with `strict` and `noUncheckedIndexedAccess` |
+| `npm run test` | Vitest in watch mode |
+| `npm run test:run` | Vitest single run (CI-style) |
+| `npm run test:coverage` | Single run with the enforced coverage floors |
+| `npm run verify` | Lint + format + typecheck + coverage — run before pushing |
+
+Tests live in [`frontend/src/test/`](frontend/src/test/) (Testing Library on
+`happy-dom`) and cover the pages, the API layer and the auth store.
 
 ## Documentation
 
