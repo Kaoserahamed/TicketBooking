@@ -23,13 +23,16 @@ npm test                 # both (CI backend job)
 | `tests/unit/app.test.js` | `/health`, `/metrics`, request-id, helmet, error envelope |
 | `tests/unit/config.test.js` | production secret guards, coercion, silent test logs |
 | `tests/unit/env-example.test.js` | every `process.env.X` documented in `.env.example` |
+| `tests/unit/test-stack.test.js` | `docker-compose.test.yml` + `backend/.env.test.example` stay in sync |
 | `tests/unit/error-*.test.js` | envelope shape + Sentry opt-in wiring |
 | `tests/unit/logger.test.js` | JSON shape, service/env fields, credential redaction |
 | `tests/unit/metrics.test.js` | route-pattern labels, token gate, disabled-mode passthrough |
 | `tests/integration/*.test.js` | register/login/refresh, holds, events, venues/shows over MySQL |
 
 Coverage is **enforced** on the frontend; backend unit tests are hermetic so
-they run anywhere. SQL checks (`tests/sql/*.sql` via
+they run anywhere. SQL checks (`tests/sql/*.sql` via `tests/run-sql-tests.ps1`)
+verify seed data, auth queries, the booking flow and the concurrency guards
+against a real MySQL, and run as their own CI job.
 
 ## Frontend (`frontend/`, Vitest + happy-dom)
 
@@ -60,7 +63,4 @@ floor down — that is the point. Type/lint gates run alongside: `npm run lint`,
 - `404` on a seeded row → ownership filter (intended — see isolation tests).
 - `400 VALIDATION_ERROR` → Zod rejected the payload; `errors[]` names the field.
 - `Duplicate entry` in SQL tests → DB already seeded; re-run with `-Fresh`.
-
-`tests/run-sql-tests.ps1`) verify seed, auth queries, booking flow, and the
-concurrency guards against a real MySQL.
 
