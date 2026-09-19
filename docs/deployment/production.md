@@ -30,6 +30,27 @@ curl -fsS http://localhost:4000/health
 curl -fsS http://localhost:8080/
 ```
 
+## Pod hardening
+
+The overlay is schema-validated in CI (`kubeconform -strict`), and the
+properties below are asserted by
+`backend/tests/unit/manifest-hardening.test.js` — a manifest edit that drops one
+of them fails the build instead of reaching a cluster:
+
+- Every container declares `resources.requests` **and** `resources.limits`
+  (the MySQL wait init container included).
+- Every workload declares both a `readinessProbe` and a `livenessProbe`.
+- No pod asks for `privileged`, `hostNetwork`, `hostPID`, `hostIPC` or a
+  `hostPath` volume.
+- The mutable `:latest` tag the pipeline publishes is always paired with
+  `imagePullPolicy: Always`, so a node never serves a stale layer.
+- `backend-secrets.yaml` holds `CHANGE-ME-*` placeholders only; real values come
+  from `kubectl create secret` or a secrets manager.
+- The API pod pins `runAsNonRoot: true` with `runAsUser`/`runAsGroup` `1000` to
+  match `backend/Dockerfile` (`USER node`), and drops all Linux capabilities.
+- MySQL keeps its data in a `volumeClaimTemplates` claim, never in the container
+  filesystem.
+
 ## Reverse proxy
 
 `frontend/nginx.conf` serves the static build and proxies `/api` to the

@@ -37,6 +37,14 @@ spec:
         app.kubernetes.io/name: backend
         app.kubernetes.io/part-of: ticket-booking
     spec:
+      # The API image already drops to the unprivileged `node` user
+      # (backend/Dockerfile -> USER node, UID 1000). Declaring it here makes the
+      # kubelet enforce it: runAsNonRoot alone cannot be verified against a
+      # named user, so the numeric ID is pinned too.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
       # Give MySQL a head start on cold boot; retry loop keeps pods pending
       # rather than crash-looping while the DB initializes its schema.
       initContainers:
@@ -53,11 +61,20 @@ spec:
             requests:
               cpu: 10m
               memory: 16Mi
+            limits:
+              cpu: 50m
+              memory: 32Mi
       containers:
         - name: backend
           # Published by the CI pipeline (ghcr.io/<repo>/backend:latest).
           image: ghcr.io/kaoserahamed/ticketbooking/backend:latest
           imagePullPolicy: Always
+          # The API only needs to listen on 4000, so it gets no Linux
+          # capabilities and cannot gain any through a setuid binary.
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           ports:
             - containerPort: 4000
               name: http
