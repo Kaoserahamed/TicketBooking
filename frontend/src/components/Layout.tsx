@@ -40,6 +40,16 @@ export default function Layout() {
                 >
                   Events
                 </NavLink>
+                <NavLink
+                  to="/venues"
+                  className={({ isActive }) =>
+                    `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                      isActive ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-gray-100'
+                    }`
+                  }
+                >
+                  Venues
+                </NavLink>
                 {token && (
                   <NavLink
                     to="/bookings"

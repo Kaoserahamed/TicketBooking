@@ -13,6 +13,8 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import ProfilePage from './pages/ProfilePage'
 import BookingsPage from './pages/BookingsPage'
+import VenuesPage from './pages/VenuesPage'
+import VenueDetailPage from './pages/VenueDetailPage'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { token } = useAuthStore()
@@ -39,6 +41,8 @@ export default function App() {
         <Route path="reset-password" element={<ResetPasswordPage />} />
         <Route path="profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         <Route path="bookings" element={<ProtectedRoute><BookingsPage /></ProtectedRoute>} />
+        <Route path="venues" element={<VenuesPage />} />
+        <Route path="venues/:id" element={<VenueDetailPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
