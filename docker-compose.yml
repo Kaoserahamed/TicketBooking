@@ -1,0 +1,70 @@
+# Ticket Booking System — full local stack (docs/12-deployment.md).
+#
+#   docker compose up --build
+#     web:      http://localhost:8080   (nginx → SPA + /api proxy)
+#     api:      http://localhost:4000   (backend, optional direct access)
+#     mysql:    internal, schema auto-loaded from
+#               infrastructure/database/schema.sql on first start
+#
+# Secrets: compose defaults are development-only placeholders. Override them
+# via a root .env file (never committed) or the environment when running this
+# outside a laptop — NODE_ENV=production makes config/env.js refuse dev secrets.
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: tbs-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-dev-root-password}
+      MYSQL_DATABASE: ${DB_NAME:-ticket_booking}
+      MYSQL_USER: ${DB_USER:-tbs_app}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-dev-db-password}
+    volumes:
+      - mysql-data:/var/lib/mysql
+      # First-boot initialization: full schema + reference data.
+      - ./infrastructure/database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-p${DB_PASSWORD:-dev-db-password}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    # Not published to the host by default — only the backend talks to it.
+    expose:
+      - "3306"
+
+  backend:
+    build: ./backend
+    container_name: tbs-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 4000
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: ${DB_USER:-tbs_app}
+      DB_PASSWORD: ${DB_PASSWORD:-dev-db-password}
+      DB_NAME: ${DB_NAME:-ticket_booking}
+      JWT_SECRET: ${JWT_SECRET:-dev-only-access-secret-change-me}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev-only-refresh-secret-change-me}
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:8080}
+      # Optional: set REDIS_URL=redis://redis:6379 to enable shared rate limiting.
+      REDIS_URL: ${REDIS_URL:-}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "${BACKEND_PORT:-4000}:4000"
+
+  frontend:
+    build: ./frontend
+    container_name: tbs-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-8080}:80"
+
+volumes:
+  mysql-data:

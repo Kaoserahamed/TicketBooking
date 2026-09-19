@@ -1,0 +1,12 @@
+# Keep the build context small — dist is rebuilt inside the image.
+node_modules
+dist
+.env
+.env.*
+npm-debug.log*
+coverage
+test-output.log
+build-output.log
+.git
+Dockerfile
+.dockerignore
