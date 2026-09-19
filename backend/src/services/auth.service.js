@@ -101,7 +101,6 @@ async function issueTokens(user, meta = {}) {
   };
 }
 
-
 /**
  * Register a new account (POST /api/v1/auth/register).
  *
@@ -118,10 +117,16 @@ async function register(input, meta = {}) {
 
   // Friendly, specific conflicts (the UNIQUE constraints are the real guard).
   if (await userRepository.findByEmail(email)) {
-    throw new ConflictError('An account with this email already exists', 'EMAIL_ALREADY_REGISTERED');
+    throw new ConflictError(
+      'An account with this email already exists',
+      'EMAIL_ALREADY_REGISTERED'
+    );
   }
   if (phone && (await userRepository.findByPhone(phone))) {
-    throw new ConflictError('An account with this phone number already exists', 'PHONE_ALREADY_REGISTERED');
+    throw new ConflictError(
+      'An account with this phone number already exists',
+      'PHONE_ALREADY_REGISTERED'
+    );
   }
 
   const passwordHash = await hashPassword(input.password);
@@ -192,7 +197,8 @@ async function login(input, meta = {}) {
  * @returns {Promise<{user: object, tokens: object}>}
  */
 async function refresh(input, meta = {}) {
-  const invalid = () => new UnauthorizedError('Invalid or expired refresh token', 'INVALID_REFRESH_TOKEN');
+  const invalid = () =>
+    new UnauthorizedError('Invalid or expired refresh token', 'INVALID_REFRESH_TOKEN');
 
   let payload;
   try {

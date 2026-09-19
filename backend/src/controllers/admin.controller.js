@@ -55,7 +55,11 @@ async function adminCreateSeat(req, res) {
 
 /** PUT /api/v1/admin/venues/:id/seats/:seatId */
 async function adminUpdateSeat(req, res) {
-  const seat = await venueService.updateSeat(req.validatedParams.id, req.validatedParams.seatId, req.body);
+  const seat = await venueService.updateSeat(
+    req.validatedParams.id,
+    req.validatedParams.seatId,
+    req.body
+  );
   res.json({ status: 'ok', seat });
 }
 

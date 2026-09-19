@@ -9,12 +9,14 @@ const { required } = require('./fields');
 
 /** POST /api/v1/bookings/hold */
 const holdBookingSchema = z.object({
-  showId: z.number(required('Show ID'))
+  showId: z
+    .number(required('Show ID'))
     .int('Show ID must be an integer')
     .positive('Show ID must be positive'),
-  seatIds: z.array(z.number().int().positive(), {
-    message: 'seatIds must be an array of seat IDs',
-  })
+  seatIds: z
+    .array(z.number().int().positive(), {
+      message: 'seatIds must be an array of seat IDs',
+    })
     .min(1, 'At least one seat is required')
     .max(20, 'At most 20 seats can be held at once'),
   idempotencyKey: z.string().max(255).optional(),

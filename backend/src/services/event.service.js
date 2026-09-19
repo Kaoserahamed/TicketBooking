@@ -39,7 +39,8 @@ async function updateEvent(id, changes) {
   const norm = {};
   if (changes.name !== undefined) norm.name = String(changes.name).trim();
   if (changes.description !== undefined) {
-    norm.description = changes.description === null ? null : String(changes.description).trim() || null;
+    norm.description =
+      changes.description === null ? null : String(changes.description).trim() || null;
   }
   if (changes.category !== undefined) {
     norm.category = changes.category === null ? null : String(changes.category).trim() || null;
@@ -50,6 +51,16 @@ async function updateEvent(id, changes) {
   return toEvent(await eventRepository.findById(id));
 }
 function pagingOf(f = {}) {
-  return { limit: Number.isInteger(f.limit) ? f.limit : 20, offset: Number.isInteger(f.offset) ? f.offset : 0 };
+  return {
+    limit: Number.isInteger(f.limit) ? f.limit : 20,
+    offset: Number.isInteger(f.offset) ? f.offset : 0,
+  };
 }
-module.exports = { listPublic, getPublicById, listShowsForEvent, listAdmin, createEvent, updateEvent };
+module.exports = {
+  listPublic,
+  getPublicById,
+  listShowsForEvent,
+  listAdmin,
+  createEvent,
+  updateEvent,
+};

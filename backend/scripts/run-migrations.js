@@ -20,7 +20,14 @@ const mysql = require('mysql2/promise');
 
 const config = require('../src/config/env');
 
-const migrationsDir = path.resolve(__dirname, '..', '..', 'infrastructure', 'database', 'migrations');
+const migrationsDir = path.resolve(
+  __dirname,
+  '..',
+  '..',
+  'infrastructure',
+  'database',
+  'migrations'
+);
 
 const CREATE_TRACKING_TABLE = `
   CREATE TABLE IF NOT EXISTS schema_migrations (
@@ -43,7 +50,9 @@ async function main() {
   console.log('---------------------------------------------------------');
   console.log(' Ticket Booking System - database migrations');
   console.log('---------------------------------------------------------');
-  console.log(` database : ${config.database.name} @ ${config.database.host}:${config.database.port}`);
+  console.log(
+    ` database : ${config.database.name} @ ${config.database.host}:${config.database.port}`
+  );
   console.log(` files    : ${files.length}`);
   console.log('---------------------------------------------------------');
 

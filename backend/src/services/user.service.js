@@ -93,7 +93,10 @@ async function updateProfile(userId, changes) {
     if (email !== current.email) {
       const existing = await userRepository.findByEmail(email);
       if (existing && Number(existing.id) !== Number(userId)) {
-        throw new ConflictError('An account with this email already exists', 'EMAIL_ALREADY_REGISTERED');
+        throw new ConflictError(
+          'An account with this email already exists',
+          'EMAIL_ALREADY_REGISTERED'
+        );
       }
       updates.email = email;
       emailChanged = true;
@@ -105,7 +108,10 @@ async function updateProfile(userId, changes) {
     if (phone && phone !== current.phone) {
       const existing = await userRepository.findByPhone(phone);
       if (existing && Number(existing.id) !== Number(userId)) {
-        throw new ConflictError('An account with this phone number already exists', 'PHONE_ALREADY_REGISTERED');
+        throw new ConflictError(
+          'An account with this phone number already exists',
+          'PHONE_ALREADY_REGISTERED'
+        );
       }
     }
     if (phone !== current.phone) {
@@ -119,7 +125,10 @@ async function updateProfile(userId, changes) {
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         const field = /phone/i.test(error.message) ? 'phone number' : 'email';
-        throw new ConflictError(`An account with this ${field} already exists`, 'DUPLICATE_ACCOUNT');
+        throw new ConflictError(
+          `An account with this ${field} already exists`,
+          'DUPLICATE_ACCOUNT'
+        );
       }
       throw error;
     }

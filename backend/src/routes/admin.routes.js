@@ -28,7 +28,11 @@ const {
   updateSeatSchema,
   seatParamSchema,
 } = require('../validators/venue.validator');
-const { createShowSchema, updateShowSchema, showIdParamSchema } = require('../validators/show.validator');
+const {
+  createShowSchema,
+  updateShowSchema,
+  showIdParamSchema,
+} = require('../validators/show.validator');
 const { listBookingsQuerySchema } = require('../validators/booking.validator');
 const asyncHandler = require('../utils/async-handler');
 

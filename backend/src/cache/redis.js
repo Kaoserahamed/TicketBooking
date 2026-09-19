@@ -52,9 +52,7 @@ async function getRedisClient() {
     console.log(`[redis] connected to ${config.cache.url}`);
     client = candidate;
   } catch (error) {
-    console.warn(
-      `[redis] unavailable (${error.message}) - falling back to in-process behaviour`
-    );
+    console.warn(`[redis] unavailable (${error.message}) - falling back to in-process behaviour`);
     try {
       await candidate.disconnect();
     } catch (disconnectError) {

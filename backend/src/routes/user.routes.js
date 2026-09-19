@@ -19,7 +19,12 @@ const router = express.Router();
 
 // Declared before '/:id' so "me" is never parsed as an id.
 router.get('/me', authenticate, asyncHandler(userController.me));
-router.put('/me', authenticate, validate(updateProfileSchema), asyncHandler(userController.updateMe));
+router.put(
+  '/me',
+  authenticate,
+  validate(updateProfileSchema),
+  asyncHandler(userController.updateMe)
+);
 
 // Rate limited: verifying the current password is a brute-force target.
 router.put(

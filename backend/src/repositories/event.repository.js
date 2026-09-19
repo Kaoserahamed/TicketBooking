@@ -8,9 +8,17 @@ const PUBLIC_STATUSES = ['PUBLISHED', 'ACTIVE'];
 function buildPublicFilter(filters = {}) {
   const conditions = [];
   const params = [];
-  if (filters.status) { conditions.push('status = ?'); params.push(filters.status); }
-  else { conditions.push('status IN (?, ?)'); params.push(...PUBLIC_STATUSES); }
-  if (filters.category) { conditions.push('category = ?'); params.push(filters.category); }
+  if (filters.status) {
+    conditions.push('status = ?');
+    params.push(filters.status);
+  } else {
+    conditions.push('status IN (?, ?)');
+    params.push(...PUBLIC_STATUSES);
+  }
+  if (filters.category) {
+    conditions.push('category = ?');
+    params.push(filters.category);
+  }
   if (filters.search) {
     const like = `%${filters.search}%`;
     conditions.push('(name LIKE ? OR description LIKE ?)');
@@ -37,7 +45,9 @@ async function findPublicById(id) {
   return rows[0] ?? null;
 }
 async function findById(id) {
-  const [rows] = await pool.execute(`SELECT ${EVENT_COLUMNS} FROM events WHERE id = ? LIMIT 1`, [id]);
+  const [rows] = await pool.execute(`SELECT ${EVENT_COLUMNS} FROM events WHERE id = ? LIMIT 1`, [
+    id,
+  ]);
   return rows[0] ?? null;
 }
 async function listShowsForEvent(eventId, paging = {}) {
@@ -51,14 +61,22 @@ async function listShowsForEvent(eventId, paging = {}) {
       WHERE s.event_id = ? ORDER BY s.start_time ASC LIMIT ${limit} OFFSET ${offset}`,
     [eventId]
   );
-  const [c] = await pool.execute('SELECT COUNT(*) AS total FROM shows WHERE event_id = ?', [eventId]);
+  const [c] = await pool.execute('SELECT COUNT(*) AS total FROM shows WHERE event_id = ?', [
+    eventId,
+  ]);
   return { rows, total: Number(c[0].total) };
 }
 async function listAdmin(filters = {}) {
   const conditions = [];
   const params = [];
-  if (filters.status) { conditions.push('status = ?'); params.push(filters.status); }
-  if (filters.category) { conditions.push('category = ?'); params.push(filters.category); }
+  if (filters.status) {
+    conditions.push('status = ?');
+    params.push(filters.status);
+  }
+  if (filters.category) {
+    conditions.push('category = ?');
+    params.push(filters.category);
+  }
   if (filters.search) {
     const like = `%${filters.search}%`;
     conditions.push('(name LIKE ? OR description LIKE ?)');
@@ -77,20 +95,44 @@ async function listAdmin(filters = {}) {
 async function create(input) {
   const [r] = await pool.execute(
     `INSERT INTO events (name, description, category, poster_url, status) VALUES (?, ?, ?, ?, ?)`,
-    [input.name, input.description ?? null, input.category ?? null, input.posterUrl ?? null, input.status || 'DRAFT']
+    [
+      input.name,
+      input.description ?? null,
+      input.category ?? null,
+      input.posterUrl ?? null,
+      input.status || 'DRAFT',
+    ]
   );
   return r.insertId;
 }
 async function update(id, changes) {
-  const map = { name: 'name', description: 'description', category: 'category', posterUrl: 'poster_url', status: 'status' };
+  const map = {
+    name: 'name',
+    description: 'description',
+    category: 'category',
+    posterUrl: 'poster_url',
+    status: 'status',
+  };
   const sets = [];
   const params = [];
   for (const [k, col] of Object.entries(map)) {
-    if (changes[k] !== undefined) { sets.push(`${col} = ?`); params.push(changes[k]); }
+    if (changes[k] !== undefined) {
+      sets.push(`${col} = ?`);
+      params.push(changes[k]);
+    }
   }
   if (!sets.length) return false;
   params.push(id);
   const [r] = await pool.execute(`UPDATE events SET ${sets.join(', ')} WHERE id = ?`, params);
   return r.affectedRows > 0;
 }
-module.exports = { PUBLIC_STATUSES, listPublic, findPublicById, findById, listShowsForEvent, listAdmin, create, update };
+module.exports = {
+  PUBLIC_STATUSES,
+  listPublic,
+  findPublicById,
+  findById,
+  listShowsForEvent,
+  listAdmin,
+  create,
+  update,
+};

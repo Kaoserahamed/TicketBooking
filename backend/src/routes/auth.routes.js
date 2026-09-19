@@ -33,12 +33,7 @@ router.post(
 );
 
 // POST /api/v1/auth/login - exchange credentials for a token pair
-router.post(
-  '/login',
-  authRateLimiter(),
-  validate(loginSchema),
-  asyncHandler(authController.login)
-);
+router.post('/login', authRateLimiter(), validate(loginSchema), asyncHandler(authController.login));
 
 // POST /api/v1/auth/refresh - rotate the refresh token
 router.post(

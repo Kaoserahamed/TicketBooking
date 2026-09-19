@@ -10,5 +10,9 @@ const router = express.Router();
 router.get('/', validate(listShowsQuerySchema, 'query'), asyncHandler(c.listShows));
 router.get('/:id', validate(showIdParamSchema, 'params'), asyncHandler(c.getShow));
 router.get('/:id/seats', validate(showIdParamSchema, 'params'), asyncHandler(c.seatMap));
-router.get('/:id/availability', validate(showIdParamSchema, 'params'), asyncHandler(c.availability));
+router.get(
+  '/:id/availability',
+  validate(showIdParamSchema, 'params'),
+  asyncHandler(c.availability)
+);
 module.exports = router;

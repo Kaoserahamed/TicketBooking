@@ -44,9 +44,7 @@ const authenticate = asyncHandler(async (req, res, next) => {
     payload = verifyAccessToken(token);
   } catch (error) {
     const message =
-      error.name === 'TokenExpiredError'
-        ? 'Access token has expired'
-        : 'Invalid access token';
+      error.name === 'TokenExpiredError' ? 'Access token has expired' : 'Invalid access token';
     throw new UnauthorizedError(message, 'INVALID_ACCESS_TOKEN');
   }
 

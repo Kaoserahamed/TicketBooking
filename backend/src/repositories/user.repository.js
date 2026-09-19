@@ -24,10 +24,9 @@ const PUBLIC_COLUMNS =
  * @returns {Promise<object|null>} row including `password_hash`
  */
 async function findByEmail(email) {
-  const [rows] = await pool.execute(
-    `SELECT ${AUTH_COLUMNS} FROM users WHERE email = ? LIMIT 1`,
-    [email]
-  );
+  const [rows] = await pool.execute(`SELECT ${AUTH_COLUMNS} FROM users WHERE email = ? LIMIT 1`, [
+    email,
+  ]);
   return rows[0] ?? null;
 }
 
@@ -38,10 +37,9 @@ async function findByEmail(email) {
  * @returns {Promise<object|null>} row without `password_hash`
  */
 async function findById(id) {
-  const [rows] = await pool.execute(
-    `SELECT ${PUBLIC_COLUMNS} FROM users WHERE id = ? LIMIT 1`,
-    [id]
-  );
+  const [rows] = await pool.execute(`SELECT ${PUBLIC_COLUMNS} FROM users WHERE id = ? LIMIT 1`, [
+    id,
+  ]);
   return rows[0] ?? null;
 }
 
@@ -52,10 +50,9 @@ async function findById(id) {
  * @returns {Promise<object|null>}
  */
 async function findByPhone(phone) {
-  const [rows] = await pool.execute(
-    `SELECT ${PUBLIC_COLUMNS} FROM users WHERE phone = ? LIMIT 1`,
-    [phone]
-  );
+  const [rows] = await pool.execute(`SELECT ${PUBLIC_COLUMNS} FROM users WHERE phone = ? LIMIT 1`, [
+    phone,
+  ]);
   return rows[0] ?? null;
 }
 
@@ -117,10 +114,7 @@ async function list(filters = {}) {
  * @returns {Promise<object|null>}
  */
 async function findAuthById(id) {
-  const [rows] = await pool.execute(
-    `SELECT ${AUTH_COLUMNS} FROM users WHERE id = ? LIMIT 1`,
-    [id]
-  );
+  const [rows] = await pool.execute(`SELECT ${AUTH_COLUMNS} FROM users WHERE id = ? LIMIT 1`, [id]);
   return rows[0] ?? null;
 }
 
@@ -170,10 +164,10 @@ async function updateProfile(id, changes) {
  * @returns {Promise<boolean>}
  */
 async function updatePassword(id, passwordHash) {
-  const [result] = await pool.execute(
-    'UPDATE users SET password_hash = ? WHERE id = ?',
-    [passwordHash, id]
-  );
+  const [result] = await pool.execute('UPDATE users SET password_hash = ? WHERE id = ?', [
+    passwordHash,
+    id,
+  ]);
   return result.affectedRows > 0;
 }
 
@@ -201,10 +195,9 @@ async function markEmailVerified(id) {
  * @returns {Promise<boolean>}
  */
 async function clearEmailVerified(id) {
-  const [result] = await pool.execute(
-    'UPDATE users SET email_verified_at = NULL WHERE id = ?',
-    [id]
-  );
+  const [result] = await pool.execute('UPDATE users SET email_verified_at = NULL WHERE id = ?', [
+    id,
+  ]);
   return result.affectedRows > 0;
 }
 

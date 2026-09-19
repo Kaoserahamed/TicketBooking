@@ -24,10 +24,22 @@ const SHOW_DETAIL_SELECT = `s.id, s.event_id, s.venue_id, s.start_time, s.end_ti
 async function list(filters = {}) {
   const conditions = [];
   const params = [];
-  if (filters.eventId) { conditions.push('s.event_id = ?'); params.push(filters.eventId); }
-  if (filters.venueId) { conditions.push('s.venue_id = ?'); params.push(filters.venueId); }
-  if (filters.status) { conditions.push('s.status = ?'); params.push(filters.status); }
-  if (filters.upcoming) { conditions.push(`s.status = 'SCHEDULED'`); conditions.push('s.start_time > NOW()'); }
+  if (filters.eventId) {
+    conditions.push('s.event_id = ?');
+    params.push(filters.eventId);
+  }
+  if (filters.venueId) {
+    conditions.push('s.venue_id = ?');
+    params.push(filters.venueId);
+  }
+  if (filters.status) {
+    conditions.push('s.status = ?');
+    params.push(filters.status);
+  }
+  if (filters.upcoming) {
+    conditions.push(`s.status = 'SCHEDULED'`);
+    conditions.push('s.start_time > NOW()');
+  }
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
   const limit = Number.isInteger(filters.limit) ? filters.limit : 20;
   const offset = Number.isInteger(filters.offset) ? filters.offset : 0;
@@ -57,7 +69,13 @@ async function create(input) {
   try {
     const [r] = await pool.execute(
       `INSERT INTO shows (event_id, venue_id, start_time, end_time, status) VALUES (?, ?, ?, ?, ?)`,
-      [input.eventId, input.venueId, toMysqlDatetime(input.startTime), toMysqlDatetime(input.endTime), input.status || 'SCHEDULED']
+      [
+        input.eventId,
+        input.venueId,
+        toMysqlDatetime(input.startTime),
+        toMysqlDatetime(input.endTime),
+        input.status || 'SCHEDULED',
+      ]
     );
     return r.insertId;
   } catch (e) {
@@ -74,7 +92,10 @@ async function update(id, changes) {
   const sets = [];
   const params = [];
   for (const [k, col] of Object.entries(map)) {
-    if (changes[k] !== undefined) { sets.push(`${col} = ?`); params.push(changes[k]); }
+    if (changes[k] !== undefined) {
+      sets.push(`${col} = ?`);
+      params.push(changes[k]);
+    }
   }
   if (!sets.length) return false;
   for (const [k] of Object.entries(map)) {
@@ -147,7 +168,21 @@ async function provisionInventory(showId, defaultPrice) {
   return r.affectedRows;
 }
 async function countInventory(showId) {
-  const [rows] = await pool.execute('SELECT COUNT(*) AS c FROM show_seats WHERE show_id = ?', [showId]);
+  const [rows] = await pool.execute('SELECT COUNT(*) AS c FROM show_seats WHERE show_id = ?', [
+    showId,
+  ]);
   return Number(rows[0].c);
 }
-module.exports = { SHOW_STATUSES, list, findById, findDetailById, create, update, seatMap, availabilityByRow, availabilityTotals, provisionInventory, countInventory };
+module.exports = {
+  SHOW_STATUSES,
+  list,
+  findById,
+  findDetailById,
+  create,
+  update,
+  seatMap,
+  availabilityByRow,
+  availabilityTotals,
+  provisionInventory,
+  countInventory,
+};

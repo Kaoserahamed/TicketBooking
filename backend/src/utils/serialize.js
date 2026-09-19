@@ -251,9 +251,10 @@ function toBooking(row, items = []) {
         capacity: Number(row.venue_capacity),
       },
     },
-    user: row.user_name != null
-      ? { id: Number(row.user_id), name: row.user_name, email: row.user_email }
-      : null,
+    user:
+      row.user_name != null
+        ? { id: Number(row.user_id), name: row.user_name, email: row.user_email }
+        : null,
     items: items.map(toBookingItem),
   };
 }
@@ -270,17 +271,29 @@ function toBookingItem(row) {
     id: Number(row.id),
     bookingId: Number(row.booking_id),
     showSeatId: Number(row.show_seat_id),
-    seat: row.row_number != null
-      ? {
-          id: Number(row.seat_id),
-          row: row.row_number,
-          number: row.seat_number,
-          label: `${row.row_number}${row.seat_number}`,
-          seatType: row.seat_type,
-        }
-      : { id: Number(row.seat_id) },
+    seat:
+      row.row_number != null
+        ? {
+            id: Number(row.seat_id),
+            row: row.row_number,
+            number: row.seat_number,
+            label: `${row.row_number}${row.seat_number}`,
+            seatType: row.seat_type,
+          }
+        : { id: Number(row.seat_id) },
     price: Number(row.price),
   };
 }
 
-module.exports = { toPublicUser, toEvent, toShow, toVenue, toSeat, toShowDetail, toShowSeat, toAvailability, toBooking, toBookingItem };
+module.exports = {
+  toPublicUser,
+  toEvent,
+  toShow,
+  toVenue,
+  toSeat,
+  toShowDetail,
+  toShowSeat,
+  toAvailability,
+  toBooking,
+  toBookingItem,
+};

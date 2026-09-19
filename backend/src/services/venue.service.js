@@ -45,7 +45,10 @@ async function createSeat(venueId, input) {
   await requireVenue(venueId);
   try {
     const id = await venueRepository.createSeat({
-      venueId, rowNumber: String(input.rowNumber).trim(), seatNumber: String(input.seatNumber).trim(), seatType: input.seatType || 'REGULAR',
+      venueId,
+      rowNumber: String(input.rowNumber).trim(),
+      seatNumber: String(input.seatNumber).trim(),
+      seatType: input.seatType || 'REGULAR',
     });
     return toSeat(await venueRepository.findSeatById(id));
   } catch (e) {
@@ -59,7 +62,8 @@ async function updateSeat(venueId, seatId, changes) {
   if (!seat || Number(seat.venue_id) !== Number(venueId)) {
     throw new NotFoundError('Seat not found in this venue', 'SEAT_NOT_FOUND');
   }
-  if (changes.seatType !== undefined) await venueRepository.updateSeat(seatId, { seatType: changes.seatType });
+  if (changes.seatType !== undefined)
+    await venueRepository.updateSeat(seatId, { seatType: changes.seatType });
   return toSeat(await venueRepository.findSeatById(seatId));
 }
 async function deleteSeat(venueId, seatId) {
@@ -76,6 +80,18 @@ async function requireVenue(id) {
   return row;
 }
 function pagingOf(f = {}, dflt = 20) {
-  return { limit: Number.isInteger(f.limit) ? f.limit : dflt, offset: Number.isInteger(f.offset) ? f.offset : 0 };
+  return {
+    limit: Number.isInteger(f.limit) ? f.limit : dflt,
+    offset: Number.isInteger(f.offset) ? f.offset : 0,
+  };
 }
-module.exports = { listVenues, getVenue, createVenue, updateVenue, listSeats, createSeat, updateSeat, deleteSeat };
+module.exports = {
+  listVenues,
+  getVenue,
+  createVenue,
+  updateVenue,
+  listSeats,
+  createSeat,
+  updateSeat,
+  deleteSeat,
+};

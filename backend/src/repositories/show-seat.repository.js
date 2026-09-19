@@ -9,8 +9,6 @@
  * Read paths stay in src/repositories/show.repository.js; this module owns writes.
  */
 
-const { pool } = require('../database/pool');
-
 /** Atomically move AVAILABLE seats into HELD inside one show.
  *
  * @param {import('mysql2/promise').Connection} conn
@@ -25,7 +23,7 @@ async function holdSeats(conn, showId, seatIds, holdToken, holdExpiresAt) {
     `UPDATE show_seats
         SET status = 'HELD', hold_token = ?, hold_expires_at = ?, booking_id = NULL
       WHERE show_id = ? AND seat_id IN (${seatIds.map(() => '?').join(',')}) AND status = 'AVAILABLE'`,
-        [holdToken, holdExpiresAt.toISOString().slice(0, 19).replace('T', ' '), showId, ...seatIds]
+    [holdToken, holdExpiresAt.toISOString().slice(0, 19).replace('T', ' '), showId, ...seatIds]
   );
 
   const held = Number(upd.affectedRows);

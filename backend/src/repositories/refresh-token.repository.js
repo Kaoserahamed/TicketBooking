@@ -102,7 +102,9 @@ async function revokeAllForUser(userId) {
  * @returns {Promise<number>} number of deleted rows
  */
 async function deleteExpired() {
-  const [result] = await pool.execute('DELETE FROM refresh_tokens WHERE expires_at < UTC_TIMESTAMP()');
+  const [result] = await pool.execute(
+    'DELETE FROM refresh_tokens WHERE expires_at < UTC_TIMESTAMP()'
+  );
   return result.affectedRows;
 }
 

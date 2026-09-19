@@ -12,7 +12,7 @@ const { pool } = require('../database/pool');
 
 const BOOKING_COLUMNS =
   'b.id, b.user_id, b.show_id, b.booking_reference, b.idempotency_key, ' +
-  "b.status, b.subtotal, b.discount, b.total_amount, b.currency, " +
+  'b.status, b.subtotal, b.discount, b.total_amount, b.currency, ' +
   'b.expires_at, b.created_at, b.updated_at';
 
 /**
@@ -20,7 +20,7 @@ const BOOKING_COLUMNS =
  */
 async function findById(id) {
   const [rows] = await pool.execute(
-        `SELECT
+    `SELECT
         ${BOOKING_COLUMNS},
         s.event_id, s.venue_id,
         s.start_time AS show_start_time, s.end_time AS show_end_time, s.status AS show_status,
@@ -134,7 +134,7 @@ async function listAll(filters = {}) {
  */
 async function findItemsByBookingId(bookingId) {
   const [rows] = await pool.execute(
-        `SELECT bi.id, bi.booking_id, bi.show_seat_id, bi.price,
+    `SELECT bi.id, bi.booking_id, bi.show_seat_id, bi.price,
             s.id AS seat_id, s.row_number, s.seat_number, s.seat_type
       FROM booking_items bi
       JOIN show_seats ss ON ss.id = bi.show_seat_id

@@ -4,10 +4,19 @@
 const express = require('express');
 const c = require('../controllers/event.controller');
 const validate = require('../middlewares/validate');
-const { listEventsQuerySchema, eventIdParamSchema, listShowsQuerySchema } = require('../validators/event.validator');
+const {
+  listEventsQuerySchema,
+  eventIdParamSchema,
+  listShowsQuerySchema,
+} = require('../validators/event.validator');
 const asyncHandler = require('../utils/async-handler');
 const router = express.Router();
 router.get('/', validate(listEventsQuerySchema, 'query'), asyncHandler(c.listEvents));
 router.get('/:id', validate(eventIdParamSchema, 'params'), asyncHandler(c.getEvent));
-router.get('/:id/shows', validate(eventIdParamSchema, 'params'), validate(listShowsQuerySchema, 'query'), asyncHandler(c.listShows));
+router.get(
+  '/:id/shows',
+  validate(eventIdParamSchema, 'params'),
+  validate(listShowsQuerySchema, 'query'),
+  asyncHandler(c.listShows)
+);
 module.exports = router;

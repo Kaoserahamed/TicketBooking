@@ -26,11 +26,24 @@ async function adminCreateSeat(req, res) {
   res.status(201).json({ status: 'ok', seat });
 }
 async function adminUpdateSeat(req, res) {
-  const seat = await venueService.updateSeat(req.validatedParams.id, req.validatedParams.seatId, req.body);
+  const seat = await venueService.updateSeat(
+    req.validatedParams.id,
+    req.validatedParams.seatId,
+    req.body
+  );
   res.json({ status: 'ok', seat });
 }
 async function adminDeleteSeat(req, res) {
   await venueService.deleteSeat(req.validatedParams.id, req.validatedParams.seatId);
   res.json({ status: 'ok', message: 'Seat deleted' });
 }
-module.exports = { listVenues, getVenue, listSeats, adminCreateVenue, adminUpdateVenue, adminCreateSeat, adminUpdateSeat, adminDeleteSeat };
+module.exports = {
+  listVenues,
+  getVenue,
+  listSeats,
+  adminCreateVenue,
+  adminUpdateVenue,
+  adminCreateSeat,
+  adminUpdateSeat,
+  adminDeleteSeat,
+};

@@ -21,12 +21,7 @@ const asyncHandler = require('../utils/async-handler');
 const router = express.Router();
 
 // POST /api/v1/bookings/hold — hold seats (idempotency via Idempotency-Key)
-router.post(
-  '/hold',
-  authenticate,
-  validate(holdBookingSchema),
-  asyncHandler(c.holdBooking)
-);
+router.post('/hold', authenticate, validate(holdBookingSchema), asyncHandler(c.holdBooking));
 
 // GET /api/v1/bookings/:id — own booking or admin
 router.get(

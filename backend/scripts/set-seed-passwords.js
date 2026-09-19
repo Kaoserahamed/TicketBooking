@@ -59,7 +59,9 @@ async function main() {
     );
 
     // Prove the stored hash really matches before moving on.
-    const [check] = await pool.execute('SELECT password_hash FROM users WHERE id = ?', [rows[0].id]);
+    const [check] = await pool.execute('SELECT password_hash FROM users WHERE id = ?', [
+      rows[0].id,
+    ]);
     const ok = await verifyPassword(DEV_PASSWORD, check[0].password_hash);
 
     console.log(`  UPDATE  ${email} (verify=${ok})`);

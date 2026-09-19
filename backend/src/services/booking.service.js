@@ -9,7 +9,12 @@
 
 const bookingRepository = require('../repositories/booking.repository');
 const showSeatRepository = require('../repositories/show-seat.repository');
-const { ValidationError, NotFoundError, ConflictError, ForbiddenError } = require('../utils/errors');
+const {
+  ValidationError,
+  NotFoundError,
+  ConflictError,
+  ForbiddenError,
+} = require('../utils/errors');
 const { toBooking, toBookingItem } = require('../utils/serialize');
 
 const CANCELLABLE = new Set(['PENDING', 'HOLDING']);
@@ -24,10 +29,14 @@ async function holdBooking(user, input) {
   const { showId, seatIds, idempotencyKey } = input;
 
   if (!Array.isArray(seatIds) || seatIds.length === 0) {
-    throw new ValidationError('At least one seat must be selected', [{ field: 'seatIds', message: 'At least one seat is required' }]);
+    throw new ValidationError('At least one seat must be selected', [
+      { field: 'seatIds', message: 'At least one seat is required' },
+    ]);
   }
   if (seatIds.length > 20) {
-    throw new ValidationError('At most 20 seats can be held at once', [{ field: 'seatIds', message: 'At most 20 seats can be held at once' }]);
+    throw new ValidationError('At most 20 seats can be held at once', [
+      { field: 'seatIds', message: 'At most 20 seats can be held at once' },
+    ]);
   }
 
   let conn;
@@ -36,17 +45,26 @@ async function holdBooking(user, input) {
     await conn.beginTransaction();
 
     if (idempotencyKey) {
-      const existing = await bookingRepository.findByUserIdAndIdempotencyKey(user.id, idempotencyKey);
+      const existing = await bookingRepository.findByUserIdAndIdempotencyKey(
+        user.id,
+        idempotencyKey
+      );
       if (existing) {
         const booking = await bookingRepository.findById(existing.id);
         if (!booking) throw new NotFoundError('Booking not found', 'BOOKING_NOT_FOUND');
         const items = await bookingRepository.findItemsByBookingId(booking.id);
         await conn.rollback();
-        return { booking: toBooking(booking, items), items: items.map(toBookingItem), idempotentReplay: true };
+        return {
+          booking: toBooking(booking, items),
+          items: items.map(toBookingItem),
+          idempotentReplay: true,
+        };
       }
     }
 
-    const [showRows] = await conn.execute('SELECT id, status FROM shows WHERE id = ? LIMIT 1', [showId]);
+    const [showRows] = await conn.execute('SELECT id, status FROM shows WHERE id = ? LIMIT 1', [
+      showId,
+    ]);
     if (!showRows[0]) throw new NotFoundError('Show not found', 'SHOW_NOT_FOUND');
 
     const ph = seatIds.map(() => '?').join(',');
@@ -56,12 +74,19 @@ async function holdBooking(user, input) {
     );
     const found = new Set(seatRows.map((r) => r.seat_id));
     for (const sid of seatIds) {
-      if (!found.has(sid)) throw new NotFoundError(`Seat ${sid} is not part of this show`, 'SEAT_NOT_IN_SHOW');
+      if (!found.has(sid))
+        throw new NotFoundError(`Seat ${sid} is not part of this show`, 'SEAT_NOT_IN_SHOW');
     }
 
     const holdToken = `hold-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const holdExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
-    const { held, prices } = await showSeatRepository.holdSeats(conn, showId, seatIds, holdToken, holdExpiresAt);
+    const { held, prices } = await showSeatRepository.holdSeats(
+      conn,
+      showId,
+      seatIds,
+      holdToken,
+      holdExpiresAt
+    );
     if (held !== seatIds.length) {
       await conn.rollback();
       throw new ConflictError('One or more seats are no longer available', 'SEATS_UNAVAILABLE');
@@ -72,24 +97,51 @@ async function holdBooking(user, input) {
     const [ins] = await conn.execute(
       `INSERT INTO bookings (user_id, show_id, booking_reference, idempotency_key, status, subtotal, discount, total_amount, currency, expires_at)
         VALUES (?, ?, ?, ?, 'PENDING', ?, 0.00, ?, 'INR', ?)`,
-          [user.id, showId, bookingRef, idempotencyKey || null, subtotal, subtotal, holdExpiresAt.toISOString().slice(0, 19).replace('T', ' ')]
+      [
+        user.id,
+        showId,
+        bookingRef,
+        idempotencyKey || null,
+        subtotal,
+        subtotal,
+        holdExpiresAt.toISOString().slice(0, 19).replace('T', ' '),
+      ]
     );
     const bookingId = Number(ins.insertId);
 
     for (const p of prices) {
-      await conn.execute('INSERT INTO booking_items (booking_id, show_seat_id, price) VALUES (?, ?, ?)', [bookingId, p.show_seat_id, p.price]);
+      await conn.execute(
+        'INSERT INTO booking_items (booking_id, show_seat_id, price) VALUES (?, ?, ?)',
+        [bookingId, p.show_seat_id, p.price]
+      );
     }
     await showSeatRepository.linkSeatsToBooking(conn, showId, seatIds, bookingId);
     await conn.commit();
 
     const booking = await bookingRepository.findById(bookingId);
     const items = await bookingRepository.findItemsByBookingId(bookingId);
-    return { booking: toBooking(booking, items), items: items.map(toBookingItem), idempotentReplay: false };
+    return {
+      booking: toBooking(booking, items),
+      items: items.map(toBookingItem),
+      idempotentReplay: false,
+    };
   } catch (error) {
-    if (conn && conn.destroyed === false) { try { await conn.rollback(); } catch {} }
+    if (conn && conn.destroyed === false) {
+      try {
+        await conn.rollback();
+      } catch {
+        // Rollback is best effort - the original error is what matters.
+      }
+    }
     throw error;
   } finally {
-    if (conn) { try { await conn.release(); } catch {} }
+    if (conn) {
+      try {
+        await conn.release();
+      } catch {
+        // Releasing a dead connection is a no-op.
+      }
+    }
   }
 }
 
@@ -136,10 +188,7 @@ async function cancelBooking(user, bookingId) {
 
     const released = await showSeatRepository.releaseSeats(conn, bookingId);
 
-    await conn.execute(
-      `UPDATE bookings SET status = 'CANCELLED' WHERE id = ?`,
-      [bookingId]
-    );
+    await conn.execute(`UPDATE bookings SET status = 'CANCELLED' WHERE id = ?`, [bookingId]);
 
     await conn.commit();
 
@@ -151,10 +200,22 @@ async function cancelBooking(user, bookingId) {
       released,
     };
   } catch (error) {
-    if (conn && conn.destroyed === false) { try { await conn.rollback(); } catch {} }
+    if (conn && conn.destroyed === false) {
+      try {
+        await conn.rollback();
+      } catch {
+        // Rollback is best effort - the original error is what matters.
+      }
+    }
     throw error;
   } finally {
-    if (conn) { try { await conn.release(); } catch {} }
+    if (conn) {
+      try {
+        await conn.release();
+      } catch {
+        // Releasing a dead connection is a no-op.
+      }
+    }
   }
 }
 

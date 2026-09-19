@@ -6,10 +6,7 @@ const bookingService = require('../services/booking.service');
 
 /** POST /api/v1/bookings/hold */
 async function holdBooking(req, res) {
-  const { booking, items, idempotentReplay } = await bookingService.holdBooking(
-    req.user,
-    req.body
-  );
+  const { booking, items, idempotentReplay } = await bookingService.holdBooking(req.user, req.body);
   res.status(idempotentReplay ? 200 : 201).json({
     status: 'ok',
     booking,
@@ -20,7 +17,10 @@ async function holdBooking(req, res) {
 
 /** GET /api/v1/bookings/:id */
 async function getBooking(req, res) {
-  const { booking, items } = await bookingService.getBooking(req.user, Number(req.validatedParams.id));
+  const { booking, items } = await bookingService.getBooking(
+    req.user,
+    Number(req.validatedParams.id)
+  );
   res.json({ status: 'ok', booking, items });
 }
 

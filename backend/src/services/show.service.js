@@ -25,13 +25,18 @@ async function createShow(input) {
   const start = new Date(input.startTime);
   const end = new Date(input.endTime);
   if (!(start < end)) {
-    throw new ValidationError('endTime must be after startTime', [{ field: 'endTime', message: 'endTime must be after startTime' }]);
+    throw new ValidationError('endTime must be after startTime', [
+      { field: 'endTime', message: 'endTime must be after startTime' },
+    ]);
   }
   let id;
   try {
     id = await showRepository.create({
-      eventId: input.eventId, venueId: input.venueId,
-      startTime: input.startTime, endTime: input.endTime, status: input.status || 'SCHEDULED',
+      eventId: input.eventId,
+      venueId: input.venueId,
+      startTime: input.startTime,
+      endTime: input.endTime,
+      status: input.status || 'SCHEDULED',
     });
   } catch (e) {
     if (e.code === 'SHOW_DUPLICATE') throw new ConflictError(e.message, 'SHOW_ALREADY_EXISTS');
@@ -45,10 +50,14 @@ async function createShow(input) {
 async function updateShow(id, changes) {
   const existing = await showRepository.findById(id);
   if (!existing) throw new NotFoundError('Show not found', 'SHOW_NOT_FOUND');
-  const start = changes.startTime !== undefined ? new Date(changes.startTime) : new Date(existing.start_time);
-  const end = changes.endTime !== undefined ? new Date(changes.endTime) : new Date(existing.end_time);
+  const start =
+    changes.startTime !== undefined ? new Date(changes.startTime) : new Date(existing.start_time);
+  const end =
+    changes.endTime !== undefined ? new Date(changes.endTime) : new Date(existing.end_time);
   if (!(start < end)) {
-    throw new ValidationError('endTime must be after startTime', [{ field: 'endTime', message: 'endTime must be after startTime' }]);
+    throw new ValidationError('endTime must be after startTime', [
+      { field: 'endTime', message: 'endTime must be after startTime' },
+    ]);
   }
   if (Object.keys(changes).length) {
     try {
@@ -79,6 +88,9 @@ async function requireShow(id) {
   return row;
 }
 function pagingOf(f = {}) {
-  return { limit: Number.isInteger(f.limit) ? f.limit : 20, offset: Number.isInteger(f.offset) ? f.offset : 0 };
+  return {
+    limit: Number.isInteger(f.limit) ? f.limit : 20,
+    offset: Number.isInteger(f.offset) ? f.offset : 0,
+  };
 }
 module.exports = { listShows, getShow, createShow, updateShow, seatMap, availability };

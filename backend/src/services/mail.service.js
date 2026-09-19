@@ -26,7 +26,11 @@ let transportOverride = null;
  * @returns {'console'|'smtp'}
  */
 function resolveTransport() {
-  if (transportOverride === 'memory' || transportOverride === 'console' || transportOverride === 'smtp') {
+  if (
+    transportOverride === 'memory' ||
+    transportOverride === 'console' ||
+    transportOverride === 'smtp'
+  ) {
     return transportOverride === 'memory' ? 'console' : transportOverride;
   }
   if (config.mail.transport === 'smtp' || config.mail.transport === 'console') {
@@ -75,9 +79,7 @@ async function sendMail(message) {
   outbox.push(record);
 
   if (transport === 'console') {
-    console.log(
-      `[mail:console] to=${message.to} subject="${message.subject}"\n${message.text}`
-    );
+    console.log(`[mail:console] to=${message.to} subject="${message.subject}"\n${message.text}`);
     return { transport, delivered: false };
   }
 

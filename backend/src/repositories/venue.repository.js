@@ -10,7 +10,10 @@ const SEAT_TYPES = ['REGULAR', 'VIP', 'PREMIUM', 'BALCONY', 'BOX'];
 async function list(filters = {}) {
   const conditions = [];
   const params = [];
-  if (filters.city) { conditions.push('city = ?'); params.push(filters.city); }
+  if (filters.city) {
+    conditions.push('city = ?');
+    params.push(filters.city);
+  }
   if (filters.search) {
     const like = `%${filters.search}%`;
     conditions.push('(name LIKE ? OR city LIKE ?)');
@@ -27,7 +30,9 @@ async function list(filters = {}) {
   return { rows, total: Number(c[0].total) };
 }
 async function findById(id) {
-  const [rows] = await pool.execute(`SELECT ${VENUE_COLUMNS} FROM venues WHERE id = ? LIMIT 1`, [id]);
+  const [rows] = await pool.execute(`SELECT ${VENUE_COLUMNS} FROM venues WHERE id = ? LIMIT 1`, [
+    id,
+  ]);
   return rows[0] ?? null;
 }
 // Venue with seat-layout summary (tests/sql/04-venue-seat-queries.sql Q2).
@@ -58,7 +63,10 @@ async function update(id, changes) {
   const sets = [];
   const params = [];
   for (const [k, col] of Object.entries(map)) {
-    if (changes[k] !== undefined) { sets.push(`${col} = ?`); params.push(changes[k]); }
+    if (changes[k] !== undefined) {
+      sets.push(`${col} = ?`);
+      params.push(changes[k]);
+    }
   }
   if (!sets.length) return false;
   params.push(id);
@@ -69,7 +77,10 @@ async function update(id, changes) {
 async function listSeats(venueId, filters = {}) {
   const conditions = ['venue_id = ?'];
   const params = [venueId];
-  if (filters.seatType) { conditions.push('seat_type = ?'); params.push(filters.seatType); }
+  if (filters.seatType) {
+    conditions.push('seat_type = ?');
+    params.push(filters.seatType);
+  }
   const where = `WHERE ${conditions.join(' AND ')}`;
   const limit = Number.isInteger(filters.limit) ? filters.limit : 500;
   const offset = Number.isInteger(filters.offset) ? filters.offset : 0;
@@ -101,7 +112,10 @@ async function updateSeat(id, changes) {
   const sets = [];
   const params = [];
   for (const [k, col] of Object.entries(map)) {
-    if (changes[k] !== undefined) { sets.push(`${col} = ?`); params.push(changes[k]); }
+    if (changes[k] !== undefined) {
+      sets.push(`${col} = ?`);
+      params.push(changes[k]);
+    }
   }
   if (!sets.length) return false;
   params.push(id);
@@ -116,4 +130,16 @@ async function deleteSeat(id) {
   const [r] = await pool.execute('DELETE FROM seats WHERE id = ?', [id]);
   return r.affectedRows > 0;
 }
-module.exports = { SEAT_TYPES, list, findById, findWithSeatSummary, create, update, listSeats, createSeat, updateSeat, findSeatById, deleteSeat };
+module.exports = {
+  SEAT_TYPES,
+  list,
+  findById,
+  findWithSeatSummary,
+  create,
+  update,
+  listSeats,
+  createSeat,
+  updateSeat,
+  findSeatById,
+  deleteSeat,
+};
