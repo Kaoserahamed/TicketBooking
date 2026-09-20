@@ -25,3 +25,13 @@ coverage/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Terraform — state, plans and provider caches are machine-local
+# (remote state lives in S3 + DynamoDB, see docs/deployment/production.md).
+# `.terraform.lock.hcl` is NOT ignored: like package-lock.json it is committed
+# so provider versions are reproducible.
+*.tfstate
+*.tfstate.*
+*.tfplan
+.terraform/
+crash.log
