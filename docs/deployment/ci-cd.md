@@ -20,16 +20,19 @@ job needs no cluster — `kubeconform` validates against published schemas.
 
 ## 2. Jobs
 
-| Job         | Runs                                                                                                                                                                           | Fails when                                                               |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
-| `backend`   | `npm ci`, `lint`, `format:check`, `typecheck`, `npm audit --audit-level=high`, `npm test` (unit + integration on MySQL), `test:coverage`                                       | lint/format/type/audit/test error or unit coverage below floor           |
-| `frontend`  | `npm ci`, `lint`, `format:check`, `typecheck`, `npm audit --audit-level=high`, `test:coverage`, `build`                                                                        | any gate fails or coverage below floor                                   |
-| `sql`       | `npm ci` not needed — installs the `mysql` client, recreates the DB from `schema.sql`, then `tests/run-sql-tests.ps1 -Fresh`                                                   | any `ERROR <code>` in a `tests/sql/` script                              |
-| `manifests` | `kubectl kustomize infrastructure/kubernetes` piped into `kubeconform -strict` (Kubernetes 1.29 schemas), then `kube-linter lint --add-all-built-in infrastructure/kubernetes` | a rendered object fails schema validation or trips a built-in lint check |
-| `docker`    | builds `./backend` + `./frontend` images (pushes to GHCR on `main`)                                                                                                            | any image fails to build                                                 |
+| Job           | Runs                                                                                                                                                                                                      | Fails when                                                                |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `backend`     | `npm ci`, `lint`, `format:check`, `typecheck`, `npm audit --audit-level=high`, `npm test` (unit + integration on MySQL), `test:coverage`                                                                  | lint/format/type/audit/test error or unit coverage below floor            |
+| `frontend`    | `npm ci`, `lint`, `format:check`, `typecheck`, `npm audit --audit-level=high`, `test:coverage`, `build`                                                                                                   | any gate fails or coverage below floor                                    |
+| `sql`         | `npm ci` not needed — installs the `mysql` client, recreates the DB from `schema.sql`, then `tests/run-sql-tests.ps1 -Fresh`                                                                              | any `ERROR <code>` in a `tests/sql/` script                               |
+| `manifests`   | `kubectl kustomize infrastructure/kubernetes` piped into `kubeconform -strict` (Kubernetes 1.29 schemas), then `kube-linter lint --config .kube-linter.yaml --add-all-built-in infrastructure/kubernetes` | a rendered object fails schema validation or trips a lint check           |
+| `terraform`   | `terraform fmt -check -recursive`, `init -backend=false` + `validate` (provider pinned by the committed `.terraform.lock.hcl`), then a pinned `trivy config` scan                                         | non-canonical format, invalid config, or a HIGH/CRITICAL misconfiguration |
+| `fresh-clone` | `npm ci` with no caches and no services, then `npm run setup` + `npm run verify:repo` + `npm run verify`                                                                                                  | the README's cold-start recipe does not build, lint or test clean         |
+| `docker`      | builds `./backend` + `./frontend` images (pushes to GHCR on `main`)                                                                                                                                       | any image fails to build                                                  |
 
-`docker` runs only after `backend`, `frontend`, `sql` and `manifests` are green,
-so a broken schema or manifest cannot publish an image.
+`docker` runs only after `backend`, `frontend`, `sql`, `manifests`,
+`terraform` and `fresh-clone` are green, so a broken schema, manifest, IaC
+module or cold-start recipe cannot publish an image.
 
 ## 3. Gates and floors
 

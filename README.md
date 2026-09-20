@@ -177,15 +177,17 @@ The frontend coverage floors are enforced by `vitest` thresholds in
 of them fails the job. Dependency updates are proposed weekly by
 [`.github/dependabot.yml`](.github/dependabot.yml).
 
-Two further jobs guard the parts that are neither half:
+Three further jobs guard the parts that are neither half:
 
-| Job                                  | Runs                                                                                                                | Fails when                                                      |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| Database — SQL suite                 | [`tests/run-sql-tests.ps1`](tests/run-sql-tests.ps1) `-Fresh` against a `mysql:8.0` service                         | any `ERROR <code>` in a `tests/sql/` script                     |
-| Infrastructure — manifest validation | `kubectl kustomize` then `kubeconform -strict` (Kubernetes 1.29 schemas) plus `kube-linter lint --add-all-built-in` | a rendered object fails schema validation or trips a lint check |
+| Job                         | Runs                                                                                                                | Fails when                                                                |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Database — SQL suite        | [`tests/run-sql-tests.ps1`](tests/run-sql-tests.ps1) `-Fresh` against a `mysql:8.0` service                         | any `ERROR <code>` in a `tests/sql/` script                               |
+| Infrastructure — manifests  | `kubectl kustomize` then `kubeconform -strict` (Kubernetes 1.29 schemas) plus `kube-linter lint --add-all-built-in` | a rendered object fails schema validation or trips a lint check           |
+| Infrastructure — IaC        | `terraform fmt -check -recursive`, `init -backend=false` + `validate`, then a `trivy config` policy scan            | non-canonical format, invalid config, or a HIGH/CRITICAL misconfiguration |
+| Fresh clone — README recipe | `npm ci`, `npm run setup` + `npm run verify` with no caches and no services                                         | the documented cold-start path does not build, lint or test clean         |
 
-Both are prerequisites for the container job, so a broken schema or manifest
-cannot publish an image.
+All of them are prerequisites for the container job, so a broken schema,
+manifest, IaC module or cold-start recipe cannot publish an image.
 
 ### Run the tests locally
 

@@ -11,7 +11,9 @@ name: CI/CD
 #   4. manifests— render infrastructure/kubernetes with kustomize, validate
 #      every object against the Kubernetes API schemas (kubeconform, strict),
 #      then lint the overlay for misconfigurations (kube-linter)
-#   5. images  — build both container images (and push to GHCR on main)
+#   5. terraform— fmt + init + validate the IaC module, then a trivy policy
+#      scan (HIGH/CRITICAL misconfigurations fail the build)
+#   6. images  — build both container images (and push to GHCR on main)
 #
 # The `fresh-clone` job has no services: it is the README's cold-start recipe
 # (`npm run setup && npm run verify`) run exactly as a buyer would run it, so
@@ -259,7 +261,7 @@ jobs:
           kubectl kustomize infrastructure/kubernetes \
             | kubeconform -strict -summary -kubernetes-version 1.29.0
 
-            # kubeconform proves the objects are *valid*; kube-linter proves they are
+      # kubeconform proves the objects are *valid*; kube-linter proves they are
       # not *misconfigured* (privilege escalation, missing probes, unset memory
       # requirements...). The config file pins the rule set so a new release
       # cannot silently narrow or widen the gate.
@@ -275,10 +277,46 @@ jobs:
           kube-linter version
           kube-linter lint --config .kube-linter.yaml --add-all-built-in infrastructure/kubernetes
 
+  terraform:
+    name: Infrastructure — IaC validation & policy scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          # Same version the module is developed and validated against locally.
+          terraform_version: 1.9.8
+
+      # fmt is the terraform linter: a diff means the file is not canonical.
+      - name: Check formatting
+        run: terraform -chdir=infrastructure/terraform fmt -check -recursive
+
+      # -backend=false: CI has no state backend credentials — this validates the
+      # configuration only. The committed .terraform.lock.hcl pins the provider
+      # for both linux_amd64 and windows_amd64, so init is checksum-exact.
+      - name: Initialize (no backend)
+        run: terraform -chdir=infrastructure/terraform init -backend=false
+
+      - name: Validate
+        run: terraform -chdir=infrastructure/terraform validate
+
+      # Policy scan (misconfigurations only — the module holds no secrets).
+      # Pinned: a new trivy release must not silently change the gate.
+      - name: Policy-scan the IaC
+        env:
+          TRIVY_VERSION: 0.74.0
+        run: |
+          curl -sSL -o trivy.tgz \
+            "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
+          tar -xzf trivy.tgz trivy
+          ./trivy config --scanners misconfig --severity HIGH,CRITICAL \
+            --exit-code 1 infrastructure/terraform
+
   docker:
     name: Docker — build & publish
     runs-on: ubuntu-latest
-    needs: [backend, frontend, sql, manifests, fresh-clone]
+    needs: [backend, frontend, sql, manifests, terraform, fresh-clone]
     permissions:
       contents: read
       packages: write

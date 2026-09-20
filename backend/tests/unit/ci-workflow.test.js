@@ -6,7 +6,7 @@
  * `.github/` is the part of the repository nobody runs locally, so a deleted
  * gate is invisible until it is needed. These checks read the workflow and the
  * Dependabot config the way a reviewer would and assert the contract the docs
- * describe: five jobs, every gate wired into the right job, container publishing
+ * describe: seven jobs, every gate wired into the right job, container publishing
  * blocked behind all of them, actions pinned to a release tag, and updates
  * opened for both npm stacks plus the actions themselves.
  */
@@ -21,7 +21,7 @@ const WORKFLOW_FILE = path.join(REPO_ROOT, '.github', 'workflows', 'ci.yml');
 const DEPENDABOT_FILE = path.join(REPO_ROOT, '.github', 'dependabot.yml');
 const KUBE_LINTER_CONFIG = path.join(REPO_ROOT, '.kube-linter.yaml');
 
-const JOBS = ['backend', 'frontend', 'sql', 'manifests', 'fresh-clone', 'docker'];
+const JOBS = ['backend', 'frontend', 'sql', 'manifests', 'terraform', 'fresh-clone', 'docker'];
 
 const read = (file) => fs.readFileSync(file, 'utf8');
 
@@ -138,7 +138,25 @@ test('the fresh-clone job proves the README recipe on a cold install', () => {
   assert.match(block, /npm run verify/);
 });
 
-test('publishing an image waits for all five verification jobs', () => {
+test('the terraform job validates the IaC and policy-scans it', () => {
+  const block = jobBlock(read(WORKFLOW_FILE), 'terraform');
+  // Canonical formatting, a real init + validate, and a policy gate that fails
+  // the build on HIGH/CRITICAL misconfigurations.
+  assert.match(block, /terraform -chdir=infrastructure\/terraform fmt -check -recursive/);
+  assert.match(block, /init -backend=false/);
+  assert.match(block, /terraform -chdir=infrastructure\/terraform validate/);
+  assert.match(block, /trivy config/);
+  assert.match(block, /--exit-code 1/);
+  // Pinned tool versions, so a new release cannot silently change the gate.
+  assert.match(block, /terraform_version: \d+\.\d+\.\d+/);
+  assert.match(block, /TRIVY_VERSION: \d+\.\d+\.\d+/);
+  // The committed lockfile must pin the provider for the CI platform too.
+  const lock = read(path.join(REPO_ROOT, 'infrastructure', 'terraform', '.terraform.lock.hcl'));
+  assert.match(lock, /registry\.terraform\.io\/petoju\/mysql/);
+  assert.ok(lock.split('h1:').length >= 3, 'the lockfile must carry per-platform hashes');
+});
+
+test('publishing an image waits for all six verification jobs', () => {
   const block = jobBlock(read(WORKFLOW_FILE), 'docker');
   const needs = /needs: \[([^\]]+)\]/.exec(block);
   assert.ok(needs, 'the docker job must declare needs');
@@ -147,7 +165,14 @@ test('publishing an image waits for all five verification jobs', () => {
     .split(',')
     .map((name) => name.trim())
     .sort();
-  assert.deepEqual(required, ['backend', 'fresh-clone', 'frontend', 'manifests', 'sql']);
+  assert.deepEqual(required, [
+    'backend',
+    'fresh-clone',
+    'frontend',
+    'manifests',
+    'sql',
+    'terraform',
+  ]);
 });
 
 test('actions are pinned to a release tag, never a branch', () => {

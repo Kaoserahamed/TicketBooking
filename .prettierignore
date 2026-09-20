@@ -11,6 +11,9 @@ node_modules/
 **/package-lock.json
 package-lock.json
 
+# HCL is not a Prettier language; `terraform fmt` is its formatter.
+infrastructure/terraform/
+
 # Build / coverage output.
 dist/
 build/

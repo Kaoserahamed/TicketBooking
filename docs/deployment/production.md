@@ -51,6 +51,56 @@ of them fails the build instead of reaching a cluster:
 - MySQL keeps its data in a `volumeClaimTemplates` claim, never in the container
   filesystem.
 
+## Infrastructure as code (Terraform)
+
+The Kubernetes overlay is managed by kustomize and lives entirely in YAML.
+[`infrastructure/terraform/`](../../infrastructure/terraform/) owns the
+**external** prerequisites kustomize cannot provision: the MySQL database, the
+application user and its grants that the backend expects. Splitting the two
+responsibilities this way avoids drift between the cluster objects and the
+database grants.
+
+```text
+infrastructure/terraform/
+├── main.tf                  # wires the database module (petoju/mysql provider)
+├── backend.tf               # required_version, provider pin, S3 backend stub
+├── backend-production.tf    # commented remote-state layout for production
+└── modules/database/        # database + user + grants, idempotent
+```
+
+### Verify locally
+
+```bash
+cd infrastructure/terraform
+terraform fmt -check -recursive      # canonical formatting (CI gate)
+terraform init -backend=false        # install providers from .terraform.lock.hcl
+terraform validate                   # configuration is valid
+trivy config --severity HIGH,CRITICAL infrastructure/terraform   # policy scan
+```
+
+CI runs exactly these steps in the `terraform` job (pinned Terraform 1.9.8 and
+a pinned Trivy version), and the `docker` publish job waits for it — an IaC
+regression cannot ship an image.
+
+### State management
+
+Local state files (`*.tfstate`, `*.tfplan`, `.terraform/`) are git-ignored.
+The committed `.terraform.lock.hcl` pins provider checksums for both
+`linux_amd64` and `windows_amd64`, the same role `package-lock.json` plays for
+npm.
+
+Remote state is S3 + a DynamoDB lock table (see the commented layout in
+[`backend-production.tf`](../../infrastructure/terraform/backend-production.tf)).
+Both are provisioned **out of band** — never by the configuration they back —
+following this bootstrap sequence:
+
+1. Create the state bucket with versioning + encryption on and the lock table
+   with a simple primary key (`LockID`) — one-off, by hand or console.
+2. Fill in the per-environment backend config
+   (`terraform init -backend-config=env/production.hcl`).
+3. `terraform plan`, review, then `terraform apply` — always from a reviewed
+   PR, never from CI.
+
 ## Reverse proxy
 
 `frontend/nginx.conf` serves the static build and proxies `/api` to the
