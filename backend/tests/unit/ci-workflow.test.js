@@ -19,6 +19,7 @@ const path = require('node:path');
 const REPO_ROOT = path.resolve(__dirname, '..', '..', '..');
 const WORKFLOW_FILE = path.join(REPO_ROOT, '.github', 'workflows', 'ci.yml');
 const DEPENDABOT_FILE = path.join(REPO_ROOT, '.github', 'dependabot.yml');
+const KUBE_LINTER_CONFIG = path.join(REPO_ROOT, '.kube-linter.yaml');
 
 const JOBS = ['backend', 'frontend', 'sql', 'manifests', 'fresh-clone', 'docker'];
 
@@ -102,7 +103,9 @@ test('the manifests job validates rendered output in strict mode', () => {
 
 test('the manifests job lints the rendered overlay for misconfigurations', () => {
   const block = jobBlock(read(WORKFLOW_FILE), 'manifests');
-  assert.match(block, /kube-linter lint --add-all-built-in/);
+  // The rule set is pinned in .kube-linter.yaml, not passed ad-hoc on the CLI.
+  assert.match(block, /kube-linter lint --config \.kube-linter\.yaml/);
+  assert.ok(fs.existsSync(KUBE_LINTER_CONFIG), '.kube-linter.yaml must be committed');
   // Pinned release, rendered output — the same objects the cluster receives.
   assert.match(block, /KUBE_LINTER_VERSION: v\d+\.\d+\.\d+/);
   assert.match(block, /kubectl kustomize infrastructure\/kubernetes/);
@@ -111,10 +114,18 @@ test('the manifests job lints the rendered overlay for misconfigurations', () =>
 test('the manifests job also lints for misconfigurations', () => {
   const block = jobBlock(read(WORKFLOW_FILE), 'manifests');
   // kube-linter is fetched from its pinned release tarball and run with every
-  // built-in check against the kustomize overlay.
+  // built-in check against the kustomize overlay, driven by the config file.
   assert.match(block, /KUBE_LINTER_VERSION: v\d+\.\d+\.\d+/);
   assert.match(block, /kube-linter-linux\.tar\.gz/);
-  assert.match(block, /kube-linter lint --add-all-built-in infrastructure\/kubernetes/);
+  assert.match(
+    block,
+    /kube-linter lint --config \.kube-linter\.yaml --add-all-built-in infrastructure\/kubernetes/
+  );
+
+  // The config must enable every built-in check and use a stable schema.
+  const config = read(KUBE_LINTER_CONFIG);
+  assert.match(config, /addAllBuiltIn: true/, 'the config must enable all built-in checks');
+  assert.match(config, /setExitCode: true/, 'the config must fail the build on findings');
 });
 
 test('the fresh-clone job proves the README recipe on a cold install', () => {

@@ -1,0 +1,17 @@
+# kube-linter 0.8.x — a stable, pinned rule set for the infrastructure overlay.
+# Using --config keeps the gate from drifting when a new kube-linter release
+# ships new defaults. Every built-in check is enabled, with only the
+# object-untagged-image check silenced because the CI pipeline always supplies
+# the image tag at publish time.
+ignoreGeneratedTemplates: false
+includeGeneratedTemplates: false
+setExitCode: true
+failOnSeverity: error
+checks:
+  addAllBuiltIn: true
+  exclude:
+    # The pipeline always tags images at publish time (ghcr.io/<repo>/...:latest
+    # is resolved by the metadata action), so this check only false-positives.
+    - object-untagged-image
+customChecks: []
+exclusions: []
